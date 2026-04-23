@@ -35,7 +35,7 @@ export function Services() {
         {pillars.map((p, i) => (
           <div
             key={p.title}
-            className="group rounded-2xl border border-hairline bg-surface-1 p-6 transition-colors hover:border-lime/40"
+            className="card-lift group rounded-2xl border border-hairline bg-surface-1 p-6 hover:border-lime/40 hover:bg-surface-2"
           >
             <div className="mb-3 font-display text-xs tracking-[0.25em] text-lime">
               0{i + 1}
