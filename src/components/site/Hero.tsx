@@ -1,18 +1,24 @@
-import heroBg from "@/assets/hero-bg.jpg";
-
 export function Hero() {
   return (
     <section className="relative overflow-hidden border-b border-hairline">
+      {/* Soft lime glow */}
       <div
-        className="pointer-events-none absolute inset-0 opacity-30"
+        className="pointer-events-none absolute inset-0"
         style={{
-          backgroundImage: `url(${heroBg})`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          maskImage: "radial-gradient(circle at 50% 40%, black 30%, transparent 75%)",
+          background:
+            "radial-gradient(ellipse 60% 50% at 50% 35%, oklch(0.94 0.23 125 / 0.15), transparent 70%)",
         }}
       />
-      <div className="absolute inset-0 gradient-hero" />
+      {/* Subtle grid lines */}
+      <div
+        className="pointer-events-none absolute inset-0 opacity-[0.04]"
+        style={{
+          backgroundImage:
+            "linear-gradient(oklch(1 0 0) 1px, transparent 1px), linear-gradient(90deg, oklch(1 0 0) 1px, transparent 1px)",
+          backgroundSize: "80px 80px",
+          maskImage: "radial-gradient(ellipse at center, black 30%, transparent 75%)",
+        }}
+      />
       <div className="relative mx-auto max-w-5xl px-5 py-24 text-center md:py-36">
         <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-hairline bg-surface-1 px-4 py-1.5 text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
           <span className="h-1.5 w-1.5 rounded-full bg-lime animate-pulse-lime" />
