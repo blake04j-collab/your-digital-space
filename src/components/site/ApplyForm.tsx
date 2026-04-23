@@ -71,7 +71,7 @@ export function ApplyForm() {
         <p className="mx-auto mt-3 max-w-md text-sm font-light text-muted-foreground">
           {plan === "partner"
             ? "You're on the Partner track. Expect a call within 24 hours to lock in your brand connection."
-            : "You've been added to the creator pool. We'll reach out if a match becomes available."}
+            : "You've been added to the creator pool. We'll reach out soon with more information to get you connected."}
         </p>
       </div>
     );
