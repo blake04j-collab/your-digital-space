@@ -1,16 +1,26 @@
-import { useEffect, useState } from "react";
-
+import { useEffect, useRef } from "react";
 
 export function Nav() {
-  const [progress, setProgress] = useState(0);
+  const barRef = useRef<HTMLDivElement>(null);
+  const tickingRef = useRef(false);
 
   useEffect(() => {
-    const onScroll = () => {
+    const update = () => {
       const h = document.documentElement;
       const max = h.scrollHeight - h.clientHeight;
-      setProgress(max > 0 ? (h.scrollTop / max) * 100 : 0);
+      const pct = max > 0 ? h.scrollTop / max : 0;
+      if (barRef.current) {
+        barRef.current.style.transform = `scaleX(${pct})`;
+      }
+      tickingRef.current = false;
     };
-    onScroll();
+    const onScroll = () => {
+      if (!tickingRef.current) {
+        tickingRef.current = true;
+        requestAnimationFrame(update);
+      }
+    };
+    update();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
@@ -19,7 +29,7 @@ export function Nav() {
     "relative hover:text-foreground transition-colors after:absolute after:left-0 after:-bottom-1 after:h-px after:w-full after:scale-x-0 after:origin-left after:bg-lime after:transition-transform after:duration-300 hover:after:scale-x-100";
 
   return (
-    <header className="sticky top-0 z-50 border-b border-hairline bg-background/80 backdrop-blur-xl">
+    <header className="sticky top-0 z-50 border-b border-hairline bg-background/95 backdrop-blur-md [transform:translateZ(0)] [will-change:transform]">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4">
         <a
           href="https://linktr.ee/b1btc"
@@ -45,8 +55,12 @@ export function Nav() {
           Apply ›
         </a>
       </div>
-      {/* scroll progress */}
-      <div className="absolute bottom-0 left-0 h-px bg-lime transition-[width] duration-150" style={{ width: `${progress}%` }} />
+      {/* scroll progress — transform-only, no React re-renders */}
+      <div
+        ref={barRef}
+        className="absolute bottom-0 left-0 h-px w-full origin-left bg-lime [will-change:transform]"
+        style={{ transform: "scaleX(0)" }}
+      />
     </header>
   );
 }
