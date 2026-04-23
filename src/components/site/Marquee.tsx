@@ -1,7 +1,7 @@
 const items = [
   "Fitness",
   "Looksmaxxing",
-  "Men's Lifestyle",
+  "Lifestyle",
   "Supplements",
   "Peptides",
   "Performance",

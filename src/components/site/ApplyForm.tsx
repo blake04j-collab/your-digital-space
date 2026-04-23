@@ -132,7 +132,7 @@ export function ApplyForm() {
               <option value="" disabled>Select your niche...</option>
               <option>Gym / Fitness</option>
               <option>Looksmaxxing</option>
-              <option>Men's Lifestyle</option>
+              <option>Lifestyle</option>
               <option>Nutrition / Supplements</option>
               <option>Fashion / Style</option>
               <option>Other</option>
