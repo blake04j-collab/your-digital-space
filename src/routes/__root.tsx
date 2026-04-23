@@ -39,8 +39,8 @@ export const Route = createRootRoute({
       { name: "twitter:site", content: "@Lovable" },
       { name: "twitter:title", content: "B1 Digital Space" },
       { name: "twitter:description", content: "Built for creators and operators focused on performance, scale, and control." },
-      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/bobjbHCHILMzFGCPkPbCVKaOkgH2/social-images/social-1776967398987-ChatGPT_Image_Apr_23,_2026,_11_02_44_AM.webp" },
-      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/bobjbHCHILMzFGCPkPbCVKaOkgH2/social-images/social-1776967398987-ChatGPT_Image_Apr_23,_2026,_11_02_44_AM.webp" },
+      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/4c5193e7-52c2-4589-88fe-ad413e2fb9d5" },
+      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/4c5193e7-52c2-4589-88fe-ad413e2fb9d5" },
     ],
     links: [
       {
