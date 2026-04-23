@@ -5,8 +5,7 @@ export function Nav() {
     <header className="sticky top-0 z-50 border-b border-hairline bg-background/80 backdrop-blur-xl">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4">
         <Link to="/" className="flex items-center gap-2">
-          <span className="grid h-7 w-7 place-items-center rounded-md bg-lime text-primary-foreground font-display text-base">B1</span>
-          <span className="font-display text-xl tracking-wider">B1BTC</span>
+          <span className="grid h-9 w-9 place-items-center rounded-md bg-lime text-primary-foreground font-display text-xl">B1</span>
         </Link>
         <nav className="hidden items-center gap-7 text-xs uppercase tracking-[0.2em] text-muted-foreground md:flex">
           <a href="#services" className="hover:text-foreground transition-colors">Services</a>
