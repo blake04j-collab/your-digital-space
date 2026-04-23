@@ -14,7 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      applications: {
+        Row: {
+          bio: string | null
+          created_at: string
+          email: string
+          fname: string
+          id: string
+          ig_followers: number | null
+          instagram: string | null
+          lname: string | null
+          niche: string | null
+          phone: string | null
+          plan: string
+          tiktok: string | null
+          tiktok_followers: number | null
+        }
+        Insert: {
+          bio?: string | null
+          created_at?: string
+          email: string
+          fname: string
+          id?: string
+          ig_followers?: number | null
+          instagram?: string | null
+          lname?: string | null
+          niche?: string | null
+          phone?: string | null
+          plan?: string
+          tiktok?: string | null
+          tiktok_followers?: number | null
+        }
+        Update: {
+          bio?: string | null
+          created_at?: string
+          email?: string
+          fname?: string
+          id?: string
+          ig_followers?: number | null
+          instagram?: string | null
+          lname?: string | null
+          niche?: string | null
+          phone?: string | null
+          plan?: string
+          tiktok?: string | null
+          tiktok_followers?: number | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
