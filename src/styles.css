@@ -1,6 +1,7 @@
 @import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,300&display=swap');
 
 @custom-variant dark (&:is(.dark *));
 
@@ -62,26 +63,39 @@
 }
 
 :root {
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.129 0.042 264.695);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.129 0.042 264.695);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.129 0.042 264.695);
-  --primary: oklch(0.208 0.042 265.755);
-  --primary-foreground: oklch(0.984 0.003 247.858);
-  --secondary: oklch(0.968 0.007 247.896);
-  --secondary-foreground: oklch(0.208 0.042 265.755);
-  --muted: oklch(0.968 0.007 247.896);
-  --muted-foreground: oklch(0.554 0.046 257.417);
-  --accent: oklch(0.968 0.007 247.896);
-  --accent-foreground: oklch(0.208 0.042 265.755);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.984 0.003 247.858);
-  --border: oklch(0.929 0.013 255.508);
-  --input: oklch(0.929 0.013 255.508);
-  --ring: oklch(0.704 0.04 256.788);
+  --radius: 0.75rem;
+  /* B1BTC dark brand */
+  --background: oklch(0.13 0 0);            /* #0a0a0a */
+  --foreground: oklch(0.985 0 0);           /* #fff */
+  --card: oklch(0.16 0 0);                  /* #111 */
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.16 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.94 0.23 125);          /* lime #c8ff00 */
+  --primary-foreground: oklch(0.13 0 0);
+  --secondary: oklch(0.21 0 0);             /* #1a1a1a */
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.21 0 0);
+  --muted-foreground: oklch(0.6 0 0);       /* #888 */
+  --accent: oklch(0.94 0.23 125);
+  --accent-foreground: oklch(0.13 0 0);
+  --destructive: oklch(0.65 0.24 27);
+  --destructive-foreground: oklch(0.985 0 0);
+  --border: oklch(0.26 0 0);                /* #222 */
+  --input: oklch(0.21 0 0);
+  --ring: oklch(0.94 0.23 125);
+
+  --brand-lime: oklch(0.94 0.23 125);
+  --brand-lime-soft: oklch(0.94 0.23 125 / 0.12);
+  --brand-blue: oklch(0.7 0.18 240);
+  --surface-1: oklch(0.16 0 0);
+  --surface-2: oklch(0.19 0 0);
+  --hairline: oklch(1 0 0 / 0.08);
+  --gradient-hero: radial-gradient(circle at 50% 30%, oklch(0.7 0.18 240 / 0.35), transparent 60%);
+  --gradient-lime: linear-gradient(135deg, oklch(0.94 0.23 125), oklch(0.86 0.2 130));
+  --shadow-lime: 0 0 0 1px oklch(0.94 0.23 125 / 0.4), 0 10px 40px -10px oklch(0.94 0.23 125 / 0.5);
+  --font-display: 'Bebas Neue', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
