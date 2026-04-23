@@ -29,8 +29,8 @@ export function Plans() {
               </li>
             ))}
           </ul>
-          <div className="mt-6 rounded-lg border border-yellow-900/40 bg-yellow-950/30 p-3">
-            <p className="text-[11px] font-light leading-relaxed text-yellow-700/80">
+          <div className="mt-6 rounded-lg border border-hairline bg-surface-2 p-3">
+            <p className="text-[11px] font-light leading-relaxed text-muted-foreground/80">
               Passive tier. You're in the network — but not being actively worked. Most creators here are not placed.
             </p>
           </div>
