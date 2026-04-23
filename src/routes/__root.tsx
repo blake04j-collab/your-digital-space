@@ -29,14 +29,18 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
+      { title: "B1 Digital Space" },
+      { name: "description", content: "Built for creators and operators focused on performance, scale, and control." },
       { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { property: "og:title", content: "B1 Digital Space" },
+      { property: "og:description", content: "Built for creators and operators focused on performance, scale, and control." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "B1 Digital Space" },
+      { name: "twitter:description", content: "Built for creators and operators focused on performance, scale, and control." },
+      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/bobjbHCHILMzFGCPkPbCVKaOkgH2/social-images/social-1776967398987-ChatGPT_Image_Apr_23,_2026,_11_02_44_AM.webp" },
+      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/bobjbHCHILMzFGCPkPbCVKaOkgH2/social-images/social-1776967398987-ChatGPT_Image_Apr_23,_2026,_11_02_44_AM.webp" },
     ],
     links: [
       {
