@@ -154,5 +154,51 @@
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
+    font-family: var(--font-body);
+    font-weight: 300;
+    -webkit-font-smoothing: antialiased;
   }
+
+  h1, h2, h3, .font-display {
+    font-family: var(--font-display);
+    letter-spacing: 0.02em;
+    font-weight: 400;
+  }
+}
+
+@layer utilities {
+  .text-lime { color: var(--brand-lime); }
+  .bg-lime { background-color: var(--brand-lime); }
+  .border-lime { border-color: var(--brand-lime); }
+  .bg-surface-1 { background-color: var(--surface-1); }
+  .bg-surface-2 { background-color: var(--surface-2); }
+  .border-hairline { border-color: var(--hairline); }
+  .bg-lime-soft { background-color: var(--brand-lime-soft); }
+  .shadow-lime { box-shadow: var(--shadow-lime); }
+  .gradient-hero { background: var(--gradient-hero); }
+  .font-display { font-family: var(--font-display); }
+  .font-body { font-family: var(--font-body); }
+  .eyebrow {
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--brand-lime);
+    font-weight: 500;
+  }
+  .grain {
+    background-image: radial-gradient(oklch(1 0 0 / 0.015) 1px, transparent 1px);
+    background-size: 3px 3px;
+  }
+  @keyframes scroll-x {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+  .animate-marquee {
+    animation: scroll-x 30s linear infinite;
+  }
+  @keyframes pulse-lime {
+    0%, 100% { box-shadow: 0 0 0 0 oklch(0.94 0.23 125 / 0.5); }
+    50% { box-shadow: 0 0 0 12px oklch(0.94 0.23 125 / 0); }
+  }
+  .animate-pulse-lime { animation: pulse-lime 2s ease-out infinite; }
 }
