@@ -1,26 +1,50 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { Nav } from "@/components/site/Nav";
+import { Hero } from "@/components/site/Hero";
+import { Marquee } from "@/components/site/Marquee";
+import { Services } from "@/components/site/Services";
+import { Stuck } from "@/components/site/Stuck";
+import { Process } from "@/components/site/Process";
+import { Plans } from "@/components/site/Plans";
+import { Fit } from "@/components/site/Fit";
+import { Apply } from "@/components/site/Apply";
+import { Footer } from "@/components/site/Footer";
 
 export const Route = createFileRoute("/")({
+  head: () => ({
+    meta: [
+      { title: "B1BTC — Turn Your Attention Into Income" },
+      {
+        name: "description",
+        content:
+          "B1BTC works with creators in fitness, looks, and lifestyle to turn audience into real brand income. i ♡ scaling.",
+      },
+      { property: "og:title", content: "B1BTC — Turn Your Attention Into Income" },
+      {
+        property: "og:description",
+        content:
+          "Creator partnership program. Direct brand network. Real deals. Apply for priority placement.",
+      },
+    ],
+  }),
   component: Index,
 });
 
-// IMPORTANT: Replace this placeholder. For sites with multiple pages (About, Services, Contact, etc.),
-// create separate route files (about.tsx, services.tsx, contact.tsx) — don't put all pages in this file.
-function PlaceholderIndex() {
+function Index() {
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
+    <div className="min-h-screen bg-background text-foreground grain">
+      <Nav />
+      <main>
+        <Hero />
+        <Marquee />
+        <Services />
+        <Stuck />
+        <Process />
+        <Plans />
+        <Fit />
+        <Apply />
+      </main>
+      <Footer />
     </div>
   );
-}
-
-function Index() {
-  return <PlaceholderIndex />;
 }
