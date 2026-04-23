@@ -15,7 +15,7 @@ export function Footer() {
               X
             </a>
             <span className="text-hairline">·</span>
-            <a href="https://linktr.ee/b1btc" target="_blank" rel="noreferrer" className="hover:text-lime transition-colors">
+            <a href="https://tiktok.com/@b1.btc" target="_blank" rel="noreferrer" className="hover:text-lime transition-colors">
               TikTok
             </a>
           </div>
