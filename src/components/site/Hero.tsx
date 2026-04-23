@@ -64,11 +64,11 @@ export function Hero() {
           </div>
         </Reveal>
         <Reveal delay={280}>
-          <div className="mt-14 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-[11px] uppercase tracking-[0.25em] text-muted-foreground">
+          <div className="mt-14 flex flex-col items-center justify-center gap-3 text-[10px] uppercase tracking-[0.25em] text-muted-foreground sm:flex-row sm:flex-wrap sm:gap-x-8 sm:gap-y-3 sm:text-[11px]">
             <span>5K – 500K+ creators</span>
-            <span className="text-lime animate-blink">●</span>
+            <span className="hidden text-lime animate-blink sm:inline">●</span>
             <span>Fitness · Looks · Lifestyle</span>
-            <span className="text-lime animate-blink">●</span>
+            <span className="hidden text-lime animate-blink sm:inline">●</span>
             <span>Direct brand network</span>
           </div>
         </Reveal>
