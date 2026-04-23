@@ -71,29 +71,29 @@
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.16 0 0);
   --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.94 0.23 125);          /* lime #c8ff00 */
+  --primary: oklch(0.82 0.16 220);          /* electric blue #01cafb */
   --primary-foreground: oklch(0.13 0 0);
   --secondary: oklch(0.21 0 0);             /* #1a1a1a */
   --secondary-foreground: oklch(0.985 0 0);
   --muted: oklch(0.21 0 0);
   --muted-foreground: oklch(0.6 0 0);       /* #888 */
-  --accent: oklch(0.94 0.23 125);
+  --accent: oklch(0.82 0.16 220);
   --accent-foreground: oklch(0.13 0 0);
   --destructive: oklch(0.65 0.24 27);
   --destructive-foreground: oklch(0.985 0 0);
   --border: oklch(0.26 0 0);                /* #222 */
   --input: oklch(0.21 0 0);
-  --ring: oklch(0.94 0.23 125);
+  --ring: oklch(0.82 0.16 220);
 
-  --brand-lime: oklch(0.94 0.23 125);
-  --brand-lime-soft: oklch(0.94 0.23 125 / 0.12);
-  --brand-blue: oklch(0.7 0.18 240);
+  --brand-lime: oklch(0.82 0.16 220);
+  --brand-lime-soft: oklch(0.82 0.16 220 / 0.12);
+  --brand-blue: oklch(0.82 0.16 220);
   --surface-1: oklch(0.16 0 0);
   --surface-2: oklch(0.19 0 0);
   --hairline: oklch(1 0 0 / 0.08);
-  --gradient-hero: radial-gradient(circle at 50% 30%, oklch(0.7 0.18 240 / 0.35), transparent 60%);
-  --gradient-lime: linear-gradient(135deg, oklch(0.94 0.23 125), oklch(0.86 0.2 130));
-  --shadow-lime: 0 0 0 1px oklch(0.94 0.23 125 / 0.4), 0 10px 40px -10px oklch(0.94 0.23 125 / 0.5);
+  --gradient-hero: radial-gradient(circle at 50% 30%, oklch(0.82 0.16 220 / 0.35), transparent 60%);
+  --gradient-lime: linear-gradient(135deg, oklch(0.82 0.16 220), oklch(0.74 0.18 225));
+  --shadow-lime: 0 0 0 1px oklch(0.82 0.16 220 / 0.4), 0 10px 40px -10px oklch(0.82 0.16 220 / 0.5);
   --font-display: 'Bebas Neue', sans-serif;
   --font-body: 'DM Sans', sans-serif;
   --chart-1: oklch(0.646 0.222 41.116);
@@ -197,8 +197,8 @@
     animation: scroll-x 30s linear infinite;
   }
   @keyframes pulse-lime {
-    0%, 100% { box-shadow: 0 0 0 0 oklch(0.94 0.23 125 / 0.5); }
-    50% { box-shadow: 0 0 0 12px oklch(0.94 0.23 125 / 0); }
+    0%, 100% { box-shadow: 0 0 0 0 oklch(0.82 0.16 220 / 0.5); }
+    50% { box-shadow: 0 0 0 12px oklch(0.82 0.16 220 / 0); }
   }
   .animate-pulse-lime { animation: pulse-lime 2s ease-out infinite; }
 }
