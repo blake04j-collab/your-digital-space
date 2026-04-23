@@ -13,13 +13,13 @@ import { Footer } from "@/components/site/Footer";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "B1BTC — Turn Your Attention Into Income" },
+      { title: "B1SCALE — Turn Your Attention Into Income" },
       {
         name: "description",
         content:
-          "B1BTC works with creators in fitness, looks, and lifestyle to turn audience into real brand income. i ♡ scaling.",
+          "B1SCALE works with creators in fitness, looks, and lifestyle to turn audience into real brand income. i ♡ scaling.",
       },
-      { property: "og:title", content: "B1BTC — Turn Your Attention Into Income" },
+      { property: "og:title", content: "B1SCALE — Turn Your Attention Into Income" },
       {
         property: "og:description",
         content:
