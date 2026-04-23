@@ -41,7 +41,7 @@ export function Footer() {
               ))}
             </div>
             <p className="text-[11px] uppercase tracking-[0.25em] text-muted-foreground/60">
-              © {new Date().getFullYear()} B1BTC · Built for creators who scale
+              © {new Date().getFullYear()} B1SCALE · Built for creators who scale
             </p>
           </div>
         </Reveal>
