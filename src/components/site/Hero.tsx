@@ -23,9 +23,6 @@ export function Hero() {
           Attention Into<br />
           <em className="not-italic text-lime">Income.</em>
         </h1>
-        <p className="mx-auto mt-8 max-w-xl text-base font-light leading-relaxed text-muted-foreground md:text-lg">
-          B1BTC scales creators in fitness, looks, and lifestyle — connecting real audiences to real brand deals. <span className="text-foreground">i ♡ scaling.</span>
-        </p>
         <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
           <a
             href="#apply"
