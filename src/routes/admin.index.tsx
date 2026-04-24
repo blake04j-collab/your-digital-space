@@ -58,6 +58,7 @@ function AdminDashboard() {
   const [apps, setApps] = useState<Application[]>([]);
   const [links, setLinks] = useState<TrackingLink[]>([]);
   const [clicks, setClicks] = useState<LinkClick[]>([]);
+  const [totalViews, setTotalViews] = useState<number>(0);
 
   const [filter, setFilter] = useState<"all" | "partner" | "free">("all");
   const [query, setQuery] = useState("");
@@ -81,14 +82,16 @@ function AdminDashboard() {
         return;
       }
       setAuthorized(true);
-      const [appsRes, linksRes, clicksRes] = await Promise.all([
+      const [appsRes, linksRes, clicksRes, viewsRes] = await Promise.all([
         supabase.from("applications").select("*").order("created_at", { ascending: false }),
         supabase.from("tracking_links").select("*").order("created_at", { ascending: false }),
         supabase.from("link_clicks").select("*").order("created_at", { ascending: false }).limit(2000),
+        supabase.from("page_views").select("*", { count: "exact", head: true }),
       ]);
       setApps((appsRes.data as Application[]) ?? []);
       setLinks((linksRes.data as TrackingLink[]) ?? []);
       setClicks((clicksRes.data as LinkClick[]) ?? []);
+      setTotalViews(viewsRes.count ?? 0);
       setLoading(false);
     })();
   }, [navigate]);
@@ -217,8 +220,9 @@ function AdminDashboard() {
         {tab === "applications" ? (
           <>
             {/* stats */}
-            <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
               {[
+                { label: "Site visitors", value: totalViews },
                 { label: "Total", value: stats.total },
                 { label: "Partner", value: stats.partner, accent: true },
                 { label: "Free", value: stats.free },
@@ -232,7 +236,7 @@ function AdminDashboard() {
                 >
                   <div className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground">{s.label}</div>
                   <div className={`mt-2 font-display text-4xl ${s.accent ? "text-lime" : "text-foreground"}`}>
-                    {s.value}
+                    {s.value.toLocaleString()}
                   </div>
                 </div>
               ))}
