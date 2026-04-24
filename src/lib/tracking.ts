@@ -2,6 +2,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 const STORAGE_KEY = "b1_ref";
 const CLICK_SENT_KEY = "b1_ref_click_sent";
+const VIEW_SENT_KEY = "b1_view_sent";
 
 /** Read the current attribution ref code (if any) from sessionStorage. */
 export function getStoredRef(): string | null {
@@ -53,4 +54,29 @@ export async function captureRefFromUrl() {
     referrer: document.referrer ? document.referrer.slice(0, 2000) : null,
     user_agent: navigator.userAgent ? navigator.userAgent.slice(0, 1000) : null,
   });
+}
+
+/**
+ * Record a single page view for the current path.
+ * Deduped per path within the same browser session.
+ */
+export async function trackPageView(path?: string) {
+  if (typeof window === "undefined") return;
+  const p = (path ?? window.location.pathname ?? "/").slice(0, 500);
+  const sentKey = `${VIEW_SENT_KEY}:${p}`;
+  try {
+    if (sessionStorage.getItem(sentKey) === "1") return;
+    sessionStorage.setItem(sentKey, "1");
+  } catch {
+    // ignore
+  }
+  try {
+    await supabase.from("page_views").insert({
+      path: p,
+      referrer: document.referrer ? document.referrer.slice(0, 2000) : null,
+      user_agent: navigator.userAgent ? navigator.userAgent.slice(0, 1000) : null,
+    });
+  } catch {
+    // ignore
+  }
 }
