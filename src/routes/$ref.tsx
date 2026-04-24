@@ -83,9 +83,5 @@ function RefRedirect() {
     })();
   }, [ref]);
 
-  return (
-    <div className="grid min-h-screen place-items-center bg-background text-muted-foreground">
-      <p className="text-sm">Redirecting…</p>
-    </div>
-  );
+  return <div className="min-h-screen bg-background" />;
 }
