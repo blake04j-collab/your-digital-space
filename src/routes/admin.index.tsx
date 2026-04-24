@@ -514,10 +514,9 @@ function LinksPanel({
   }
 
   function buildUrl(code: string) {
-    const dest = links.find((l) => l.code === code)?.destination?.trim();
-    const base = dest && /^https?:\/\//.test(dest) ? dest : origin + "/";
-    const sep = base.includes("?") ? "&" : "?";
-    return `${base}${sep}ref=${encodeURIComponent(code)}`;
+    // Always use the short path on our own domain. The /$ref route handles
+    // attribution and (optionally) redirects to a custom destination.
+    return `${origin}/${encodeURIComponent(code)}`;
   }
 
   async function copyUrl(code: string) {
