@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
+import { getStoredRef } from "@/lib/tracking";
 
 const schema = z.object({
   fname: z.string().trim().min(1, "First name required").max(100),
@@ -52,7 +53,10 @@ export function ApplyForm() {
       return;
     }
     setSubmitting(true);
-    const { error } = await supabase.from("applications").insert(parsed.data);
+    const ref_code = getStoredRef();
+    const { error } = await supabase
+      .from("applications")
+      .insert({ ...parsed.data, ref_code });
     setSubmitting(false);
     if (error) {
       setErr("Submission failed. Try again.");
