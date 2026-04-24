@@ -1,4 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useEffect } from "react";
+import { captureRefFromUrl } from "@/lib/tracking";
 import { Nav } from "@/components/site/Nav";
 import { Hero } from "@/components/site/Hero";
 import { Marquee } from "@/components/site/Marquee";
@@ -31,6 +33,9 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
+  useEffect(() => {
+    captureRefFromUrl();
+  }, []);
   return (
     <div className="min-h-screen bg-background text-foreground grain">
       <Nav />

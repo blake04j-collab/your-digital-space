@@ -27,6 +27,7 @@ export type Database = {
           niche: string | null
           phone: string | null
           plan: string
+          ref_code: string | null
           tiktok: string | null
           tiktok_followers: number | null
         }
@@ -42,6 +43,7 @@ export type Database = {
           niche?: string | null
           phone?: string | null
           plan?: string
+          ref_code?: string | null
           tiktok?: string | null
           tiktok_followers?: number | null
         }
@@ -57,8 +59,63 @@ export type Database = {
           niche?: string | null
           phone?: string | null
           plan?: string
+          ref_code?: string | null
           tiktok?: string | null
           tiktok_followers?: number | null
+        }
+        Relationships: []
+      }
+      link_clicks: {
+        Row: {
+          code: string
+          country: string | null
+          created_at: string
+          id: string
+          referrer: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          code: string
+          country?: string | null
+          created_at?: string
+          id?: string
+          referrer?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          code?: string
+          country?: string | null
+          created_at?: string
+          id?: string
+          referrer?: string | null
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
+      tracking_links: {
+        Row: {
+          archived: boolean
+          code: string
+          created_at: string
+          destination: string | null
+          id: string
+          label: string
+        }
+        Insert: {
+          archived?: boolean
+          code: string
+          created_at?: string
+          destination?: string | null
+          id?: string
+          label: string
+        }
+        Update: {
+          archived?: boolean
+          code?: string
+          created_at?: string
+          destination?: string | null
+          id?: string
+          label?: string
         }
         Relationships: []
       }
