@@ -514,9 +514,9 @@ function LinksPanel({
   }
 
   function buildUrl(code: string) {
-    // Always use the short path on our own domain. The /$ref route handles
-    // attribution and (optionally) redirects to a custom destination.
-    return `${origin}/${encodeURIComponent(code)}`;
+    // Always use the live custom domain so copied links are clean and shareable,
+    // regardless of which environment the admin is viewed from.
+    return `https://b1scale.com/${encodeURIComponent(code)}`;
   }
 
   async function copyUrl(code: string) {
