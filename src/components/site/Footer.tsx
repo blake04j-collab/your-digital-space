@@ -23,7 +23,7 @@ export function Footer() {
             </div>
             <div className="flex items-center gap-6 text-xs uppercase tracking-[0.25em] text-muted-foreground">
               {[
-                { label: "Instagram", href: "https://www.instagram.com/b1btc" },
+                { label: "Instagram", href: "https://www.instagram.com/b1scale" },
                 { label: "X", href: "https://x.com/b1btc" },
                 { label: "TikTok", href: "https://tiktok.com/@b1.btc" },
               ].map((s, i) => (
