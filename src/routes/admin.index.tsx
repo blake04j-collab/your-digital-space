@@ -222,13 +222,15 @@ function AdminDashboard() {
         {tab === "applications" ? (
           <>
             {/* stats */}
-            <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-7">
               {[
                 { label: "Site visitors", value: totalViews },
                 { label: "Total", value: stats.total },
                 { label: "Partner", value: stats.partner, accent: true },
                 { label: "Free", value: stats.free },
                 { label: "Last 7 days", value: stats.last7 },
+                { label: "TikTok followers", value: stats.tiktokFollowers },
+                { label: "IG followers", value: stats.igFollowers },
               ].map((s) => (
                 <div
                   key={s.label}
