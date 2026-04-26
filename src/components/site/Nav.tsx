@@ -31,17 +31,11 @@ export function Nav() {
   return (
     <header className="sticky top-0 z-50 border-b border-hairline bg-background/95 backdrop-blur-md [transform:translateZ(0)] [will-change:transform]">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4">
-        <a
-          href="https://linktr.ee/b1btc"
-          target="_blank"
-          rel="noreferrer"
-          aria-label="B1 — Linktree"
-          className="flex items-center gap-2 transition-transform hover:scale-[1.04]"
-        >
+        <div aria-label="B1" className="flex items-center gap-2">
           <span className="grid h-9 w-9 place-items-center rounded-md bg-lime text-primary-foreground font-display text-xl shadow-lime">
             B1
           </span>
-        </a>
+        </div>
         <nav className="hidden items-center gap-7 text-xs uppercase tracking-[0.2em] text-muted-foreground md:flex">
           <a href="#services" className={linkCls}>Services</a>
           <a href="#process" className={linkCls}>Process</a>
