@@ -121,7 +121,9 @@ function AdminDashboard() {
     const last7 = apps.filter(
       (a) => new Date(a.created_at).getTime() > Date.now() - 7 * 86400_000,
     ).length;
-    return { total: apps.length, partner, free, last7 };
+    const tiktokFollowers = apps.reduce((sum, a) => sum + (a.tiktok_followers ?? 0), 0);
+    const igFollowers = apps.reduce((sum, a) => sum + (a.ig_followers ?? 0), 0);
+    return { total: apps.length, partner, free, last7, tiktokFollowers, igFollowers };
   }, [apps]);
 
   async function logout() {
