@@ -186,7 +186,7 @@ export function Estimator() {
             </div>
 
             <p className="mt-6 text-[10px] uppercase tracking-[0.25em] text-muted-foreground/70">
-              * Estimates based on average B1Scale partner earnings. Actual results vary.
+              * Estimates based on real earnings of creators we currently work with. Actual results vary.
             </p>
           </div>
         )}
