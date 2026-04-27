@@ -59,7 +59,7 @@ export function Estimator() {
       title={
         <>
           Estimate How Much You<br />
-          Could Earn With <em className="not-italic text-lime">B1Scale.</em>
+          Could Earn With <em className="not-italic text-lime">The B1 Team.</em>
         </>
       }
       lead="Enter your Instagram or TikTok handle and follower count to see your potential monthly earnings."
