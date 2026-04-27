@@ -7,7 +7,8 @@ function estimateEarnings(followers: number): string {
   if (followers <= 5000) return "$1,750";
   if (followers <= 15000) return "$3,000";
   if (followers <= 75000) return "$4,500";
-  return "$6,000+";
+  if (followers <= 150000) return "$6,000";
+  return "$9,000+";
 }
 
 export function Estimator() {
