@@ -10,6 +10,7 @@ import { Process } from "@/components/site/Process";
 import { Plans } from "@/components/site/Plans";
 import { Fit } from "@/components/site/Fit";
 import { Apply } from "@/components/site/Apply";
+import { Estimator } from "@/components/site/Estimator";
 import { Footer } from "@/components/site/Footer";
 
 export const Route = createFileRoute("/")({
@@ -43,6 +44,7 @@ function Index() {
       <main>
         <Hero />
         <Marquee />
+        <Estimator />
         <Services />
         <Stuck />
         <Process />
