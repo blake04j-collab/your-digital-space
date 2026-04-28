@@ -44,12 +44,6 @@ export function Nav() {
         </nav>
         <div className="flex items-center gap-2">
           <a
-            href="#estimator"
-            className="hidden rounded-full border border-hairline bg-surface-1 px-4 py-2 font-display text-sm tracking-wider text-foreground transition-colors hover:bg-surface-2 sm:inline-block"
-          >
-            Earnings Estimator
-          </a>
-          <a
             href="#apply"
             className="shimmer-cta rounded-full bg-lime px-4 py-2 font-display text-sm tracking-wider text-primary-foreground transition-transform hover:scale-[1.04]"
           >
