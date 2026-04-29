@@ -119,6 +119,42 @@ export function LinkInBio() {
           ))}
         </div>
 
+        {/* Proof of work */}
+        <div className="mt-10 w-full">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="font-display text-xs uppercase tracking-[0.3em] text-muted-foreground">
+              Proof of work
+            </h2>
+            <span className="text-[10px] uppercase tracking-[0.25em] text-lime/80">Results</span>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            {results.map((r) => (
+              <figure
+                key={r.label}
+                className="group relative overflow-hidden rounded-2xl border border-hairline bg-card/80 backdrop-blur transition-all hover:-translate-y-0.5 hover:border-lime/60 hover:shadow-lime"
+              >
+                <div className="aspect-[4/3] overflow-hidden bg-background">
+                  <img
+                    src={r.src}
+                    alt={r.alt}
+                    loading="lazy"
+                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                </div>
+                <figcaption className="flex items-baseline justify-between gap-2 px-3 py-2.5">
+                  <span className="font-display text-lg leading-none text-foreground">
+                    {r.stat}
+                  </span>
+                  <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                    {r.label}
+                  </span>
+                </figcaption>
+              </figure>
+            ))}
+          </div>
+        </div>
+
         <div className="mt-auto pt-12 text-[10px] uppercase tracking-[0.3em] text-muted-foreground/70">
           © B1 · b1scale.com
         </div>
