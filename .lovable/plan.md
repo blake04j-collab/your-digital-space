@@ -1,32 +1,54 @@
-# Add subheading and reframe key proof tiles
+## Goal
 
-Three tiny edits, all in `src/components/site/LinkInBio.tsx`. No new files, no asset changes.
+Replace the blinking lime dot beside "Creator Partnership Program" in the hero with **Option D — a small lime signal bar with a sweeping highlight**. Same footprint, more crafted, matches the existing `shimmer-cta` language.
 
-## 1. Add subheading under "i ♡ scaling"
+## Changes
 
-Right under the existing `i ♡ scaling` line, add a second line:
+### 1. `src/styles.css` — add signal-bar utility
 
-> **making the attention pay**
->
-> **social media marketing**
+Inside the `@layer utilities` block, just after the existing `animate-blink` rule (around line 246), add:
 
-Styled slightly larger and brighter than the uppercase tagline so it reads as the primary message, but still subordinate to the `B1` display headline.
+```css
+/* Signal bar with sweeping highlight */
+@keyframes signal-sweep {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+.signal-bar {
+  position: relative;
+  display: inline-block;
+  width: 14px;
+  height: 2px;
+  background-color: var(--brand-lime);
+  overflow: hidden;
+  border-radius: 1px;
+  opacity: 0.85;
+}
+.signal-bar::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, oklch(1 0 0 / 0.9), transparent);
+  transform: translateX(-100%);
+  animation: signal-sweep 2.6s ease-in-out infinite;
+}
+```
 
-## 2. Make the Views tile show the full "129k" in the preview
+### 2. `src/components/site/Hero.tsx` — swap the dot for the bar
 
-The Views screenshot has the chart at the top and the big "129k" number near the bottom. With `object-cover` on a `4:3` frame, the bottom of the image (where 129k lives) gets cropped.
+Replace lines 38–41:
 
-Fix: switch the Views tile to `object-contain` (and a dark background to fill the letterboxing) so the entire screenshot — including the "129k" — is visible inside the card before clicking. The click-to-zoom dialog still opens the full image.
+```tsx
+<div className="mb-6 inline-flex items-center gap-2.5 rounded-full border border-hairline bg-surface-1 px-4 py-1.5 text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
+  <span className="signal-bar" aria-hidden />
+  Creator Partnership Program
+</div>
+```
 
-## 3. Same fix for the Subs tile
+## Notes
 
-The Subscribers screenshot has "758 Subscribers" sitting low in the frame and gets cropped the same way. Apply the same `object-contain` treatment so the full "758" reads in the preview.
+- Keeps the pill the exact same height; only the dot becomes a 14×2px lime bar.
+- Sweep animation reuses the same easing/timing feel as the Apply button shimmer for consistency.
+- No new dependencies, no other files affected.
 
-Other tiles (Earnings video, Impressions, Visitors) keep `object-cover` — they look better filling the frame and their key numbers are already centered.
-
-## Technical details
-
-- File: `src/components/site/LinkInBio.tsx`
-- Add a `fit?: "cover" | "contain"` field to the `Result` type and set `fit: "contain"` on the Views and Subs entries; default remains `cover`.
-- In the tile renderer, switch the `<img>` class between `object-cover` and `object-contain` based on `r.fit`. When `contain`, give the image wrapper a solid `bg-background` so the empty space matches the card.
-- Subheading uses `font-display`, a slightly larger size than the uppercase tagline, and normal letter-spacing so it doesn't compete with `i ♡ scaling`.
+Approve and I'll apply it.

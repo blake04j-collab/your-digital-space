@@ -35,8 +35,8 @@ export function Hero() {
 
       <div className="relative mx-auto max-w-5xl px-5 py-24 text-center md:py-36">
         <Reveal>
-          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-hairline bg-surface-1 px-4 py-1.5 text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
-            <span className="h-1.5 w-1.5 rounded-full bg-lime animate-pulse-lime" />
+          <div className="mb-6 inline-flex items-center gap-2.5 rounded-full border border-hairline bg-surface-1 px-4 py-1.5 text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
+            <span className="signal-bar" aria-hidden />
             Creator Partnership Program
           </div>
         </Reveal>
