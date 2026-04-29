@@ -52,7 +52,7 @@ export function LinkInBio() {
           <img
             src={avatar}
             alt="B1"
-            className="relative h-44 w-44 rounded-full border-2 border-lime/70 object-cover shadow-lime sm:h-52 sm:w-52"
+            className="relative h-28 w-28 rounded-full border-2 border-lime/70 object-cover shadow-lime"
             loading="eager"
           />
         </div>
