@@ -14,14 +14,15 @@ type Result = {
   label: string;
   type?: "image" | "video";
   poster?: string;
+  fit?: "cover" | "contain";
 };
 
 const results: Result[] = [
   { src: "/results/earnings.mp4", poster: "/results/earnings-poster.jpg", alt: "$63k earnings in 7 days", stat: "$63K", label: "Earnings / 7d", type: "video" },
-  { src: resultViews, alt: "129k views in first 48 hours", stat: "129K", label: "Views / 48h" },
+  { src: resultViews, alt: "129k views in first 48 hours", stat: "129K", label: "Views / 48h", fit: "contain" },
   { src: resultImpressions, alt: "93,701 impressions and 5,288 link clicks", stat: "93.7K", label: "Impressions" },
   { src: resultVisitors, alt: "20,307 profile visitors over 5 days", stat: "20.3K", label: "Visitors / 5d" },
-  { src: resultSubscribers, alt: "758 subscribers in 1 day", stat: "758", label: "Subs / 1d" },
+  { src: resultSubscribers, alt: "758 subscribers in 1 day", stat: "758", label: "Subs / 1d", fit: "contain" },
 ];
 
 type LinkItem = {
@@ -79,6 +80,12 @@ export function LinkInBio() {
         <h1 className="mt-6 font-display text-5xl tracking-tight">B1</h1>
         <p className="mt-2 text-xs uppercase tracking-[0.35em] text-muted-foreground">
           i ♡ scaling
+        </p>
+        <p className="mt-3 font-display text-base text-foreground/90 sm:text-lg">
+          making the attention pay
+        </p>
+        <p className="mt-1 text-[11px] uppercase tracking-[0.3em] text-lime/80">
+          social media marketing
         </p>
 
         {/* Featured CTA */}
