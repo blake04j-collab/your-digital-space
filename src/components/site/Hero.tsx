@@ -38,6 +38,7 @@ export function Hero() {
           <div className="mb-6 inline-flex items-center gap-2.5 rounded-full border border-hairline bg-surface-1 px-4 py-1.5 text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
             <span className="signal-bar" aria-hidden />
             Creator Partnership Program
+            <span className="signal-bar" aria-hidden />
           </div>
         </Reveal>
         <Reveal delay={80}>
