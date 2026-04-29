@@ -78,7 +78,7 @@ export function LinkInBio() {
         </div>
 
         <h1 className="mt-6 font-display text-5xl tracking-tight">B1</h1>
-        <div className="mt-3 space-y-0.5 text-center text-[11px] lowercase tracking-[0.3em] text-muted-foreground">
+        <div className="mt-4 space-y-1.5 text-center text-[13px] lowercase tracking-[0.25em] text-muted-foreground">
           <p>i ♡ scaling</p>
           <p>making the attention pay</p>
           <p>social media marketing</p>
@@ -87,7 +87,7 @@ export function LinkInBio() {
         {/* Featured CTA */}
         <a
           href="/"
-          className="group relative mt-10 block w-full overflow-hidden rounded-2xl border border-lime/40 bg-card transition-all hover:-translate-y-0.5 hover:border-lime hover:shadow-lime"
+          className="group relative mt-8 block w-full overflow-hidden rounded-2xl border border-lime/40 bg-card transition-all hover:-translate-y-0.5 hover:border-lime hover:shadow-lime"
         >
           <div
             aria-hidden
@@ -110,7 +110,7 @@ export function LinkInBio() {
         </a>
 
         {/* Social links */}
-        <div className="mt-4 flex w-full flex-col gap-3">
+        <div className="mt-3 flex w-full flex-col gap-3">
           {links.map((l) => (
             <a
               key={l.label}
@@ -131,7 +131,7 @@ export function LinkInBio() {
         </div>
 
         {/* Proof of work — single horizontal scrollable row */}
-        <div className="mt-10 -mx-5 w-[calc(100%+2.5rem)]">
+        <div className="mt-8 -mx-5 w-[calc(100%+2.5rem)]">
           <div className="mb-4 flex items-center justify-between px-5">
             <h2 className="font-display text-xs uppercase tracking-[0.3em] text-muted-foreground">
               Proof of work
