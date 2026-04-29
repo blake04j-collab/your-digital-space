@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Instagram, Music2, ArrowUpRight } from "lucide-react";
+import { useRef, useState } from "react";
+import { Instagram, Music2, ArrowUpRight, ChevronLeft, ChevronRight } from "lucide-react";
 import avatar from "@/assets/b1-avatar.jpg";
 import resultViews from "@/assets/results/views.jpg";
 import resultImpressions from "@/assets/results/impressions.jpg";
@@ -131,60 +131,10 @@ export function LinkInBio() {
         </div>
 
         {/* Proof of work — single horizontal scrollable row */}
-        <div className="mt-8 -mx-5 w-[calc(100%+2.5rem)]">
-          <div className="mb-4 flex items-center justify-between px-5">
-            <h2 className="font-display text-xs uppercase tracking-[0.3em] text-muted-foreground">
-              Proof of work
-            </h2>
-            <span className="text-[10px] uppercase tracking-[0.25em] text-lime/80">Swipe →</span>
-          </div>
-
-          <div
-            className="flex snap-x snap-mandatory gap-3 overflow-x-auto px-5 pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-          >
-            {results.map((r) => (
-              <button
-                key={r.label}
-                type="button"
-                onClick={() => setZoomed({ src: r.src, alt: r.alt, type: r.type })}
-                className="group relative w-[68%] shrink-0 snap-start overflow-hidden rounded-2xl border border-hairline bg-card/80 text-left backdrop-blur transition-all hover:-translate-y-0.5 hover:border-lime/60 hover:shadow-lime focus:outline-none focus-visible:border-lime focus-visible:shadow-lime sm:w-[55%]"
-                aria-label={`View larger: ${r.alt}`}
-              >
-                <div className="aspect-[4/3] overflow-hidden bg-background">
-                  {r.type === "video" ? (
-                    <video
-                      src={r.src}
-                      poster={r.poster}
-                      autoPlay
-                      muted
-                      loop
-                      playsInline
-                      preload="metadata"
-                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    />
-                  ) : (
-                    <img
-                      src={r.src}
-                      alt={r.alt}
-                      loading="lazy"
-                      className={`h-full w-full transition-transform duration-500 group-hover:scale-105 ${
-                        r.fit === "contain" ? "object-contain p-2" : "object-cover"
-                      }`}
-                    />
-                  )}
-                </div>
-                <div className="flex items-baseline justify-between gap-2 px-3 py-2.5">
-                  <span className="font-display text-lg leading-none text-foreground">
-                    {r.stat}
-                  </span>
-                  <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-                    {r.label}
-                  </span>
-                </div>
-              </button>
-            ))}
-          </div>
-        </div>
+        <ProofRow
+          results={results}
+          onZoom={(r) => setZoomed({ src: r.src, alt: r.alt, type: r.type })}
+        />
 
         <div className="mt-auto pt-12 text-[10px] uppercase tracking-[0.3em] text-muted-foreground/70">
           © B1 · b1scale.com
@@ -213,6 +163,101 @@ export function LinkInBio() {
           ))}
         </DialogContent>
       </Dialog>
+    </div>
+  );
+}
+
+function ProofRow({
+  results,
+  onZoom,
+}: {
+  results: Result[];
+  onZoom: (r: Result) => void;
+}) {
+  const scrollerRef = useRef<HTMLDivElement>(null);
+
+  const scrollByDir = (dir: 1 | -1) => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    const amount = el.clientWidth * 0.8 * dir;
+    el.scrollBy({ left: amount, behavior: "smooth" });
+  };
+
+  return (
+    <div className="mt-8 -mx-5 w-[calc(100%+2.5rem)]">
+      <div className="mb-4 flex items-center justify-between px-5">
+        <h2 className="font-display text-xs uppercase tracking-[0.3em] text-muted-foreground">
+          Proof of work
+        </h2>
+        <div className="flex items-center gap-2">
+          <span className="hidden text-[10px] uppercase tracking-[0.25em] text-lime/80 sm:inline">
+            Scroll →
+          </span>
+          <button
+            type="button"
+            onClick={() => scrollByDir(-1)}
+            aria-label="Scroll left"
+            className="grid h-8 w-8 place-items-center rounded-full border border-hairline bg-card/80 text-muted-foreground backdrop-blur transition-all hover:border-lime/60 hover:text-lime"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </button>
+          <button
+            type="button"
+            onClick={() => scrollByDir(1)}
+            aria-label="Scroll right"
+            className="grid h-8 w-8 place-items-center rounded-full border border-hairline bg-card/80 text-muted-foreground backdrop-blur transition-all hover:border-lime/60 hover:text-lime"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </button>
+        </div>
+      </div>
+
+      <div
+        ref={scrollerRef}
+        className="flex snap-x snap-mandatory gap-3 overflow-x-auto px-5 pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      >
+        {results.map((r) => (
+          <button
+            key={r.label}
+            type="button"
+            onClick={() => onZoom(r)}
+            className="group relative w-[68%] shrink-0 snap-start overflow-hidden rounded-2xl border border-hairline bg-card/80 text-left backdrop-blur transition-all hover:-translate-y-0.5 hover:border-lime/60 hover:shadow-lime focus:outline-none focus-visible:border-lime focus-visible:shadow-lime sm:w-[55%]"
+            aria-label={`View larger: ${r.alt}`}
+          >
+            <div className="aspect-[4/3] overflow-hidden bg-background">
+              {r.type === "video" ? (
+                <video
+                  src={r.src}
+                  poster={r.poster}
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  preload="metadata"
+                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+              ) : (
+                <img
+                  src={r.src}
+                  alt={r.alt}
+                  loading="lazy"
+                  className={`h-full w-full transition-transform duration-500 group-hover:scale-105 ${
+                    r.fit === "contain" ? "object-contain p-2" : "object-cover"
+                  }`}
+                />
+              )}
+            </div>
+            <div className="flex items-baseline justify-between gap-2 px-3 py-2.5">
+              <span className="font-display text-lg leading-none text-foreground">
+                {r.stat}
+              </span>
+              <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                {r.label}
+              </span>
+            </div>
+          </button>
+        ))}
+      </div>
     </div>
   );
 }
