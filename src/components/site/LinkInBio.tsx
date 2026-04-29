@@ -17,7 +17,7 @@ const links: LinkItem[] = [
   },
   {
     label: "TikTok",
-    href: "https://www.tiktok.com/@b1btc",
+    href: "https://www.tiktok.com/@b1.btc",
     icon: <Music2 className="h-5 w-5" />,
     external: true,
   },
