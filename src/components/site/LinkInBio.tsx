@@ -171,7 +171,9 @@ export function LinkInBio() {
                       src={r.src}
                       alt={r.alt}
                       loading="lazy"
-                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      className={`h-full w-full transition-transform duration-500 group-hover:scale-105 ${
+                        r.fit === "contain" ? "object-contain p-2" : "object-cover"
+                      }`}
                     />
                   )}
                 </div>
