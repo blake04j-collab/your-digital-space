@@ -7,7 +7,17 @@ import resultVisitors from "@/assets/results/visitors.png";
 import resultSubscribers from "@/assets/results/subscribers.png";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 
-const results = [
+type Result = {
+  src: string;
+  alt: string;
+  stat: string;
+  label: string;
+  type?: "image" | "video";
+  poster?: string;
+};
+
+const results: Result[] = [
+  { src: "/results/earnings.mp4", poster: "/results/earnings-poster.jpg", alt: "$63k earnings in 7 days", stat: "$63K", label: "Earnings / 7d", type: "video" },
   { src: resultViews, alt: "129k views in first 48 hours", stat: "129K", label: "Views / 48h" },
   { src: resultImpressions, alt: "93,701 impressions and 5,288 link clicks", stat: "93.7K", label: "Impressions" },
   { src: resultVisitors, alt: "20,307 profile visitors over 5 days", stat: "20.3K", label: "Visitors / 5d" },
@@ -37,7 +47,7 @@ const links: LinkItem[] = [
 ];
 
 export function LinkInBio() {
-  const [zoomed, setZoomed] = useState<{ src: string; alt: string } | null>(null);
+  const [zoomed, setZoomed] = useState<{ src: string; alt: string; type?: "image" | "video" } | null>(null);
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-background text-foreground grain">
@@ -117,31 +127,46 @@ export function LinkInBio() {
           ))}
         </div>
 
-        {/* Proof of work */}
-        <div className="mt-10 w-full">
-          <div className="mb-4 flex items-center justify-between">
+        {/* Proof of work — single horizontal scrollable row */}
+        <div className="mt-10 -mx-5 w-[calc(100%+2.5rem)]">
+          <div className="mb-4 flex items-center justify-between px-5">
             <h2 className="font-display text-xs uppercase tracking-[0.3em] text-muted-foreground">
               Proof of work
             </h2>
-            <span className="text-[10px] uppercase tracking-[0.25em] text-lime/80">Tap to zoom</span>
+            <span className="text-[10px] uppercase tracking-[0.25em] text-lime/80">Swipe →</span>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div
+            className="flex snap-x snap-mandatory gap-3 overflow-x-auto px-5 pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          >
             {results.map((r) => (
               <button
                 key={r.label}
                 type="button"
-                onClick={() => setZoomed({ src: r.src, alt: r.alt })}
-                className="group relative overflow-hidden rounded-2xl border border-hairline bg-card/80 text-left backdrop-blur transition-all hover:-translate-y-0.5 hover:border-lime/60 hover:shadow-lime focus:outline-none focus-visible:border-lime focus-visible:shadow-lime"
+                onClick={() => setZoomed({ src: r.src, alt: r.alt, type: r.type })}
+                className="group relative w-[68%] shrink-0 snap-start overflow-hidden rounded-2xl border border-hairline bg-card/80 text-left backdrop-blur transition-all hover:-translate-y-0.5 hover:border-lime/60 hover:shadow-lime focus:outline-none focus-visible:border-lime focus-visible:shadow-lime sm:w-[55%]"
                 aria-label={`View larger: ${r.alt}`}
               >
                 <div className="aspect-[4/3] overflow-hidden bg-background">
-                  <img
-                    src={r.src}
-                    alt={r.alt}
-                    loading="lazy"
-                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
+                  {r.type === "video" ? (
+                    <video
+                      src={r.src}
+                      poster={r.poster}
+                      autoPlay
+                      muted
+                      loop
+                      playsInline
+                      preload="metadata"
+                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                  ) : (
+                    <img
+                      src={r.src}
+                      alt={r.alt}
+                      loading="lazy"
+                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                  )}
                 </div>
                 <div className="flex items-baseline justify-between gap-2 px-3 py-2.5">
                   <span className="font-display text-lg leading-none text-foreground">
@@ -165,13 +190,22 @@ export function LinkInBio() {
       <Dialog open={!!zoomed} onOpenChange={(o) => !o && setZoomed(null)}>
         <DialogContent className="max-w-4xl border-lime/40 bg-card p-2 sm:p-3">
           <DialogTitle className="sr-only">{zoomed?.alt ?? "Result"}</DialogTitle>
-          {zoomed && (
+          {zoomed && (zoomed.type === "video" ? (
+            <video
+              src={zoomed.src}
+              autoPlay
+              loop
+              controls
+              playsInline
+              className="h-auto max-h-[85vh] w-full rounded-lg object-contain"
+            />
+          ) : (
             <img
               src={zoomed.src}
               alt={zoomed.alt}
               className="h-auto max-h-[85vh] w-full rounded-lg object-contain"
             />
-          )}
+          ))}
         </DialogContent>
       </Dialog>
     </div>
