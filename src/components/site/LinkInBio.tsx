@@ -1,5 +1,16 @@
 import { Instagram, Twitter, Music2, ArrowUpRight } from "lucide-react";
 import avatar from "@/assets/b1-avatar.jpg";
+import resultViews from "@/assets/results/views.jpg";
+import resultImpressions from "@/assets/results/impressions.jpg";
+import resultVisitors from "@/assets/results/visitors.png";
+import resultSubscribers from "@/assets/results/subscribers.png";
+
+const results = [
+  { src: resultViews, alt: "129k views in first 48 hours", stat: "129K", label: "Views / 48h" },
+  { src: resultImpressions, alt: "93,701 impressions and 5,288 link clicks", stat: "93.7K", label: "Impressions" },
+  { src: resultVisitors, alt: "20,307 profile visitors", stat: "20.3K", label: "Profile visitors" },
+  { src: resultSubscribers, alt: "758 subscribers", stat: "758", label: "Subscribers" },
+];
 
 type LinkItem = {
   label: string;
