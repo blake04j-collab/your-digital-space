@@ -7,7 +7,17 @@ import resultVisitors from "@/assets/results/visitors.png";
 import resultSubscribers from "@/assets/results/subscribers.png";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 
-const results = [
+type Result = {
+  src: string;
+  alt: string;
+  stat: string;
+  label: string;
+  type?: "image" | "video";
+  poster?: string;
+};
+
+const results: Result[] = [
+  { src: "/results/earnings.mp4", poster: "/results/earnings-poster.jpg", alt: "$63k earnings in 7 days", stat: "$63K", label: "Earnings / 7d", type: "video" },
   { src: resultViews, alt: "129k views in first 48 hours", stat: "129K", label: "Views / 48h" },
   { src: resultImpressions, alt: "93,701 impressions and 5,288 link clicks", stat: "93.7K", label: "Impressions" },
   { src: resultVisitors, alt: "20,307 profile visitors over 5 days", stat: "20.3K", label: "Visitors / 5d" },
