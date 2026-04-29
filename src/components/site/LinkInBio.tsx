@@ -144,7 +144,7 @@ export function LinkInBio() {
               Proof of work
             </h2>
             <div className="flex items-center gap-2">
-              <span className="hidden text-[10px] uppercase tracking-[0.25em] text-muted-foreground sm:inline">
+              <span className="hidden font-display text-xs uppercase tracking-[0.3em] text-muted-foreground sm:inline">
                 Scroll →
               </span>
               <button
