@@ -245,6 +245,30 @@
   }
   .animate-blink { animation: blink-dot 2.4s ease-in-out infinite; }
 
+  /* Signal bar with sweeping highlight */
+  @keyframes signal-sweep {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+  .signal-bar {
+    position: relative;
+    display: inline-block;
+    width: 14px;
+    height: 2px;
+    background-color: var(--brand-lime);
+    overflow: hidden;
+    border-radius: 1px;
+    opacity: 0.85;
+  }
+  .signal-bar::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, oklch(1 0 0 / 0.9), transparent);
+    transform: translateX(-100%);
+    animation: signal-sweep 2.6s ease-in-out infinite;
+  }
+
   /* Subtle card lift */
   .card-lift {
     transition: transform 0.4s cubic-bezier(0.2, 0.7, 0.2, 1), border-color 0.3s, background-color 0.3s;
