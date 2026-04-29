@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Instagram, Twitter, Music2, ArrowUpRight, X } from "lucide-react";
+import { Instagram, Music2, ArrowUpRight } from "lucide-react";
 import avatar from "@/assets/b1-avatar.jpg";
 import resultViews from "@/assets/results/views.jpg";
 import resultImpressions from "@/assets/results/impressions.jpg";
@@ -32,12 +32,6 @@ const links: LinkItem[] = [
     label: "TikTok",
     href: "https://www.tiktok.com/@b1.btc",
     icon: <Music2 className="h-5 w-5" />,
-    external: true,
-  },
-  {
-    label: "X / Twitter",
-    href: "https://x.com/b1btc",
-    icon: <Twitter className="h-5 w-5" />,
     external: true,
   },
 ];
