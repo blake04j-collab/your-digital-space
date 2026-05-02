@@ -9,12 +9,17 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as B1btcRouteImport } from './routes/b1btc'
 import { Route as RefRouteImport } from './routes/$ref'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
-import { Route as LB1btcRouteImport } from './routes/l.b1btc'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
 
+const B1btcRoute = B1btcRouteImport.update({
+  id: '/b1btc',
+  path: '/b1btc',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RefRoute = RefRouteImport.update({
   id: '/$ref',
   path: '/$ref',
@@ -30,11 +35,6 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/admin/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const LB1btcRoute = LB1btcRouteImport.update({
-  id: '/l/b1btc',
-  path: '/l/b1btc',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AdminLoginRoute = AdminLoginRouteImport.update({
   id: '/admin/login',
   path: '/admin/login',
@@ -44,43 +44,50 @@ const AdminLoginRoute = AdminLoginRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$ref': typeof RefRoute
+  '/b1btc': typeof B1btcRoute
   '/admin/login': typeof AdminLoginRoute
-  '/l/b1btc': typeof LB1btcRoute
   '/admin/': typeof AdminIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$ref': typeof RefRoute
+  '/b1btc': typeof B1btcRoute
   '/admin/login': typeof AdminLoginRoute
-  '/l/b1btc': typeof LB1btcRoute
   '/admin': typeof AdminIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/$ref': typeof RefRoute
+  '/b1btc': typeof B1btcRoute
   '/admin/login': typeof AdminLoginRoute
-  '/l/b1btc': typeof LB1btcRoute
   '/admin/': typeof AdminIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/$ref' | '/admin/login' | '/l/b1btc' | '/admin/'
+  fullPaths: '/' | '/$ref' | '/b1btc' | '/admin/login' | '/admin/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/$ref' | '/admin/login' | '/l/b1btc' | '/admin'
-  id: '__root__' | '/' | '/$ref' | '/admin/login' | '/l/b1btc' | '/admin/'
+  to: '/' | '/$ref' | '/b1btc' | '/admin/login' | '/admin'
+  id: '__root__' | '/' | '/$ref' | '/b1btc' | '/admin/login' | '/admin/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   RefRoute: typeof RefRoute
+  B1btcRoute: typeof B1btcRoute
   AdminLoginRoute: typeof AdminLoginRoute
-  LB1btcRoute: typeof LB1btcRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/b1btc': {
+      id: '/b1btc'
+      path: '/b1btc'
+      fullPath: '/b1btc'
+      preLoaderRoute: typeof B1btcRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/$ref': {
       id: '/$ref'
       path: '/$ref'
@@ -102,13 +109,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/l/b1btc': {
-      id: '/l/b1btc'
-      path: '/l/b1btc'
-      fullPath: '/l/b1btc'
-      preLoaderRoute: typeof LB1btcRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/admin/login': {
       id: '/admin/login'
       path: '/admin/login'
@@ -122,8 +122,8 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   RefRoute: RefRoute,
+  B1btcRoute: B1btcRoute,
   AdminLoginRoute: AdminLoginRoute,
-  LB1btcRoute: LB1btcRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
 export const routeTree = rootRouteImport
