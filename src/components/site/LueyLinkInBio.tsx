@@ -81,9 +81,10 @@ export function LueyLinkInBio() {
             aria-hidden
             className="absolute -inset-3 rounded-full bg-gradient-to-tr from-lime/50 via-lime/20 to-transparent blur-2xl"
           />
-          <div
-            aria-hidden
-            className="relative h-28 w-28 rounded-full border-2 border-lime/70 bg-card shadow-lime"
+          <img
+            src="/luey-avatar.jpg"
+            alt="L5"
+            className="relative h-28 w-28 rounded-full border-2 border-lime/70 bg-card object-cover shadow-lime"
           />
         </div>
 
