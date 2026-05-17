@@ -50,7 +50,20 @@ export function LueyLinkInBio() {
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-background text-foreground grain">
+    <div
+      className="relative min-h-screen overflow-hidden bg-background text-foreground grain"
+      style={{
+        // Sith red theme — scoped override of brand tokens for this page only
+        ["--brand-lime" as any]: "oklch(0.55 0.22 27)",
+        ["--brand-lime-soft" as any]: "oklch(0.55 0.22 27 / 0.12)",
+        ["--brand-blue" as any]: "oklch(0.55 0.22 27)",
+        ["--shadow-lime" as any]:
+          "0 0 0 1px oklch(0.55 0.22 27 / 0.5), 0 10px 40px -10px oklch(0.55 0.22 27 / 0.6)",
+        ["--background" as any]: "oklch(0.11 0.03 25)",
+        ["--card" as any]: "oklch(0.16 0.04 25)",
+        ["--ring" as any]: "oklch(0.55 0.22 27)",
+      }}
+    >
       {/* Ambient glows */}
       <div
         aria-hidden
