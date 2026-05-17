@@ -179,14 +179,6 @@ export function LueyLinkInBio() {
                     />
                   )}
                 </div>
-                <div className="flex items-baseline justify-between gap-2 px-3 py-2.5">
-                  <span className="font-display text-lg leading-none text-foreground">
-                    {r.stat}
-                  </span>
-                  <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-                    {r.label}
-                  </span>
-                </div>
               </button>
             ))}
           </div>
