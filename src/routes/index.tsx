@@ -47,7 +47,7 @@ function Index() {
         <Services />
         <Stuck />
         <Process />
-        <Plans />
+        
         <Fit />
         <Apply />
       </main>
