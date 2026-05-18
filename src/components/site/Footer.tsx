@@ -16,8 +16,8 @@ export function Footer() {
         <Reveal>
           <div className="flex flex-col items-center gap-8 text-center">
             <div className="relative">
-              <div className="font-display text-[clamp(3.5rem,13vw,9rem)] leading-none tracking-wider text-lime drop-shadow-[0_0_30px_oklch(0.82_0.16_220_/_0.4)]">
-                i ♡ scaling
+              <div className="font-display text-[clamp(3rem,11vw,8rem)] leading-none tracking-wider text-lime drop-shadow-[0_0_30px_oklch(0.68_0.31_340_/_0.55)]">
+                scale beyond
               </div>
               <div className="mx-auto mt-3 h-px w-24 bg-lime/50" />
             </div>
