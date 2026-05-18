@@ -16,17 +16,17 @@ import { Footer } from "@/components/site/Footer";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "B1SCALE — Turn Your Attention Into Income" },
+      { title: "B1 Scale — Monetization Systems for Elite Creators" },
       {
         name: "description",
         content:
-          "B1SCALE works with creators in fitness, looks, and lifestyle to turn audience into real brand income. i ♡ scaling.",
+          "B1 Scale helps modern creators optimize monetization, fan engagement, and backend growth systems. Private partnerships for high-revenue subscription brands.",
       },
-      { property: "og:title", content: "B1SCALE — Turn Your Attention Into Income" },
+      { property: "og:title", content: "B1 Scale — Monetization Systems for Elite Creators" },
       {
         property: "og:description",
         content:
-          "Creator partnership program. Direct brand network. Real deals. Apply for priority placement.",
+          "Private creator growth partner. Revenue optimization, fan engagement, scaling infrastructure — built for high-ticket creator brands.",
       },
     ],
   }),
