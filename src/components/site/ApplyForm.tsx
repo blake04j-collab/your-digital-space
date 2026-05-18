@@ -17,15 +17,12 @@ const schema = z.object({
   plan: z.enum(["free", "partner"]),
 });
 
-type Plan = "free" | "partner";
-
 const inputCls =
   "w-full rounded-lg border border-hairline bg-background px-3.5 py-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground/40 focus:border-lime";
 
 const labelCls = "mb-1.5 block text-xs font-light text-muted-foreground";
 
 export function ApplyForm() {
-  const [plan, setPlan] = useState<Plan>("partner");
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
   const [err, setErr] = useState<string | null>(null);
@@ -43,9 +40,8 @@ export function ApplyForm() {
       instagram: String(fd.get("instagram") ?? "").replace("@", "") || undefined,
       tiktok_followers: Number(fd.get("tiktok_followers") || 0),
       ig_followers: Number(fd.get("ig_followers") || 0),
-      niche: String(fd.get("niche") ?? "") || undefined,
       bio: String(fd.get("bio") ?? "") || undefined,
-      plan,
+      plan: "partner" as const,
     };
     const parsed = schema.safeParse(raw);
     if (!parsed.success) {
@@ -73,9 +69,7 @@ export function ApplyForm() {
         </div>
         <h3 className="font-display text-4xl text-lime">Application received</h3>
         <p className="mx-auto mt-3 max-w-md text-sm font-light text-muted-foreground">
-          {plan === "partner"
-            ? "You're on the Partner track. Expect a call within 24 hours to lock in your brand connection."
-            : "You've been added to the creator pool. We'll reach out soon with more information to get you connected."}
+          Expect a private response within 24 hours to discuss next steps.
         </p>
       </div>
     );
@@ -131,18 +125,6 @@ export function ApplyForm() {
             <input name="ig_followers" type="number" min={0} className={inputCls} placeholder="12000" />
           </div>
           <div className="sm:col-span-2">
-            <label className={labelCls}>Primary niche</label>
-            <select name="niche" className={inputCls} defaultValue="">
-              <option value="" disabled>Select your niche...</option>
-              <option>Gym / Fitness</option>
-              <option>Looksmaxxing</option>
-              <option>Lifestyle</option>
-              <option>Nutrition / Supplements</option>
-              <option>Fashion / Style</option>
-              <option>Other</option>
-            </select>
-          </div>
-          <div className="sm:col-span-2">
             <label className={labelCls}>Brief description of your content</label>
             <textarea
               name="bio"
@@ -152,46 +134,6 @@ export function ApplyForm() {
             />
           </div>
         </div>
-      </div>
-
-      {/* Plan select */}
-      <div className="px-1 pt-2 text-[10px] font-medium uppercase tracking-[0.25em] text-muted-foreground/60">
-        Choose your path
-      </div>
-      <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-        <button
-          type="button"
-          onClick={() => setPlan("free")}
-          className={`rounded-2xl border p-5 text-left transition-all ${
-            plan === "free"
-              ? "border-muted-foreground bg-surface-2 opacity-100"
-              : "border-hairline bg-surface-1 opacity-70"
-          }`}
-        >
-          <div className="mb-2 inline-block rounded-full border border-hairline bg-surface-2 px-2.5 py-0.5 text-[9px] uppercase tracking-[0.2em] text-muted-foreground">
-            Basic
-          </div>
-          <div className="font-display text-2xl tracking-wider text-muted-foreground">Free</div>
-          <p className="mt-1 text-xs text-muted-foreground/70">No upfront cost · No guarantees</p>
-        </button>
-        <button
-          type="button"
-          onClick={() => setPlan("partner")}
-          className={`relative rounded-2xl border p-5 text-left transition-all ${
-            plan === "partner"
-              ? "border-lime bg-lime-soft shadow-lime"
-              : "border-lime/40 bg-lime-soft/40"
-          }`}
-        >
-          <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 rounded-full bg-lime px-3 py-0.5 font-display text-[9px] tracking-[0.25em] text-primary-foreground">
-            Recommended
-          </div>
-          <div className="mb-2 inline-block rounded-full bg-lime px-2.5 py-0.5 text-[9px] font-medium uppercase tracking-[0.2em] text-primary-foreground">
-            Premium
-          </div>
-          <div className="font-display text-2xl tracking-wider text-lime">Partner</div>
-          <p className="mt-1 text-xs text-muted-foreground">Direct brand intro guaranteed</p>
-        </button>
       </div>
 
       {err && (
