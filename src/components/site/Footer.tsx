@@ -9,15 +9,15 @@ export function Footer() {
         className="pointer-events-none absolute inset-x-0 bottom-0 h-64"
         style={{
           background:
-            "radial-gradient(ellipse 60% 100% at 50% 100%, oklch(0.82 0.16 220 / 0.18), transparent 70%)",
+            "radial-gradient(ellipse 60% 100% at 50% 100%, oklch(0.68 0.31 340 / 0.22), transparent 70%)",
         }}
       />
       <div className="relative mx-auto max-w-6xl px-5 py-20">
         <Reveal>
           <div className="flex flex-col items-center gap-8 text-center">
             <div className="relative">
-              <div className="font-display text-[clamp(3.5rem,13vw,9rem)] leading-none tracking-wider text-lime drop-shadow-[0_0_30px_oklch(0.82_0.16_220_/_0.4)]">
-                i ♡ scaling
+              <div className="font-display text-[clamp(3rem,11vw,8rem)] leading-none tracking-wider text-lime drop-shadow-[0_0_30px_oklch(0.68_0.31_340_/_0.55)]">
+                scale beyond
               </div>
               <div className="mx-auto mt-3 h-px w-24 bg-lime/50" />
             </div>
@@ -41,7 +41,7 @@ export function Footer() {
               ))}
             </div>
             <p className="text-[11px] uppercase tracking-[0.25em] text-muted-foreground/60">
-              © {new Date().getFullYear()} B1SCALE · Built for creators who scale
+              © {new Date().getFullYear()} B1 SCALE · Built for elite creator brands
             </p>
           </div>
         </Reveal>

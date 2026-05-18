@@ -1,18 +1,18 @@
 import { Section } from "./Section";
 
 const steps = [
-  { h: "Fill out the form", t: "We collect your profile, niche, and socials to understand where you're at." },
-  { h: "We evaluate your account", t: "Positioning, content quality, monetization potential — not just follower count." },
-  { h: "We assess the right fit", t: "We identify which brands and opportunities actually make sense for your audience." },
-  { h: "You're placed in the pipeline", t: "Either added to our broader creator network, or moved to priority where active outreach begins." },
+  { h: "Private application", t: "Share your profile, niche, and current monetization footprint so we can assess fit." },
+  { h: "Revenue & systems audit", t: "We diagnose where your funnel leaks — positioning, retention, pricing, and backend ops." },
+  { h: "Custom growth blueprint", t: "A tailored scaling plan: content engine, engagement system, and brand pipeline mapped to your numbers." },
+  { h: "Quiet, compounding scale", t: "We deploy the team and infrastructure behind the scenes — you stay the face, we run the system." },
 ];
 
 export function Process() {
   return (
     <Section
       id="process"
-      eyebrow="How it works"
-      title={<>The process is simple.<br />The results <em className="not-italic text-lime">aren't accidental.</em></>}
+      eyebrow="The process"
+      title={<>Discreet by design.<br /><em className="not-italic text-lime">Engineered for scale.</em></>}
     >
       <ol className="mt-10 space-y-1">
         {steps.map((s, i) => (

@@ -1,12 +1,12 @@
 const items = [
-  "Fitness",
-  "Looksmaxxing",
-  "Lifestyle",
-  "Supplements",
-  "Peptides",
-  "Performance",
-  "Aesthetics",
   "Creator Monetization",
+  "Audience Scaling",
+  "Fan Engagement",
+  "Brand Partnerships",
+  "DM Optimization",
+  "Content Operations",
+  "Revenue Systems",
+  "Personal Brand Equity",
 ];
 
 export function Marquee() {
