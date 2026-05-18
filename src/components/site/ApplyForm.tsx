@@ -17,15 +17,12 @@ const schema = z.object({
   plan: z.enum(["free", "partner"]),
 });
 
-type Plan = "free" | "partner";
-
 const inputCls =
   "w-full rounded-lg border border-hairline bg-background px-3.5 py-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground/40 focus:border-lime";
 
 const labelCls = "mb-1.5 block text-xs font-light text-muted-foreground";
 
 export function ApplyForm() {
-  const [plan, setPlan] = useState<Plan>("partner");
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
   const [err, setErr] = useState<string | null>(null);
@@ -43,9 +40,8 @@ export function ApplyForm() {
       instagram: String(fd.get("instagram") ?? "").replace("@", "") || undefined,
       tiktok_followers: Number(fd.get("tiktok_followers") || 0),
       ig_followers: Number(fd.get("ig_followers") || 0),
-      niche: String(fd.get("niche") ?? "") || undefined,
       bio: String(fd.get("bio") ?? "") || undefined,
-      plan,
+      plan: "partner" as const,
     };
     const parsed = schema.safeParse(raw);
     if (!parsed.success) {
@@ -73,9 +69,7 @@ export function ApplyForm() {
         </div>
         <h3 className="font-display text-4xl text-lime">Application received</h3>
         <p className="mx-auto mt-3 max-w-md text-sm font-light text-muted-foreground">
-          {plan === "partner"
-            ? "You're on the Partner track. Expect a call within 24 hours to lock in your brand connection."
-            : "You've been added to the creator pool. We'll reach out soon with more information to get you connected."}
+          Expect a private response within 24 hours to discuss next steps.
         </p>
       </div>
     );
