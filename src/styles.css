@@ -64,36 +64,36 @@
 
 :root {
   --radius: 0.75rem;
-  /* B1BTC dark brand */
-  --background: oklch(0.13 0 0);            /* #0a0a0a */
-  --foreground: oklch(0.985 0 0);           /* #fff */
-  --card: oklch(0.16 0 0);                  /* #111 */
+  /* B1 Scale — neon cloud brand (neon pink #ff00c8) */
+  --background: oklch(0.11 0.01 320);       /* near-black w/ faint magenta */
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.15 0.02 320);
   --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.16 0 0);
+  --popover: oklch(0.15 0.02 320);
   --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.82 0.16 220);          /* electric blue #01cafb */
-  --primary-foreground: oklch(0.13 0 0);
-  --secondary: oklch(0.21 0 0);             /* #1a1a1a */
+  --primary: oklch(0.68 0.31 340);          /* neon pink */
+  --primary-foreground: oklch(0.11 0.01 320);
+  --secondary: oklch(0.19 0.02 320);
   --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.21 0 0);
-  --muted-foreground: oklch(0.6 0 0);       /* #888 */
-  --accent: oklch(0.82 0.16 220);
-  --accent-foreground: oklch(0.13 0 0);
+  --muted: oklch(0.19 0.02 320);
+  --muted-foreground: oklch(0.65 0.02 320);
+  --accent: oklch(0.68 0.31 340);
+  --accent-foreground: oklch(0.11 0.01 320);
   --destructive: oklch(0.65 0.24 27);
   --destructive-foreground: oklch(0.985 0 0);
-  --border: oklch(0.26 0 0);                /* #222 */
-  --input: oklch(0.21 0 0);
-  --ring: oklch(0.82 0.16 220);
+  --border: oklch(0.27 0.03 320);
+  --input: oklch(0.19 0.02 320);
+  --ring: oklch(0.68 0.31 340);
 
-  --brand-lime: oklch(0.82 0.16 220);
-  --brand-lime-soft: oklch(0.82 0.16 220 / 0.12);
-  --brand-blue: oklch(0.82 0.16 220);
-  --surface-1: oklch(0.16 0 0);
-  --surface-2: oklch(0.19 0 0);
+  --brand-lime: oklch(0.68 0.31 340);
+  --brand-lime-soft: oklch(0.68 0.31 340 / 0.12);
+  --brand-blue: oklch(0.78 0.22 320);
+  --surface-1: oklch(0.15 0.02 320);
+  --surface-2: oklch(0.18 0.03 320);
   --hairline: oklch(1 0 0 / 0.08);
-  --gradient-hero: radial-gradient(circle at 50% 30%, oklch(0.82 0.16 220 / 0.35), transparent 60%);
-  --gradient-lime: linear-gradient(135deg, oklch(0.82 0.16 220), oklch(0.74 0.18 225));
-  --shadow-lime: 0 0 0 1px oklch(0.82 0.16 220 / 0.4), 0 10px 40px -10px oklch(0.82 0.16 220 / 0.5);
+  --gradient-hero: radial-gradient(circle at 50% 30%, oklch(0.68 0.31 340 / 0.38), transparent 60%);
+  --gradient-lime: linear-gradient(135deg, oklch(0.68 0.31 340), oklch(0.78 0.22 320));
+  --shadow-lime: 0 0 0 1px oklch(0.68 0.31 340 / 0.45), 0 0 30px -4px oklch(0.68 0.31 340 / 0.55), 0 10px 40px -10px oklch(0.68 0.31 340 / 0.5);
   --font-display: 'Bebas Neue', sans-serif;
   --font-body: 'DM Sans', sans-serif;
   --chart-1: oklch(0.646 0.222 41.116);
