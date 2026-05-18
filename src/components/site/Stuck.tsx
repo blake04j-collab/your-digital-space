@@ -1,18 +1,18 @@
 import { Section } from "./Section";
 
 const pains = [
-  { h: "No positioning strategy.", t: "Brands don't know what to do with you, so they pass or lowball." },
-  { h: "No direct brand access.", t: "Without the right network, you're stuck on cold DMs and discount codes." },
-  { h: "No system behind the content.", t: "Posting consistently isn't enough if the content isn't compounding." },
-  { h: "Taking low-quality deals.", t: "One bad partnership can damage your credibility with the brands that actually pay." },
+  { h: "Audience without infrastructure.", t: "Attention compounds, but with no backend system, monetization plateaus fast." },
+  { h: "Fan engagement leaks revenue.", t: "Most creators lose 40%+ of potential revenue in untracked DMs and broken retention flows." },
+  { h: "No real partnership pipeline.", t: "Without curated access, deals shrink to whatever lands in the inbox — usually the wrong fit." },
+  { h: "Operating as a person, not a brand.", t: "Without positioning and ops, a creator can't scale beyond their own bandwidth." },
 ];
 
 export function Stuck() {
   return (
     <Section
-      eyebrow="Why creators stay stuck"
-      title={<>It's not lack of <em className="not-italic text-lime">effort.</em></>}
-      lead="Most creators in this space are working hard. The problem isn't volume — it's the things almost no one gets right alone:"
+      eyebrow="Why creators plateau"
+      title={<>It's never lack of <em className="not-italic text-lime">audience.</em></>}
+      lead="The creators we work with already have the reach. What's missing is the system underneath — the part no one sees, and the part that actually compounds."
     >
       <ul className="mt-8 divide-y divide-hairline">
         {pains.map((p) => (
@@ -24,7 +24,7 @@ export function Stuck() {
           </li>
         ))}
       </ul>
-      <p className="mt-6 text-base font-light text-muted-foreground">That's exactly the gap we fill.</p>
+      <p className="mt-6 text-base font-light text-muted-foreground">That's the layer we build.</p>
     </Section>
   );
 }
