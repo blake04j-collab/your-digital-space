@@ -11,8 +11,8 @@ export function Process() {
   return (
     <Section
       id="process"
-      eyebrow="How it works"
-      title={<>The process is simple.<br />The results <em className="not-italic text-lime">aren't accidental.</em></>}
+      eyebrow="The process"
+      title={<>Discreet by design.<br /><em className="not-italic text-lime">Engineered for scale.</em></>}
     >
       <ol className="mt-10 space-y-1">
         {steps.map((s, i) => (
