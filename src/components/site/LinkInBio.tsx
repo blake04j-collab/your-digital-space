@@ -58,7 +58,18 @@ export function LinkInBio() {
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-background text-foreground grain">
+    <div
+      className="relative min-h-screen overflow-hidden bg-background text-foreground grain"
+      style={{
+        // B1 — keep electric-blue theme (override new global pink tokens)
+        ["--brand-lime" as any]: "oklch(0.82 0.16 220)",
+        ["--brand-lime-soft" as any]: "oklch(0.82 0.16 220 / 0.12)",
+        ["--brand-blue" as any]: "oklch(0.82 0.16 220)",
+        ["--shadow-lime" as any]:
+          "0 0 0 1px oklch(0.82 0.16 220 / 0.4), 0 10px 40px -10px oklch(0.82 0.16 220 / 0.5)",
+        ["--ring" as any]: "oklch(0.82 0.16 220)",
+      }}
+    >
       {/* Ambient glows */}
       <div
         aria-hidden
