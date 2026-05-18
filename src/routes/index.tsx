@@ -7,7 +7,7 @@ import { Marquee } from "@/components/site/Marquee";
 import { Services } from "@/components/site/Services";
 import { Stuck } from "@/components/site/Stuck";
 import { Process } from "@/components/site/Process";
-import { Plans } from "@/components/site/Plans";
+
 import { Fit } from "@/components/site/Fit";
 import { Apply } from "@/components/site/Apply";
 
