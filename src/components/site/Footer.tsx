@@ -9,7 +9,7 @@ export function Footer() {
         className="pointer-events-none absolute inset-x-0 bottom-0 h-64"
         style={{
           background:
-            "radial-gradient(ellipse 60% 100% at 50% 100%, oklch(0.82 0.16 220 / 0.18), transparent 70%)",
+            "radial-gradient(ellipse 60% 100% at 50% 100%, oklch(0.68 0.31 340 / 0.22), transparent 70%)",
         }}
       />
       <div className="relative mx-auto max-w-6xl px-5 py-20">
