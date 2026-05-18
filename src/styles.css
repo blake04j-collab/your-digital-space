@@ -197,8 +197,8 @@
     animation: scroll-x 30s linear infinite;
   }
   @keyframes pulse-lime {
-    0%, 100% { box-shadow: 0 0 0 0 oklch(0.82 0.16 220 / 0.5); }
-    50% { box-shadow: 0 0 0 12px oklch(0.82 0.16 220 / 0); }
+    0%, 100% { box-shadow: 0 0 0 0 oklch(0.68 0.31 340 / 0.55); }
+    50% { box-shadow: 0 0 0 14px oklch(0.68 0.31 340 / 0); }
   }
   .animate-pulse-lime { animation: pulse-lime 2s ease-out infinite; }
 
