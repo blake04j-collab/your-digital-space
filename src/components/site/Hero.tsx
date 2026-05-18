@@ -7,16 +7,14 @@ export function Hero() {
       <div
         className="pointer-events-none absolute inset-0 animate-float-glow"
         style={{
-          background:
-            "radial-gradient(ellipse 55% 45% at 50% 35%, oklch(0.68 0.31 340 / 0.32), transparent 70%)",
+          background: "radial-gradient(ellipse 55% 45% at 50% 35%, oklch(0.68 0.31 340 / 0.32), transparent 70%)",
         }}
       />
       {/* Secondary purple halo */}
       <div
         className="pointer-events-none absolute inset-0"
         style={{
-          background:
-            "radial-gradient(circle at 80% 80%, oklch(0.55 0.25 310 / 0.18), transparent 55%)",
+          background: "radial-gradient(circle at 80% 80%, oklch(0.55 0.25 310 / 0.18), transparent 55%)",
         }}
       />
       {/* Brick-wall texture, very subtle */}
@@ -34,9 +32,7 @@ export function Hero() {
 
       <div className="relative mx-auto max-w-5xl px-5 py-24 text-center md:py-36">
         {/* Neon cloud motif */}
-        <Reveal>
-          <NeonCloud className="mx-auto mb-6 h-16 w-auto" />
-        </Reveal>
+        <Reveal></Reveal>
         <Reveal delay={40}>
           <div className="mb-6 inline-flex items-center gap-2.5 rounded-full border border-hairline bg-surface-1/70 px-4 py-1.5 text-[10px] uppercase tracking-[0.25em] text-muted-foreground backdrop-blur">
             <span className="signal-bar" aria-hidden />
@@ -46,15 +42,17 @@ export function Hero() {
         </Reveal>
         <Reveal delay={120}>
           <h1 className="font-display text-[clamp(3rem,10vw,7.5rem)] leading-[0.9] tracking-wide">
-            Scale Your<br />
-            Creator Brand<br />
+            Scale Your
+            <br />
+            Creator Brand
+            <br />
             <em className="not-italic text-lime drop-shadow-[0_0_18px_oklch(0.68_0.31_340_/_0.6)]">Beyond Content.</em>
           </h1>
         </Reveal>
         <Reveal delay={200}>
           <p className="mx-auto mt-8 max-w-xl text-sm font-light leading-relaxed text-muted-foreground md:text-base">
-            B1 Scale helps modern creators optimize monetization, fan engagement,
-            and backend growth systems — built for high-revenue subscription brands.
+            B1 Scale helps modern creators optimize monetization, fan engagement, and backend growth systems — built for
+            high-revenue subscription brands.
           </p>
         </Reveal>
         <Reveal delay={260}>
@@ -89,13 +87,7 @@ export function Hero() {
 
 function NeonCloud({ className }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 120 70"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className={className}
-      aria-hidden
-    >
+    <svg viewBox="0 0 120 70" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} aria-hidden>
       <defs>
         <filter id="cloud-glow" x="-50%" y="-50%" width="200%" height="200%">
           <feGaussianBlur stdDeviation="3" result="b" />
