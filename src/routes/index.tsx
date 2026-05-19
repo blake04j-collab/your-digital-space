@@ -8,7 +8,7 @@ import { Services } from "@/components/site/Services";
 import { Stuck } from "@/components/site/Stuck";
 import { Process } from "@/components/site/Process";
 
-import { Fit } from "@/components/site/Fit";
+
 import { Apply } from "@/components/site/Apply";
 
 import { Footer } from "@/components/site/Footer";
@@ -16,17 +16,17 @@ import { Footer } from "@/components/site/Footer";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "B1 Scale — Monetization Systems for Elite Creators" },
+      { title: "B1 Scale — Creator Growth, From Zero to Scale" },
       {
         name: "description",
         content:
-          "B1 Scale helps modern creators optimize monetization, fan engagement, and backend growth systems. Private partnerships for high-revenue subscription brands.",
+          "We scale creators at any stage — faceless, anonymous, or established. Private partnerships built around you, no audience required.",
       },
-      { property: "og:title", content: "B1 Scale — Monetization Systems for Elite Creators" },
+      { property: "og:title", content: "B1 Scale — Creator Growth, From Zero to Scale" },
       {
         property: "og:description",
         content:
-          "Private creator growth partner. Revenue optimization, fan engagement, scaling infrastructure — built for high-ticket creator brands.",
+          "Private creator growth partner. Revenue, engagement, and scaling infrastructure — for creators at every stage, faceless welcome.",
       },
     ],
   }),
@@ -47,8 +47,6 @@ function Index() {
         <Services />
         <Stuck />
         <Process />
-        
-        <Fit />
         <Apply />
       </main>
       <Footer />

@@ -32,7 +32,6 @@ export function Hero() {
 
       <div className="relative mx-auto max-w-5xl px-5 py-24 text-center md:py-36">
         {/* Neon cloud motif */}
-        <Reveal></Reveal>
         <Reveal delay={40}>
           <div className="mb-6 inline-flex items-center gap-2.5 rounded-full border border-hairline bg-surface-1/70 px-4 py-1.5 text-[10px] uppercase tracking-[0.25em] text-muted-foreground backdrop-blur">
             <span className="signal-bar" aria-hidden />
@@ -51,8 +50,8 @@ export function Hero() {
         </Reveal>
         <Reveal delay={200}>
           <p className="mx-auto mt-8 max-w-xl text-sm font-light leading-relaxed text-muted-foreground md:text-base">
-            B1 Scale helps modern creators optimize monetization, fan engagement, and backend growth systems — built for
-            high-revenue subscription brands.
+            We scale creators at every stage — faceless, anonymous, or fully public. No audience required.
+            Just a vision worth building around.
           </p>
         </Reveal>
         <Reveal delay={260}>
