@@ -1,46 +1,38 @@
-# /lueybtc — Nightclub Mode
+## Changes
 
-Replace the rainbow LUEY page with a dark, after-hours club scene. No rainbows. Cinematic, slightly stylized, non-sexualized.
+### 1. Replace `/lueybtc` profile picture
+- Copy the uploaded image (`user-uploads://photo_2026-05-18_21-22-00.jpg`) over `public/luey-avatar.jpg` so the existing `<img src="/luey-avatar.jpg">` in `LueyLinkInBio.tsx` picks it up. No code change needed.
 
-## Scene composition
+### 2. Remove "Selective by design" section + rework "exclusive/elite" copy
+The site currently positions itself as selective and audience-required. Open it up so anyone — including faceless/anonymous creators with zero following — feels welcomed.
 
-Single full-viewport scene, layered back-to-front:
+**Delete the Fit section entirely**
+- Remove `<Fit />` and its import from `src/routes/index.tsx`.
+- Remove the `Fit` link from `src/components/site/Nav.tsx` (the only remaining nav link, so the nav links list will be empty — keep the logo + Apply CTA).
+- Delete `src/components/site/Fit.tsx`.
 
-1. **Background** — deep near-black with a faint violet wash; subtle vignette.
-2. **Disco speckle** — slowly rotating field of tiny dots (radial-gradient pattern) for ambient sparkle.
-3. **Haze layer** — two large blurred radial gradients (magenta + cyan) drifting slowly, simulating fog catching light.
-4. **Spotlight cones** — 3 large conic/linear-gradient triangles (magenta, cyan, violet) angled down from the top, sweeping side-to-side on different durations. Soft blur, screen blend.
-5. **Dancer silhouette** — inline SVG, centered-lower. Abstract figure: one hip popped, one arm raised, hair flowing — pure black silhouette with a thin neon rim-light (magenta on one side, cyan on the other via drop-shadow filters). Stylized poster-art, not realistic. Gentle sway animation (~2s, subtle rotate + translate to feel like she's moving to the beat).
-6. **Floor glow** — elliptical gradient under the dancer's feet pulsing with the beat.
-7. **Wordmark** — "LUEY" in Bebas Neue (already loaded in styles.css), large but not screen-filling, positioned upper area so it doesn't collide with the dancer. White fill with magenta + cyan neon glow (layered drop-shadows) that pulses on the beat.
-8. **Tagline** — small tracked-out "AFTER HOURS · EST. NOWHERE" eyebrow under the wordmark.
-9. **Beat pulse** — a single shared ~120bpm keyframe (`luey-beat`) drives the wordmark glow intensity and floor-glow scale so the whole scene feels synced.
+**Soften copy elsewhere to match "we work with anyone, faceless welcome"**
 
-## Color palette
+- `src/routes/index.tsx` meta: change titles/descriptions from "Elite Creators / high-revenue / high-ticket" to inclusive phrasing, e.g. *"B1 Scale — Creator Growth, From Zero to Scale"* / *"We scale creators at any stage — faceless, anonymous, or established. Private partnerships, built around you."*
+- `src/components/site/Hero.tsx`: subline "...built for high-revenue subscription brands." → "...built for any creator ready to grow — faceless, anonymous, or fully public."
+- `src/components/site/Services.tsx`:
+  - Title `"...elite creators."` → `"...modern creators."`
+  - Lead: drop "creators who already command attention — engineered for high-ticket" → "Engineered for creators at any stage — whether you're just starting, faceless, or already scaling."
+  - Service body referring to "every elite creator brand" → "every creator brand we partner with".
+- `src/components/site/Process.tsx`: first step "Share your profile, niche, and current monetization footprint so we can assess fit." → "Tell us about you and your goals — followers optional, faceless welcome."
+- `src/components/site/Stuck.tsx`: line about "curated access" stays but rephrased to remove gatekeeping tone.
+- `src/components/site/Footer.tsx`: "Built for elite creator brands" → "Built for creators at every stage."
+- `src/components/site/Plans.tsx`: not imported anywhere on the homepage, but contains "private partners" copy — leave untouched since it's unused (avoid scope creep).
 
-- bg: `#05030a`
-- magenta: `#ff2d92`
-- cyan: `#22e0ff`
-- violet: `#7a2cff`
-- silhouette: pure `#000` with neon rim via filter
+### Files touched
+- `public/luey-avatar.jpg` (overwrite)
+- `src/routes/index.tsx`
+- `src/components/site/Nav.tsx`
+- `src/components/site/Fit.tsx` (delete)
+- `src/components/site/Hero.tsx`
+- `src/components/site/Services.tsx`
+- `src/components/site/Process.tsx`
+- `src/components/site/Stuck.tsx`
+- `src/components/site/Footer.tsx`
 
-No rainbow gradients anywhere.
-
-## Animations (local `<style>` block)
-
-- `luey-beat` — 0.5s pulse on glow/scale (~120bpm)
-- `luey-sweep-a/b/c` — spotlight cones sway ±15° on 7s/9s/11s cycles
-- `luey-haze` — fog drift, 14s ease-in-out
-- `luey-speckle-spin` — 60s linear rotate on disco field
-- `luey-sway` — dancer subtle hip sway, 2s ease-in-out
-- All animations respect `prefers-reduced-motion` (wrap with media query to disable transforms).
-
-## Dancer SVG
-
-Inline SVG, ~50vh tall, centered horizontally, anchored near bottom. Abstract silhouette: head (circle), flowing hair (curved path), torso with hip tilt, one arm raised overhead, one arm out, legs with one knee bent. Tasteful poster-style outline filled black. Rim-lit via two `drop-shadow()` filters (magenta left, cyan right).
-
-## Files
-
-- **Edit** `src/routes/lueybtc.tsx` — replace the rainbow component entirely with the nightclub scene and new keyframes. Keep the same `head()` meta and `noindex` settings.
-
-No new dependencies. No other files touched.
+No backend / data changes. No design system token changes — keeps the existing pink/dark aesthetic and the red Luey page theme intact.
