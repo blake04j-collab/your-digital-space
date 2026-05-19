@@ -1,7 +1,7 @@
 import { Section } from "./Section";
 
 const steps = [
-  { h: "Private application", t: "Share your profile, niche, and current monetization footprint so we can assess fit." },
+  { h: "Private application", t: "Tell us about you and your goals — followers optional, faceless and anonymous creators welcome." },
   { h: "Revenue & systems audit", t: "We diagnose where your funnel leaks — positioning, retention, pricing, and backend ops." },
   { h: "Custom growth blueprint", t: "A tailored scaling plan: content engine, engagement system, and brand pipeline mapped to your numbers." },
   { h: "Quiet, compounding scale", t: "We deploy the team and infrastructure behind the scenes — you stay the face, we run the system." },

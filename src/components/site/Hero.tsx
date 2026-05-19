@@ -51,8 +51,8 @@ export function Hero() {
         </Reveal>
         <Reveal delay={200}>
           <p className="mx-auto mt-8 max-w-xl text-sm font-light leading-relaxed text-muted-foreground md:text-base">
-            B1 Scale helps modern creators optimize monetization, fan engagement, and backend growth systems — built for
-            high-revenue subscription brands.
+            We scale creators at every stage — faceless, anonymous, or fully public. No audience required.
+            Just a vision worth building around.
           </p>
         </Reveal>
         <Reveal delay={260}>

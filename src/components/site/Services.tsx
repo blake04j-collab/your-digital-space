@@ -19,7 +19,7 @@ const pillars = [
   },
   {
     title: "Scaling Infrastructure",
-    body: "The team, tooling, and backend ops that quietly run behind every elite creator brand — built for you, kept fully private.",
+    body: "The team, tooling, and backend ops that quietly run behind every creator brand we partner with — built for you, kept fully private.",
   },
   {
     title: "Personal Brand Strategy",
@@ -34,10 +34,10 @@ export function Services() {
       eyebrow="What we build"
       title={
         <>
-          Monetization systems for<br /><em className="not-italic text-lime">elite creators.</em>
+          Monetization systems for<br /><em className="not-italic text-lime">modern creators.</em>
         </>
       }
-      lead="A complete operating layer for creators who already command attention — engineered for high-ticket, subscription-based growth."
+      lead="A complete operating layer engineered for creators at any stage — whether you're just starting, fully faceless, or already scaling."
     >
       <div className="mt-10 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {pillars.map((p, i) => (

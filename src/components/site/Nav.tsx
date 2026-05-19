@@ -42,7 +42,7 @@ export function Nav() {
         <nav className="hidden items-center gap-7 text-xs uppercase tracking-[0.2em] text-muted-foreground md:flex">
           <a href="#services" className={linkCls}>Services</a>
           <a href="#process" className={linkCls}>Process</a>
-          <a href="#fit" className={linkCls}>Fit</a>
+          
         </nav>
         <div className="flex items-center gap-2">
           <a
