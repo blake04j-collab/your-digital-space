@@ -9,16 +9,16 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as LueybtcRouteImport } from './routes/lueybtc'
+import { Route as LuebtcRouteImport } from './routes/luebtc'
 import { Route as B1btcRouteImport } from './routes/b1btc'
 import { Route as RefRouteImport } from './routes/$ref'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
 
-const LueybtcRoute = LueybtcRouteImport.update({
-  id: '/lueybtc',
-  path: '/lueybtc',
+const LuebtcRoute = LuebtcRouteImport.update({
+  id: '/luebtc',
+  path: '/luebtc',
   getParentRoute: () => rootRouteImport,
 } as any)
 const B1btcRoute = B1btcRouteImport.update({
@@ -51,7 +51,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$ref': typeof RefRoute
   '/b1btc': typeof B1btcRoute
-  '/lueybtc': typeof LueybtcRoute
+  '/luebtc': typeof LuebtcRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/': typeof AdminIndexRoute
 }
@@ -59,7 +59,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$ref': typeof RefRoute
   '/b1btc': typeof B1btcRoute
-  '/lueybtc': typeof LueybtcRoute
+  '/luebtc': typeof LuebtcRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin': typeof AdminIndexRoute
 }
@@ -68,21 +68,21 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/$ref': typeof RefRoute
   '/b1btc': typeof B1btcRoute
-  '/lueybtc': typeof LueybtcRoute
+  '/luebtc': typeof LuebtcRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/': typeof AdminIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/$ref' | '/b1btc' | '/lueybtc' | '/admin/login' | '/admin/'
+  fullPaths: '/' | '/$ref' | '/b1btc' | '/luebtc' | '/admin/login' | '/admin/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/$ref' | '/b1btc' | '/lueybtc' | '/admin/login' | '/admin'
+  to: '/' | '/$ref' | '/b1btc' | '/luebtc' | '/admin/login' | '/admin'
   id:
     | '__root__'
     | '/'
     | '/$ref'
     | '/b1btc'
-    | '/lueybtc'
+    | '/luebtc'
     | '/admin/login'
     | '/admin/'
   fileRoutesById: FileRoutesById
@@ -91,18 +91,18 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   RefRoute: typeof RefRoute
   B1btcRoute: typeof B1btcRoute
-  LueybtcRoute: typeof LueybtcRoute
+  LuebtcRoute: typeof LuebtcRoute
   AdminLoginRoute: typeof AdminLoginRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/lueybtc': {
-      id: '/lueybtc'
-      path: '/lueybtc'
-      fullPath: '/lueybtc'
-      preLoaderRoute: typeof LueybtcRouteImport
+    '/luebtc': {
+      id: '/luebtc'
+      path: '/luebtc'
+      fullPath: '/luebtc'
+      preLoaderRoute: typeof LuebtcRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/b1btc': {
@@ -147,7 +147,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   RefRoute: RefRoute,
   B1btcRoute: B1btcRoute,
-  LueybtcRoute: LueybtcRoute,
+  LuebtcRoute: LuebtcRoute,
   AdminLoginRoute: AdminLoginRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
