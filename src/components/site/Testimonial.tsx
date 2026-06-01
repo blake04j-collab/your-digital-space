@@ -27,7 +27,7 @@ export function Testimonial() {
             <div className="relative overflow-hidden rounded-2xl border border-hairline bg-surface-1 shadow-lime">
               <video
                 className="aspect-[9/16] w-full bg-black md:aspect-video"
-                src="/testimonial.mov"
+                src="/testimonial.mp4"
                 controls
                 playsInline
                 preload="metadata"
