@@ -153,6 +153,13 @@
 
   body {
     background-color: var(--color-background);
+    background-image:
+      radial-gradient(ellipse 70% 50% at 50% 0%, oklch(0.68 0.31 340 / 0.18), transparent 70%),
+      url("/brick-bg.jpg");
+    background-size: auto, cover;
+    background-position: top center, center;
+    background-attachment: scroll, fixed;
+    background-repeat: no-repeat, no-repeat;
     color: var(--color-foreground);
     font-family: var(--font-body);
     font-weight: 300;

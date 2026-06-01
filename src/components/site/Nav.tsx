@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import cloud from "@/assets/neon-cloud.png";
 
 export function Nav() {
   const barRef = useRef<HTMLDivElement>(null);
@@ -31,14 +32,17 @@ export function Nav() {
   return (
     <header className="sticky top-0 z-50 border-b border-hairline bg-background/95 backdrop-blur-md [transform:translateZ(0)] [will-change:transform]">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4">
-        <div aria-label="B1 Scale" className="flex items-center gap-2.5">
-          <span className="relative grid h-9 w-9 place-items-center rounded-md bg-lime font-display text-xl text-primary-foreground shadow-lime">
-            B1
+        <a href="/" aria-label="B1 Scale" className="flex items-center gap-2.5">
+          <img
+            src={cloud}
+            alt=""
+            aria-hidden
+            className="h-7 w-auto drop-shadow-[0_0_10px_oklch(0.68_0.31_340_/_0.7)]"
+          />
+          <span className="font-display text-sm uppercase tracking-[0.3em] text-foreground/90">
+            B1 Scale
           </span>
-          <span className="hidden font-display text-sm uppercase tracking-[0.3em] text-foreground/90 sm:inline">
-            Scale
-          </span>
-        </div>
+        </a>
         <nav className="hidden items-center gap-7 text-xs uppercase tracking-[0.2em] text-muted-foreground md:flex">
           <a href="#services" className={linkCls}>Services</a>
           <a href="#process" className={linkCls}>Process</a>
