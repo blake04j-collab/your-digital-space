@@ -40,7 +40,7 @@ function Index() {
     trackPageView("/");
   }, []);
   return (
-    <div className="min-h-screen bg-background text-foreground grain">
+    <div className="min-h-screen text-foreground grain">
       <Nav />
       <main>
         <Hero />
