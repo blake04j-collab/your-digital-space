@@ -4,23 +4,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { getStoredRef } from "@/lib/tracking";
 
 const schema = z.object({
-  fname: z.string().trim().min(1, "First name required").max(100),
-  lname: z.string().trim().max(100).optional(),
+  fname: z.string().trim().min(1, "Name required").max(100),
   email: z.string().trim().email("Valid email required").max(255),
-  phone: z.string().trim().max(40).optional(),
-  tiktok: z.string().trim().max(80).optional(),
-  instagram: z.string().trim().max(80).optional(),
-  tiktok_followers: z.number().int().min(0).max(100_000_000).optional(),
-  ig_followers: z.number().int().min(0).max(100_000_000).optional(),
-  niche: z.string().max(80).optional(),
-  bio: z.string().trim().max(2000).optional(),
-  plan: z.enum(["free", "partner"]),
+  social: z.string().trim().min(1, "Social handle or website required").max(255),
 });
 
 const inputCls =
-  "w-full rounded-lg border border-hairline bg-background px-3.5 py-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground/40 focus:border-lime";
+  "w-full rounded-xl border border-hairline bg-background px-4 py-4 text-base text-foreground outline-none transition-colors placeholder:text-muted-foreground/40 focus:border-lime";
 
-const labelCls = "mb-1.5 block text-xs font-light text-muted-foreground";
+const labelCls = "mb-2 block text-xs font-light uppercase tracking-[0.2em] text-muted-foreground";
 
 export function ApplyForm() {
   const [submitting, setSubmitting] = useState(false);
@@ -33,15 +25,8 @@ export function ApplyForm() {
     const fd = new FormData(e.currentTarget);
     const raw = {
       fname: String(fd.get("fname") ?? ""),
-      lname: String(fd.get("lname") ?? "") || undefined,
       email: String(fd.get("email") ?? ""),
-      phone: String(fd.get("phone") ?? "") || undefined,
-      tiktok: String(fd.get("tiktok") ?? "").replace("@", "") || undefined,
-      instagram: String(fd.get("instagram") ?? "").replace("@", "") || undefined,
-      tiktok_followers: Number(fd.get("tiktok_followers") || 0),
-      ig_followers: Number(fd.get("ig_followers") || 0),
-      bio: String(fd.get("bio") ?? "") || undefined,
-      plan: "partner" as const,
+      social: String(fd.get("social") ?? ""),
     };
     const parsed = schema.safeParse(raw);
     if (!parsed.success) {
@@ -50,9 +35,13 @@ export function ApplyForm() {
     }
     setSubmitting(true);
     const ref_code = getStoredRef();
-    const { error } = await supabase
-      .from("applications")
-      .insert({ ...parsed.data, ref_code });
+    const { error } = await supabase.from("applications").insert({
+      fname: parsed.data.fname,
+      email: parsed.data.email,
+      bio: parsed.data.social,
+      plan: "partner",
+      ref_code,
+    });
     setSubmitting(false);
     if (error) {
       setErr("Submission failed. Try again.");
@@ -69,71 +58,37 @@ export function ApplyForm() {
         </div>
         <h3 className="font-display text-4xl text-lime">Application received</h3>
         <p className="mx-auto mt-3 max-w-md text-sm font-light text-muted-foreground">
-          Expect a private response within 24 hours to discuss next steps.
+          Expect a private response within 24 hours.
         </p>
       </div>
     );
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-4">
-      {/* Your info */}
-      <div className="rounded-2xl border border-hairline bg-surface-1 p-6">
-        <div className="mb-5 text-[10px] font-medium uppercase tracking-[0.25em] text-muted-foreground">
-          Your info
-        </div>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div>
-            <label className={labelCls}>First name *</label>
-            <input name="fname" required className={inputCls} placeholder="Jordan" />
-          </div>
-          <div>
-            <label className={labelCls}>Last name</label>
-            <input name="lname" className={inputCls} placeholder="Smith" />
-          </div>
-          <div>
-            <label className={labelCls}>Email *</label>
-            <input name="email" type="email" required className={inputCls} placeholder="you@email.com" />
-          </div>
-          <div>
-            <label className={labelCls}>Phone</label>
-            <input name="phone" type="tel" className={inputCls} placeholder="+1 (604) 000-0000" />
-          </div>
-        </div>
+    <form onSubmit={onSubmit} className="space-y-5">
+      <div>
+        <label className={labelCls}>Name</label>
+        <input name="fname" required className={inputCls} placeholder="Your name" autoComplete="name" />
       </div>
-
-      {/* Socials */}
-      <div className="rounded-2xl border border-hairline bg-surface-1 p-6">
-        <div className="mb-5 text-[10px] font-medium uppercase tracking-[0.25em] text-muted-foreground">
-          Your socials
-        </div>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div>
-            <label className={labelCls}>TikTok username</label>
-            <input name="tiktok" className={inputCls} placeholder="@yourhandle" />
-          </div>
-          <div>
-            <label className={labelCls}>Instagram username</label>
-            <input name="instagram" className={inputCls} placeholder="@yourhandle" />
-          </div>
-          <div>
-            <label className={labelCls}>TikTok followers</label>
-            <input name="tiktok_followers" type="number" min={0} className={inputCls} placeholder="25000" />
-          </div>
-          <div>
-            <label className={labelCls}>Instagram followers</label>
-            <input name="ig_followers" type="number" min={0} className={inputCls} placeholder="12000" />
-          </div>
-          <div className="sm:col-span-2">
-            <label className={labelCls}>Brief description of your content</label>
-            <textarea
-              name="bio"
-              rows={3}
-              className={inputCls + " resize-y"}
-              placeholder="What do you post about? What's your style?"
-            />
-          </div>
-        </div>
+      <div>
+        <label className={labelCls}>Email</label>
+        <input
+          name="email"
+          type="email"
+          required
+          className={inputCls}
+          placeholder="you@email.com"
+          autoComplete="email"
+        />
+      </div>
+      <div>
+        <label className={labelCls}>Social handle or website</label>
+        <input
+          name="social"
+          required
+          className={inputCls}
+          placeholder="@yourhandle or yoursite.com"
+        />
       </div>
 
       {err && (
@@ -147,8 +102,11 @@ export function ApplyForm() {
         disabled={submitting}
         className="w-full rounded-xl bg-lime py-4 font-display text-xl tracking-[0.2em] text-primary-foreground shadow-lime transition-transform hover:scale-[1.01] disabled:opacity-60"
       >
-        {submitting ? "Submitting…" : "Submit Application ›"}
+        {submitting ? "Submitting…" : "Request Access ›"}
       </button>
+      <p className="text-center text-xs font-light text-muted-foreground">
+        Private intake. Response within 24 hours.
+      </p>
     </form>
   );
 }
