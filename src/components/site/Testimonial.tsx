@@ -32,6 +32,7 @@ export function Testimonial() {
             <video
               className="aspect-[9/16] w-full bg-black md:aspect-video"
               src="/testimonial.mp4"
+              poster="/testimonial-poster.jpg"
               controls
               playsInline
               preload="metadata"
