@@ -1,8 +1,8 @@
 import { Reveal } from "./Reveal";
 
 const steps = [
-  { n: "01", h: "Apply", t: "Submit a short application — it takes under a minute." },
-  { n: "02", h: "Review", t: "The Cloud Agency team reviews your profile." },
+  { n: "01", h: "Apply", t: "Submit a short application with your contact info." },
+  { n: "02", h: "Discovery Call", t: "We setup a time for a discovery call to discuss what we can do for you." },
   { n: "03", h: "Grow", t: "Access opportunities designed to increase your income." },
 ];
 
