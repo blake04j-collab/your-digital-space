@@ -5,8 +5,7 @@ export function Footer() {
         <p>© {new Date().getFullYear()} Cloud Agency — Built for creators.</p>
         <div className="flex items-center gap-5">
           {[
-            { label: "Instagram", href: "https://www.instagram.com/cloudagncy" },
-            { label: "X", href: "https://x.com/cloudagncy" },
+            { label: "Instagram", href: "https://www.instagram.com/cloud.agncy" },
             { label: "TikTok", href: "https://tiktok.com/@cloudagncy" },
           ].map((s) => (
             <a
