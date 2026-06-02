@@ -1,5 +1,7 @@
 import { useRef, useState } from "react";
 import { Instagram, Music2, ArrowUpRight, ChevronLeft, ChevronRight } from "lucide-react";
+import neonCloud from "@/assets/neon-cloud.png";
+import brickBg from "@/assets/brick-bg.jpg";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 
 type Result = {
@@ -94,8 +96,40 @@ export function LueyLinkInBio() {
           <p>making girls famous</p>
         </div>
 
+        {/* Featured CTA */}
+        <a
+          href="/"
+          className="group relative mt-8 block w-full overflow-hidden rounded-2xl border border-lime/40 transition-all hover:-translate-y-0.5 hover:border-lime hover:shadow-lime"
+          style={{
+            backgroundImage: `url(${brickBg})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+          }}
+        >
+          <div
+            aria-hidden
+            className="absolute inset-0 bg-background/55 transition-colors group-hover:bg-background/40"
+          />
+          <div className="relative flex items-center gap-4 p-4">
+            <div className="grid h-14 w-14 shrink-0 place-items-center rounded-xl bg-background/60 backdrop-blur">
+              <img
+                src={neonCloud}
+                alt=""
+                aria-hidden
+                className="h-10 w-auto drop-shadow-[0_0_10px_oklch(0.68_0.31_340_/_0.8)]"
+              />
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="font-display text-base leading-tight text-foreground">
+                I want to start monetizing
+              </div>
+            </div>
+            <ArrowUpRight className="h-5 w-5 shrink-0 text-lime transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+          </div>
+        </a>
+
         {/* Social links */}
-        <div className="mt-8 flex w-full flex-col gap-3">
+        <div className="mt-3 flex w-full flex-col gap-3">
           {links.map((l) => (
             <a
               key={l.label}
