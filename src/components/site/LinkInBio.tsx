@@ -98,10 +98,8 @@ export function LinkInBio() {
         </div>
 
         <h1 className="mt-6 font-display text-5xl tracking-tight">B1</h1>
-        <div className="mt-4 space-y-0.5 text-center text-[13px] lowercase leading-tight tracking-[0.25em] text-muted-foreground">
+        <div className="mt-4 text-center text-[13px] lowercase leading-tight tracking-[0.25em] text-muted-foreground">
           <p>i ♡ scaling</p>
-          <p>making the attention pay</p>
-          <p>social media marketing</p>
         </div>
 
         {/* Featured CTA */}
