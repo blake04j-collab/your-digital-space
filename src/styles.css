@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,300&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap');
 @import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";
@@ -94,8 +94,8 @@
   --gradient-hero: radial-gradient(circle at 50% 30%, oklch(0.68 0.31 340 / 0.38), transparent 60%);
   --gradient-lime: linear-gradient(135deg, oklch(0.68 0.31 340), oklch(0.78 0.22 320));
   --shadow-lime: 0 0 0 1px oklch(0.68 0.31 340 / 0.45), 0 0 30px -4px oklch(0.68 0.31 340 / 0.55), 0 10px 40px -10px oklch(0.68 0.31 340 / 0.5);
-  --font-display: 'Bebas Neue', sans-serif;
-  --font-body: 'DM Sans', sans-serif;
+  --font-display: 'Space Grotesk', 'Inter', sans-serif;
+  --font-body: 'Inter', system-ui, sans-serif;
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -154,22 +154,23 @@
   body {
     background-color: var(--color-background);
     background-image:
-      radial-gradient(ellipse 70% 50% at 50% 0%, oklch(0.68 0.31 340 / 0.18), transparent 70%),
+      radial-gradient(ellipse 70% 50% at 50% 0%, oklch(0.68 0.31 340 / 0.22), transparent 70%),
       url("/brick-bg.jpg");
-    background-size: auto, cover;
-    background-position: top center, center;
-    background-attachment: scroll, fixed;
-    background-repeat: no-repeat, no-repeat;
+    background-size: auto, 600px auto;
+    background-position: top center, top center;
+    background-attachment: scroll, scroll;
+    background-repeat: no-repeat, repeat;
     color: var(--color-foreground);
     font-family: var(--font-body);
-    font-weight: 300;
+    font-weight: 400;
     -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
   }
 
   h1, h2, h3, .font-display {
     font-family: var(--font-display);
-    letter-spacing: 0.02em;
-    font-weight: 400;
+    letter-spacing: -0.01em;
+    font-weight: 700;
   }
 }
 
