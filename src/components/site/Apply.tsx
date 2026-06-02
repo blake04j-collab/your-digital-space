@@ -51,32 +51,35 @@ export function Apply() {
           </p>
         </Reveal>
 
-        <div className="relative z-10 mt-8 rounded-3xl border border-hairline bg-surface-1/90 p-6 backdrop-blur-xl md:p-10">
-          <ApplyForm />
-        </div>
-
-        {/* Proof wall */}
-        <div className="mt-10">
-          <div className="mb-4 text-center text-[11px] font-medium uppercase tracking-[0.25em] text-muted-foreground">
-            Real creator results
+        <div className="relative z-10 mt-8 rounded-3xl border border-hairline bg-surface-1/90 backdrop-blur-xl">
+          <div className="p-6 md:p-10">
+            <ApplyForm />
           </div>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            {PROOFS.map((p, i) => (
-              <button
-                key={i}
-                type="button"
-                onClick={() => setLightbox(p.src)}
-                className="group block overflow-hidden rounded-2xl bg-white p-2 shadow-lg ring-1 ring-white/10 transition-transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-lime"
-                aria-label={`View ${p.alt}`}
-              >
-                <img
-                  src={p.src}
-                  alt={p.alt}
-                  loading="lazy"
-                  className="block h-auto w-full rounded-xl"
-                />
-              </button>
-            ))}
+
+          <div className="mx-6 border-t border-hairline md:mx-10" />
+
+          <div className="p-6 md:p-10">
+            <div className="mb-4 text-center text-[11px] font-medium uppercase tracking-[0.25em] text-muted-foreground">
+              Recent Client Results
+            </div>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              {PROOFS.map((p, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => setLightbox(p.src)}
+                  className="group block overflow-hidden rounded-2xl bg-white p-2 shadow-lg ring-1 ring-white/10 transition-transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-lime"
+                  aria-label={`View ${p.alt}`}
+                >
+                  <img
+                    src={p.src}
+                    alt={p.alt}
+                    loading="lazy"
+                    className="block h-auto w-full rounded-xl"
+                  />
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </div>
