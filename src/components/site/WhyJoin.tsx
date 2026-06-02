@@ -12,7 +12,7 @@ const benefits = [
 export function WhyJoin() {
   return (
     <section id="benefits" className="relative">
-      <div className="mx-auto max-w-6xl px-5 py-20 md:py-28">
+      <div className="mx-auto max-w-6xl px-5 py-12 md:py-16">
         <Reveal>
           <div className="mb-3 text-center text-[11px] font-medium uppercase tracking-[0.25em] text-lime">
             Why creators join
@@ -23,7 +23,7 @@ export function WhyJoin() {
             Everything creators need to grow.
           </h2>
         </Reveal>
-        <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {benefits.map((b, i) => (
             <Reveal key={b.h} delay={100 + i * 60}>
               <div className="card-lift h-full rounded-2xl border border-hairline bg-surface-1/70 p-6 backdrop-blur transition-colors hover:border-lime/40">

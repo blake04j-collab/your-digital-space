@@ -16,7 +16,7 @@ export function Section({
 }) {
   return (
     <section id={id} className="relative">
-      <div className="mx-auto max-w-5xl px-5 py-20 md:py-28">
+      <div className="mx-auto max-w-5xl px-5 py-12 md:py-16">
         <Reveal>
           <div className="mb-4 text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
             {eyebrow}
