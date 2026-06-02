@@ -1,21 +1,9 @@
 import { Reveal } from "./Reveal";
 
 const steps = [
-  {
-    n: "01",
-    h: "Apply",
-    t: "Tell us about you and your content — it takes under a minute.",
-  },
-  {
-    n: "02",
-    h: "Strategy Call",
-    t: "We map out your content, growth, and monetization plan.",
-  },
-  {
-    n: "03",
-    h: "We Run It",
-    t: "Our team manages your content, audience, and revenue end-to-end.",
-  },
+  { n: "01", h: "Apply", t: "Submit a short application — it takes under a minute." },
+  { n: "02", h: "Review", t: "The Cloud Agency team reviews your profile." },
+  { n: "03", h: "Grow", t: "Access opportunities designed to increase your income." },
 ];
 
 export function HowItWorks() {
@@ -28,8 +16,8 @@ export function HowItWorks() {
           </div>
         </Reveal>
         <Reveal delay={80}>
-          <h2 className="mx-auto max-w-2xl text-center font-display text-[clamp(2rem,5vw,3.5rem)] leading-[1.05] tracking-tight">
-            Full-service management. Zero guesswork.
+          <h2 className="mx-auto max-w-2xl text-center font-display text-[clamp(2rem,5vw,3.5rem)] font-semibold leading-[1.05] tracking-tight">
+            Three steps to scale.
           </h2>
         </Reveal>
         <div className="mt-12 grid gap-5 md:grid-cols-3">
