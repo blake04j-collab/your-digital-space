@@ -1,38 +1,72 @@
-## Changes
 
-### 1. Replace `/lueybtc` profile picture
-- Copy the uploaded image (`user-uploads://photo_2026-05-18_21-22-00.jpg`) over `public/luey-avatar.jpg` so the existing `<img src="/luey-avatar.jpg">` in `LueyLinkInBio.tsx` picks it up. No code change needed.
+# Section Divider Upgrade — Seamless Flow System
 
-### 2. Remove "Selective by design" section + rework "exclusive/elite" copy
-The site currently positions itself as selective and audience-required. Open it up so anyone — including faceless/anonymous creators with zero following — feels welcomed.
+Goal: kill the "blocky" section breaks on the homepage and replace them with three layered, brand-aware transition primitives so the page reads as one continuous editorial scroll.
 
-**Delete the Fit section entirely**
-- Remove `<Fit />` and its import from `src/routes/index.tsx`.
-- Remove the `Fit` link from `src/components/site/Nav.tsx` (the only remaining nav link, so the nav links list will be empty — keep the logo + Apply CTA).
-- Delete `src/components/site/Fit.tsx`.
+## Current state
 
-**Soften copy elsewhere to match "we work with anyone, faceless welcome"**
+- Homepage stacks: `Hero → Testimonial → HowItWorks → WhyJoin → Apply` (in `src/routes/index.tsx`).
+- Body already paints a dark magenta radial + brick texture (see `src/styles.css` `body` rule), so "white-to-gray" jumps aren't the problem — the issue is each section is a self-contained block on the same flat backdrop with no transitional cues.
+- `Section.tsx` uses `border-b border-hairline` (a hard hairline). Other sections have no transitions at all, so they read as stacked cards rather than a flowing page.
+- Existing brand tokens we'll reuse: `--brand-lime` (neon pink), `--brand-blue`, `--hairline`, `--surface-1`.
 
-- `src/routes/index.tsx` meta: change titles/descriptions from "Elite Creators / high-revenue / high-ticket" to inclusive phrasing, e.g. *"B1 Scale — Creator Growth, From Zero to Scale"* / *"We scale creators at any stage — faceless, anonymous, or established. Private partnerships, built around you."*
-- `src/components/site/Hero.tsx`: subline "...built for high-revenue subscription brands." → "...built for any creator ready to grow — faceless, anonymous, or fully public."
-- `src/components/site/Services.tsx`:
-  - Title `"...elite creators."` → `"...modern creators."`
-  - Lead: drop "creators who already command attention — engineered for high-ticket" → "Engineered for creators at any stage — whether you're just starting, faceless, or already scaling."
-  - Service body referring to "every elite creator brand" → "every creator brand we partner with".
-- `src/components/site/Process.tsx`: first step "Share your profile, niche, and current monetization footprint so we can assess fit." → "Tell us about you and your goals — followers optional, faceless welcome."
-- `src/components/site/Stuck.tsx`: line about "curated access" stays but rephrased to remove gatekeeping tone.
-- `src/components/site/Footer.tsx`: "Built for elite creator brands" → "Built for creators at every stage."
-- `src/components/site/Plans.tsx`: not imported anywhere on the homepage, but contains "private partners" copy — leave untouched since it's unused (avoid scope creep).
+## What I'll build
 
-### Files touched
-- `public/luey-avatar.jpg` (overwrite)
-- `src/routes/index.tsx`
-- `src/components/site/Nav.tsx`
-- `src/components/site/Fit.tsx` (delete)
-- `src/components/site/Hero.tsx`
-- `src/components/site/Services.tsx`
-- `src/components/site/Process.tsx`
-- `src/components/site/Stuck.tsx`
-- `src/components/site/Footer.tsx`
+Three reusable primitives, then wire them between sections. All purely visual / presentation — no copy, layout, or business-logic changes.
 
-No backend / data changes. No design system token changes — keeps the existing pink/dark aesthetic and the red Luey page theme intact.
+### 1. `<FlowDivider />` — soft gradient fade (primary)
+
+New component `src/components/site/FlowDivider.tsx`. A full-width, ~160px tall element with `pointer-events-none` and a vertical gradient from `transparent` → faint pink/blue tint → `transparent` using `oklch(... / 0.05–0.10)`. Variants: `pink`, `blue`, `neutral`, plus `flip` to reverse direction. Used between every major section pair.
+
+### 2. `<CloudVeil />` — cloud-themed separator (brand)
+
+New component `src/components/site/CloudVeil.tsx`. Layered radial gradients with heavy `blur-3xl`, semi-transparent white fog + faint pink glow, organic non-geometric shape. Sits at the bottom of a section, overlapping the next by ~16px via negative margin. Used at 1–2 high-impact transitions (Hero→Testimonial, WhyJoin→Apply) to reinforce the cloud brand without clutter.
+
+### 3. `<AmbientShapes />` — blurred depth backdrops
+
+New component `src/components/site/AmbientShapes.tsx`. Absolutely-positioned large blurred blobs (opacity 5–12%, soft pink / blue / white), placed off-center (top-right, bottom-left). Optional slow float animation reusing the existing `animate-float-glow` keyframe in `styles.css`. Mounted once at the page level behind `<main>` with `fixed inset-0 -z-10 pointer-events-none`, so it provides continuous depth across the whole scroll instead of per-section.
+
+### Section cleanup
+
+- Remove the hard `border-b border-hairline` from `Section.tsx`.
+- Audit each homepage section component for any internal hard dividers / abrupt background blocks and soften (replace borders with gradient masks, drop opaque section backgrounds in favor of transparent + ambient backdrop).
+- Keep section padding generous (already `py-20 md:py-28`) so dividers have room to breathe.
+
+### Wiring in `src/routes/index.tsx`
+
+```text
+<AmbientShapes />          ← fixed, page-wide
+<Nav />
+<main>
+  <Hero />
+  <CloudVeil />            ← brand moment
+  <Testimonial />
+  <FlowDivider variant="pink" />
+  <HowItWorks />
+  <FlowDivider variant="blue" flip />
+  <WhyJoin />
+  <CloudVeil />            ← brand moment before CTA
+  <Apply />
+</main>
+<Footer />
+```
+
+## Responsive & perf
+
+- All dividers use `pointer-events-none`, no layout shift.
+- Heights scale down on mobile (`h-24 md:h-40`) so blur shapes don't dominate small screens.
+- Reuse existing `oklch` tokens and the existing `animate-float-glow` keyframe — no new global CSS beyond a couple of utility classes if needed.
+- No new dependencies.
+
+## Files touched
+
+- new: `src/components/site/FlowDivider.tsx`
+- new: `src/components/site/CloudVeil.tsx`
+- new: `src/components/site/AmbientShapes.tsx`
+- edit: `src/components/site/Section.tsx` (drop hard border)
+- edit: `src/routes/index.tsx` (compose dividers between sections, mount ambient shapes)
+- edit (light, only if needed): individual section components to remove any leftover hard backgrounds/borders that fight the new flow
+
+## Out of scope
+
+- No copy changes, no layout restructuring inside sections, no nav/footer changes, no new routes, no backend.
