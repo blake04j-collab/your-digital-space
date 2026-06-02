@@ -1,12 +1,12 @@
 import { Reveal } from "./Reveal";
 
 const benefits = [
-  { h: "Higher Income Opportunities", t: "Access deals and revenue streams designed to scale creator income." },
-  { h: "Premium Brand Partnerships", t: "Get connected with trusted brands that align with your audience." },
-  { h: "Creator-Focused Support", t: "A dedicated team that knows the creator economy inside out." },
-  { h: "Fast Application Review", t: "Hear back from our team within 24 hours." },
-  { h: "Long-Term Growth", t: "Sustainable strategies built for income that compounds." },
-  { h: "Free to Apply", t: "No fees, no commitments — just a fast, simple application." },
+  { h: "Revenue Optimization", t: "Analyze your content performance, audience behavior, and monetization channels to uncover opportunities that increase earnings and create more predictable, long-term income streams." },
+  { h: "Paywall Management", t: "Optimize your subscription pricing, content strategy, messaging, and fan conversion process without requiring you to spend more time online." },
+  { h: "Content Strategy", t: "Personalized content strategy designed to increase audience engagement, improve retention, and create more opportunities for growth across your platforms." },
+  { h: "Account Management", t: "We handle day-to-day platform operations including posting schedules, profile optimization, and performance tracking to ensure your account is consistently converting at its highest potential." },
+  { h: "Audience Growth", t: "Identifies growth opportunities across social platforms and implements proven strategies to help expand your reach, attract new followers, and build a stronger personal brand." },
+  { h: "Free to Apply", t: "No fees, no commitments. Just a fast, simple application." },
 ];
 
 export function WhyJoin() {
