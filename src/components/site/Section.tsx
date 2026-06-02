@@ -15,7 +15,7 @@ export function Section({
   children?: ReactNode;
 }) {
   return (
-    <section id={id} className="border-b border-hairline">
+    <section id={id} className="relative">
       <div className="mx-auto max-w-5xl px-5 py-20 md:py-28">
         <Reveal>
           <div className="mb-4 text-[10px] uppercase tracking-[0.3em] text-muted-foreground">

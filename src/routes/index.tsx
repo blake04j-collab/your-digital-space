@@ -8,6 +8,9 @@ import { HowItWorks } from "@/components/site/HowItWorks";
 import { WhyJoin } from "@/components/site/WhyJoin";
 import { Apply } from "@/components/site/Apply";
 import { Footer } from "@/components/site/Footer";
+import { FlowDivider } from "@/components/site/FlowDivider";
+import { CloudVeil } from "@/components/site/CloudVeil";
+import { AmbientShapes } from "@/components/site/AmbientShapes";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -35,13 +38,18 @@ function Index() {
     trackPageView("/");
   }, []);
   return (
-    <div className="min-h-screen text-foreground">
+    <div className="relative min-h-screen text-foreground">
+      <AmbientShapes />
       <Nav />
       <main>
         <Hero />
+        <CloudVeil />
         <Testimonial />
+        <FlowDivider variant="pink" />
         <HowItWorks />
+        <FlowDivider variant="blue" flip />
         <WhyJoin />
+        <CloudVeil />
         <Apply />
       </main>
       <Footer />
