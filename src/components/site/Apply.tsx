@@ -20,7 +20,7 @@ export function Apply() {
         </Reveal>
         <Reveal delay={80}>
           <h2 className="text-center font-display text-[clamp(2rem,5vw,3.5rem)] leading-[1.05] tracking-tight">
-            Get started in under a minute.
+            Let's scale your creator business.
           </h2>
         </Reveal>
         <Reveal delay={140}>

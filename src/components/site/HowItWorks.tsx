@@ -4,17 +4,17 @@ const steps = [
   {
     n: "01",
     h: "Apply",
-    t: "Fill out a short application — takes under a minute.",
+    t: "Tell us about you and your content — it takes under a minute.",
   },
   {
     n: "02",
-    h: "Get Reviewed",
-    t: "The B1 Team reviews your content and audience.",
+    h: "Strategy Call",
+    t: "We map out your content, growth, and monetization plan.",
   },
   {
     n: "03",
-    h: "Get Opportunities",
-    t: "Receive brand partnership opportunities that fit your niche.",
+    h: "We Run It",
+    t: "Our team manages your content, audience, and revenue end-to-end.",
   },
 ];
 
@@ -29,7 +29,7 @@ export function HowItWorks() {
         </Reveal>
         <Reveal delay={80}>
           <h2 className="mx-auto max-w-2xl text-center font-display text-[clamp(2rem,5vw,3.5rem)] leading-[1.05] tracking-tight">
-            Three steps to your next brand deal.
+            Full-service management. Zero guesswork.
           </h2>
         </Reveal>
         <div className="mt-12 grid gap-5 md:grid-cols-3">

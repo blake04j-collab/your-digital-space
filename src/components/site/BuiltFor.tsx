@@ -16,8 +16,8 @@ export function BuiltFor() {
         </Reveal>
         <Reveal delay={140}>
           <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-muted-foreground md:text-lg">
-            Whether you're growing on TikTok, Instagram, YouTube, or emerging platforms,
-            the B1 Team connects you with brands that align with your audience and content.
+            Whether you're starting out or already scaling, the B1 Team manages your content,
+            social presence, and monetization across every major platform.
           </p>
         </Reveal>
         <Reveal delay={200}>
