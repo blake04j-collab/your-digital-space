@@ -12,7 +12,7 @@ export function Apply() {
             "radial-gradient(ellipse 60% 100% at 50% 0%, oklch(0.68 0.31 340 / 0.22), transparent 70%)",
         }}
       />
-      <div className="relative mx-auto max-w-2xl px-5 py-20 md:py-28">
+      <div className="relative mx-auto max-w-2xl px-5 py-12 md:py-16">
         <Reveal>
           <div className="mb-3 text-center text-[11px] font-medium uppercase tracking-[0.25em] text-lime">
             Apply now
@@ -28,7 +28,7 @@ export function Apply() {
             Tell us where to reach you. Our team follows up within 24 hours.
           </p>
         </Reveal>
-        <div className="mt-10 rounded-3xl border border-hairline bg-surface-1/70 p-6 backdrop-blur md:p-10">
+        <div className="mt-8 rounded-3xl border border-hairline bg-surface-1/70 p-6 backdrop-blur md:p-10">
           <ApplyForm />
         </div>
       </div>

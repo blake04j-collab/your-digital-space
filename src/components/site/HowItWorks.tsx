@@ -9,7 +9,7 @@ const steps = [
 export function HowItWorks() {
   return (
     <section id="how" className="relative">
-      <div className="mx-auto max-w-6xl px-5 py-20 md:py-28">
+      <div className="mx-auto max-w-6xl px-5 py-12 md:py-16">
         <Reveal>
           <div className="mb-3 text-center text-[11px] font-medium uppercase tracking-[0.25em] text-lime">
             How it works
@@ -20,7 +20,7 @@ export function HowItWorks() {
             Three steps to scale.
           </h2>
         </Reveal>
-        <div className="mt-12 grid gap-5 md:grid-cols-3">
+        <div className="mt-8 grid gap-5 md:grid-cols-3">
           {steps.map((s, i) => (
             <Reveal key={s.n} delay={120 + i * 80}>
               <div className="card-lift h-full rounded-2xl border border-hairline bg-surface-1/80 p-8 backdrop-blur">

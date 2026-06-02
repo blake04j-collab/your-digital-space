@@ -4,7 +4,7 @@ import model from "@/assets/cloud-model.jpg.asset.json";
 export function Hero() {
   return (
     <section className="relative overflow-hidden">
-      <div className="relative mx-auto max-w-6xl px-5 pt-14 pb-10 md:pt-20 md:pb-14 lg:pt-24 lg:pb-16">
+      <div className="relative mx-auto max-w-6xl px-5 pt-10 pb-8 md:pt-14 md:pb-10 lg:pt-16 lg:pb-12">
         <div className="grid grid-cols-1 items-center gap-10 md:grid-cols-2 md:gap-12 lg:gap-16">
           {/* LEFT COLUMN — messaging + CTA */}
           <div className="flex flex-col items-center text-center md:items-start md:text-left">
