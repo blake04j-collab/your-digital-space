@@ -14,15 +14,15 @@ export function Hero() {
         </Reveal>
         <Reveal delay={120}>
           <h1 className="font-display text-[clamp(2.25rem,7vw,5.25rem)] leading-[1.02] tracking-tight text-foreground">
-            Land More Brand Deals.
+            Become a million dollar creator with
             <br />
-            <span className="text-lime">Scale Your Creator Income.</span>
+            <span className="text-lime">B1 Scale.</span>
           </h1>
         </Reveal>
         <Reveal delay={200}>
           <p className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-muted-foreground md:text-lg">
-            The B1 Team connects creators with brands actively looking for sponsorships,
-            partnerships, and long-term collaborations.
+            A full-service social media and creator management agency. We handle your content,
+            growth, and monetization — so you can focus on creating.
           </p>
         </Reveal>
         <Reveal delay={260}>
@@ -31,10 +31,10 @@ export function Hero() {
               href="#apply"
               className="rounded-full bg-lime px-10 py-4 text-base font-semibold tracking-wide text-primary-foreground shadow-lime transition-transform hover:scale-[1.03]"
             >
-              Apply Now →
+              Start your journey →
             </a>
             <p className="text-xs text-muted-foreground">
-              Free to apply · Fast review process
+              Free to apply · Response within 24 hours
             </p>
           </div>
         </Reveal>

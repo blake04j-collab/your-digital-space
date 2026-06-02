@@ -13,17 +13,17 @@ import { Footer } from "@/components/site/Footer";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "B1 Scale — Land More Brand Deals. Scale Your Creator Income." },
+      { title: "B1 Scale — Full-Service Social Media & Creator Management Agency" },
       {
         name: "description",
         content:
-          "The B1 Team connects creators with brands actively looking for sponsorships, partnerships, and long-term collaborations. Free to apply.",
+          "B1 Scale is a full-service social media, creator management, and marketing agency. We handle content, growth, and monetization for creators at every stage.",
       },
-      { property: "og:title", content: "B1 Scale — Land More Brand Deals" },
+      { property: "og:title", content: "B1 Scale — Creator Management & Marketing Agency" },
       {
         property: "og:description",
         content:
-          "Get matched with brands looking for creator partnerships. Fast review. Free to apply.",
+          "Content, social media, and monetization handled end-to-end. Built for creators ready to scale.",
       },
     ],
   }),
