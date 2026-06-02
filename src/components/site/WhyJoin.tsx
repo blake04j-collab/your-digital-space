@@ -1,12 +1,12 @@
 import { Reveal } from "./Reveal";
 
 const benefits = [
-  { h: "Content Creation", t: "Front-end production for every major platform — shot, edited, and posted." },
-  { h: "Social Media Management", t: "Daily posting, scheduling, and platform strategy across TikTok, IG, YouTube, and X." },
-  { h: "Audience Growth", t: "Data-driven strategies to grow followers, engagement, and watch time." },
-  { h: "Monetization & Paywalls", t: "Comprehensive paywall and subscription management to maximize revenue." },
-  { h: "Influencer Marketing", t: "Campaigns and partnerships managed end-to-end by our team." },
-  { h: "DM & Fan Engagement", t: "Pro chat operators that turn audience attention into recurring revenue." },
+  { h: "Higher Income Opportunities", t: "Access deals and revenue streams designed to scale creator income." },
+  { h: "Premium Brand Partnerships", t: "Get connected with trusted brands that align with your audience." },
+  { h: "Creator-Focused Support", t: "A dedicated team that knows the creator economy inside out." },
+  { h: "Fast Application Review", t: "Hear back from our team within 24 hours." },
+  { h: "Long-Term Growth", t: "Sustainable strategies built for income that compounds." },
+  { h: "Free to Apply", t: "No fees, no commitments — just a fast, simple application." },
 ];
 
 export function WhyJoin() {
@@ -15,12 +15,12 @@ export function WhyJoin() {
       <div className="mx-auto max-w-6xl px-5 py-20 md:py-28">
         <Reveal>
           <div className="mb-3 text-center text-[11px] font-medium uppercase tracking-[0.25em] text-lime">
-            What we offer
+            Why creators join
           </div>
         </Reveal>
         <Reveal delay={80}>
-          <h2 className="mx-auto max-w-2xl text-center font-display text-[clamp(2rem,5vw,3.5rem)] leading-[1.05] tracking-tight">
-            A full-service creator agency.
+          <h2 className="mx-auto max-w-2xl text-center font-display text-[clamp(2rem,5vw,3.5rem)] font-semibold leading-[1.05] tracking-tight">
+            Everything creators need to grow.
           </h2>
         </Reveal>
         <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

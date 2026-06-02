@@ -42,7 +42,7 @@ export function ApplyForm() {
       fname: parsed.data.fname,
       lname: parsed.data.lname,
       phone: parsed.data.phone,
-      email: `${digits}@phone.b1scale.local`,
+      email: `${digits}@phone.cloudagency.local`,
       bio: parsed.data.social || null,
       plan: "partner",
       ref_code,
@@ -63,7 +63,7 @@ export function ApplyForm() {
         </div>
         <h3 className="font-display text-3xl text-lime">You're in.</h3>
         <p className="mx-auto mt-3 max-w-md text-sm text-muted-foreground">
-          The B1 Team will reach out within 24 hours.
+          The Cloud Agency team will reach out within 24 hours.
         </p>
       </div>
     );
