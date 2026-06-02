@@ -9,21 +9,21 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as LuebtcRouteImport } from './routes/luebtc'
-import { Route as B1btcRouteImport } from './routes/b1btc'
+import { Route as L5RouteImport } from './routes/L5'
+import { Route as B1RouteImport } from './routes/B1'
 import { Route as RefRouteImport } from './routes/$ref'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
 
-const LuebtcRoute = LuebtcRouteImport.update({
-  id: '/luebtc',
-  path: '/luebtc',
+const L5Route = L5RouteImport.update({
+  id: '/L5',
+  path: '/L5',
   getParentRoute: () => rootRouteImport,
 } as any)
-const B1btcRoute = B1btcRouteImport.update({
-  id: '/b1btc',
-  path: '/b1btc',
+const B1Route = B1RouteImport.update({
+  id: '/B1',
+  path: '/B1',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RefRoute = RefRouteImport.update({
@@ -50,16 +50,16 @@ const AdminLoginRoute = AdminLoginRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$ref': typeof RefRoute
-  '/b1btc': typeof B1btcRoute
-  '/luebtc': typeof LuebtcRoute
+  '/B1': typeof B1Route
+  '/L5': typeof L5Route
   '/admin/login': typeof AdminLoginRoute
   '/admin/': typeof AdminIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$ref': typeof RefRoute
-  '/b1btc': typeof B1btcRoute
-  '/luebtc': typeof LuebtcRoute
+  '/B1': typeof B1Route
+  '/L5': typeof L5Route
   '/admin/login': typeof AdminLoginRoute
   '/admin': typeof AdminIndexRoute
 }
@@ -67,49 +67,42 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/$ref': typeof RefRoute
-  '/b1btc': typeof B1btcRoute
-  '/luebtc': typeof LuebtcRoute
+  '/B1': typeof B1Route
+  '/L5': typeof L5Route
   '/admin/login': typeof AdminLoginRoute
   '/admin/': typeof AdminIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/$ref' | '/b1btc' | '/luebtc' | '/admin/login' | '/admin/'
+  fullPaths: '/' | '/$ref' | '/B1' | '/L5' | '/admin/login' | '/admin/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/$ref' | '/b1btc' | '/luebtc' | '/admin/login' | '/admin'
-  id:
-    | '__root__'
-    | '/'
-    | '/$ref'
-    | '/b1btc'
-    | '/luebtc'
-    | '/admin/login'
-    | '/admin/'
+  to: '/' | '/$ref' | '/B1' | '/L5' | '/admin/login' | '/admin'
+  id: '__root__' | '/' | '/$ref' | '/B1' | '/L5' | '/admin/login' | '/admin/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   RefRoute: typeof RefRoute
-  B1btcRoute: typeof B1btcRoute
-  LuebtcRoute: typeof LuebtcRoute
+  B1Route: typeof B1Route
+  L5Route: typeof L5Route
   AdminLoginRoute: typeof AdminLoginRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/luebtc': {
-      id: '/luebtc'
-      path: '/luebtc'
-      fullPath: '/luebtc'
-      preLoaderRoute: typeof LuebtcRouteImport
+    '/L5': {
+      id: '/L5'
+      path: '/L5'
+      fullPath: '/L5'
+      preLoaderRoute: typeof L5RouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/b1btc': {
-      id: '/b1btc'
-      path: '/b1btc'
-      fullPath: '/b1btc'
-      preLoaderRoute: typeof B1btcRouteImport
+    '/B1': {
+      id: '/B1'
+      path: '/B1'
+      fullPath: '/B1'
+      preLoaderRoute: typeof B1RouteImport
       parentRoute: typeof rootRouteImport
     }
     '/$ref': {
@@ -146,11 +139,20 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   RefRoute: RefRoute,
-  B1btcRoute: B1btcRoute,
-  LuebtcRoute: LuebtcRoute,
+  B1Route: B1Route,
+  L5Route: L5Route,
   AdminLoginRoute: AdminLoginRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
