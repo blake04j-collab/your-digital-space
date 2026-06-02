@@ -3,31 +3,27 @@ import { useEffect } from "react";
 import { captureRefFromUrl, trackPageView } from "@/lib/tracking";
 import { Nav } from "@/components/site/Nav";
 import { Hero } from "@/components/site/Hero";
-import { Marquee } from "@/components/site/Marquee";
-import { Services } from "@/components/site/Services";
+import { HowItWorks } from "@/components/site/HowItWorks";
+import { WhyJoin } from "@/components/site/WhyJoin";
+import { BuiltFor } from "@/components/site/BuiltFor";
 import { Testimonial } from "@/components/site/Testimonial";
-import { Stuck } from "@/components/site/Stuck";
-import { Process } from "@/components/site/Process";
-
-
 import { Apply } from "@/components/site/Apply";
-
 import { Footer } from "@/components/site/Footer";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "B1 Scale — Creator Growth, From Zero to Scale" },
+      { title: "B1 Scale — Land More Brand Deals. Scale Your Creator Income." },
       {
         name: "description",
         content:
-          "We scale creators at any stage — faceless, anonymous, or established. Private partnerships built around you, no audience required.",
+          "The B1 Team connects creators with brands actively looking for sponsorships, partnerships, and long-term collaborations. Free to apply.",
       },
-      { property: "og:title", content: "B1 Scale — Creator Growth, From Zero to Scale" },
+      { property: "og:title", content: "B1 Scale — Land More Brand Deals" },
       {
         property: "og:description",
         content:
-          "Private creator growth partner. Revenue, engagement, and scaling infrastructure — for creators at every stage, faceless welcome.",
+          "Get matched with brands looking for creator partnerships. Fast review. Free to apply.",
       },
     ],
   }),
@@ -40,15 +36,14 @@ function Index() {
     trackPageView("/");
   }, []);
   return (
-    <div className="min-h-screen text-foreground grain">
+    <div className="min-h-screen text-foreground">
       <Nav />
       <main>
         <Hero />
-        <Marquee />
+        <HowItWorks />
+        <WhyJoin />
+        <BuiltFor />
         <Testimonial />
-        <Services />
-        <Stuck />
-        <Process />
         <Apply />
       </main>
       <Footer />
