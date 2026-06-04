@@ -23,7 +23,6 @@ type Application = {
   tiktok: string | null;
   instagram: string | null;
   x_handle: string | null;
-  onlyfans: string | null;
   notes: string | null;
   tiktok_followers: number | null;
   ig_followers: number | null;
