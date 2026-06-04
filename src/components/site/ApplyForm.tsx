@@ -36,7 +36,6 @@ export function ApplyForm() {
       lname: String(fd.get("lname") ?? ""),
       email: String(fd.get("email") ?? ""),
       phone: String(fd.get("phone") ?? ""),
-      onlyfans: String(fd.get("onlyfans") ?? ""),
       instagram: String(fd.get("instagram") ?? ""),
       tiktok: String(fd.get("tiktok") ?? ""),
       x_handle: String(fd.get("x_handle") ?? ""),
