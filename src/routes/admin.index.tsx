@@ -344,7 +344,6 @@ function AdminDashboard() {
                         <th className="px-4 py-3">Phone</th>
                         <th className="px-4 py-3">Instagram</th>
                         <th className="px-4 py-3">TikTok</th>
-                        <th className="px-4 py-3">OnlyFans</th>
                         <th className="px-4 py-3">Status</th>
                       </tr>
                     </thead>
