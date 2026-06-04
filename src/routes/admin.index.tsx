@@ -61,11 +61,6 @@ type PageView = {
 
 type Tab = "applications" | "analytics" | "links";
 
-const DAY = 86_400_000;
-
-function withinDays(iso: string, days: number) {
-  return new Date(iso).getTime() > Date.now() - days * DAY;
-}
 
 function startOfWeek() {
   const d = new Date();
