@@ -446,17 +446,6 @@ function AdminDashboard() {
               {selected.phone && (
                 <Field label="Phone" value={selected.phone} link={`tel:${selected.phone}`} />
               )}
-              {selected.onlyfans && (
-                <Field
-                  label="OnlyFans"
-                  value={selected.onlyfans}
-                  link={
-                    selected.onlyfans.startsWith("http")
-                      ? selected.onlyfans
-                      : `https://${selected.onlyfans}`
-                  }
-                />
-              )}
               {selected.instagram && (
                 <Field
                   label="Instagram"
