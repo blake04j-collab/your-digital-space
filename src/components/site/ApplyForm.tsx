@@ -122,18 +122,6 @@ export function ApplyForm() {
         />
       </div>
 
-      <div>
-        <label className={labelCls}>
-          OnlyFans Link <span className={optionalCls}>(optional)</span>
-        </label>
-        <input
-          name="onlyfans"
-          type="url"
-          className={inputCls}
-          placeholder="https://onlyfans.com/yourhandle"
-        />
-      </div>
-
       <div className="grid gap-5 sm:grid-cols-3">
         <div>
           <label className={labelCls}>
