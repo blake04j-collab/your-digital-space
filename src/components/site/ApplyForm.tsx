@@ -8,7 +8,6 @@ const schema = z.object({
   lname: z.string().trim().min(1, "Last name required").max(100),
   email: z.string().trim().email("Valid email required").max(255),
   phone: z.string().trim().max(40).optional(),
-  onlyfans: z.string().trim().max(500).optional(),
   instagram: z.string().trim().max(100).optional(),
   tiktok: z.string().trim().max(100).optional(),
   x_handle: z.string().trim().max(100).optional(),
