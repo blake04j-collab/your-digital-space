@@ -8,7 +8,6 @@ const schema = z.object({
   lname: z.string().trim().min(1, "Last name required").max(100),
   email: z.string().trim().email("Valid email required").max(255),
   phone: z.string().trim().max(40).optional(),
-  onlyfans: z.string().trim().max(500).optional(),
   instagram: z.string().trim().max(100).optional(),
   tiktok: z.string().trim().max(100).optional(),
   x_handle: z.string().trim().max(100).optional(),
@@ -37,7 +36,6 @@ export function ApplyForm() {
       lname: String(fd.get("lname") ?? ""),
       email: String(fd.get("email") ?? ""),
       phone: String(fd.get("phone") ?? ""),
-      onlyfans: String(fd.get("onlyfans") ?? ""),
       instagram: String(fd.get("instagram") ?? ""),
       tiktok: String(fd.get("tiktok") ?? ""),
       x_handle: String(fd.get("x_handle") ?? ""),
@@ -56,7 +54,6 @@ export function ApplyForm() {
       lname: d.lname,
       email: d.email,
       phone: d.phone || null,
-      onlyfans: d.onlyfans || null,
       instagram: d.instagram || null,
       tiktok: d.tiktok || null,
       x_handle: d.x_handle || null,
@@ -122,18 +119,6 @@ export function ApplyForm() {
           className={inputCls}
           placeholder="+1 555 555 5555"
           autoComplete="tel"
-        />
-      </div>
-
-      <div>
-        <label className={labelCls}>
-          OnlyFans Link <span className={optionalCls}>(optional)</span>
-        </label>
-        <input
-          name="onlyfans"
-          type="url"
-          className={inputCls}
-          placeholder="https://onlyfans.com/yourhandle"
         />
       </div>
 

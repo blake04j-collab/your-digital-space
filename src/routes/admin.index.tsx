@@ -23,7 +23,6 @@ type Application = {
   tiktok: string | null;
   instagram: string | null;
   x_handle: string | null;
-  onlyfans: string | null;
   notes: string | null;
   tiktok_followers: number | null;
   ig_followers: number | null;
@@ -160,7 +159,6 @@ function AdminDashboard() {
           (a.tiktok ?? "").toLowerCase().includes(q) ||
           (a.instagram ?? "").toLowerCase().includes(q) ||
           (a.x_handle ?? "").toLowerCase().includes(q) ||
-          (a.onlyfans ?? "").toLowerCase().includes(q) ||
           (a.notes ?? "").toLowerCase().includes(q) ||
           (a.ref_code ?? "").toLowerCase().includes(q)
         );
@@ -346,7 +344,6 @@ function AdminDashboard() {
                         <th className="px-4 py-3">Phone</th>
                         <th className="px-4 py-3">Instagram</th>
                         <th className="px-4 py-3">TikTok</th>
-                        <th className="px-4 py-3">OnlyFans</th>
                         <th className="px-4 py-3">Status</th>
                       </tr>
                     </thead>
@@ -370,13 +367,6 @@ function AdminDashboard() {
                               {a.instagram ?? "—"}
                             </td>
                             <td className="px-4 py-3 text-muted-foreground">{a.tiktok ?? "—"}</td>
-                            <td className="px-4 py-3 text-muted-foreground">
-                              {a.onlyfans ? (
-                                <span className="text-lime">link</span>
-                              ) : (
-                                "—"
-                              )}
-                            </td>
                             <td className="px-4 py-3">
                               <span
                                 className={`rounded-full px-2.5 py-0.5 text-[9px] uppercase tracking-[0.2em] ${STATUS_STYLES[status]}`}
@@ -455,17 +445,6 @@ function AdminDashboard() {
               <Field label="Email" value={selected.email} link={`mailto:${selected.email}`} />
               {selected.phone && (
                 <Field label="Phone" value={selected.phone} link={`tel:${selected.phone}`} />
-              )}
-              {selected.onlyfans && (
-                <Field
-                  label="OnlyFans"
-                  value={selected.onlyfans}
-                  link={
-                    selected.onlyfans.startsWith("http")
-                      ? selected.onlyfans
-                      : `https://${selected.onlyfans}`
-                  }
-                />
               )}
               {selected.instagram && (
                 <Field
