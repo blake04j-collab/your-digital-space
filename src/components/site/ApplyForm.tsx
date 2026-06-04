@@ -6,14 +6,22 @@ import { getStoredRef } from "@/lib/tracking";
 const schema = z.object({
   fname: z.string().trim().min(1, "First name required").max(100),
   lname: z.string().trim().min(1, "Last name required").max(100),
-  phone: z.string().trim().min(5, "Valid phone required").max(40),
-  social: z.string().trim().max(255).optional(),
+  email: z.string().trim().email("Valid email required").max(255),
+  phone: z.string().trim().max(40).optional(),
+  onlyfans: z.string().trim().max(500).optional(),
+  instagram: z.string().trim().max(100).optional(),
+  tiktok: z.string().trim().max(100).optional(),
+  x_handle: z.string().trim().max(100).optional(),
+  notes: z.string().trim().max(5000).optional(),
 });
 
 const inputCls =
   "w-full rounded-xl border border-hairline bg-background/60 px-4 py-4 text-base text-foreground outline-none transition-colors placeholder:text-muted-foreground/40 focus:border-lime";
 
-const labelCls = "mb-2 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground";
+const labelCls =
+  "mb-2 block text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground";
+
+const optionalCls = "normal-case tracking-normal text-muted-foreground/60";
 
 export function ApplyForm() {
   const [submitting, setSubmitting] = useState(false);
@@ -27,8 +35,13 @@ export function ApplyForm() {
     const raw = {
       fname: String(fd.get("fname") ?? ""),
       lname: String(fd.get("lname") ?? ""),
+      email: String(fd.get("email") ?? ""),
       phone: String(fd.get("phone") ?? ""),
-      social: String(fd.get("social") ?? ""),
+      onlyfans: String(fd.get("onlyfans") ?? ""),
+      instagram: String(fd.get("instagram") ?? ""),
+      tiktok: String(fd.get("tiktok") ?? ""),
+      x_handle: String(fd.get("x_handle") ?? ""),
+      notes: String(fd.get("notes") ?? ""),
     };
     const parsed = schema.safeParse(raw);
     if (!parsed.success) {
@@ -37,14 +50,19 @@ export function ApplyForm() {
     }
     setSubmitting(true);
     const ref_code = getStoredRef();
-    const digits = parsed.data.phone.replace(/\D/g, "") || "noemail";
+    const d = parsed.data;
     const { error } = await supabase.from("applications").insert({
-      fname: parsed.data.fname,
-      lname: parsed.data.lname,
-      phone: parsed.data.phone,
-      email: `${digits}@phone.cloudagency.local`,
-      bio: parsed.data.social || null,
+      fname: d.fname,
+      lname: d.lname,
+      email: d.email,
+      phone: d.phone || null,
+      onlyfans: d.onlyfans || null,
+      instagram: d.instagram || null,
+      tiktok: d.tiktok || null,
+      x_handle: d.x_handle || null,
+      notes: d.notes || null,
       plan: "partner",
+      status: "new",
       ref_code,
     });
     setSubmitting(false);
@@ -81,22 +99,75 @@ export function ApplyForm() {
           <input name="lname" required className={inputCls} placeholder="Doe" autoComplete="family-name" />
         </div>
       </div>
+
       <div>
-        <label className={labelCls}>Phone Number</label>
+        <label className={labelCls}>Email Address</label>
+        <input
+          name="email"
+          type="email"
+          required
+          className={inputCls}
+          placeholder="you@email.com"
+          autoComplete="email"
+        />
+      </div>
+
+      <div>
+        <label className={labelCls}>
+          Phone Number <span className={optionalCls}>(optional)</span>
+        </label>
         <input
           name="phone"
           type="tel"
-          required
           className={inputCls}
           placeholder="+1 555 555 5555"
           autoComplete="tel"
         />
       </div>
+
       <div>
         <label className={labelCls}>
-          Social Handle <span className="normal-case tracking-normal text-muted-foreground/60">(optional)</span>
+          OnlyFans Link <span className={optionalCls}>(optional)</span>
         </label>
-        <input name="social" className={inputCls} placeholder="@yourhandle" />
+        <input
+          name="onlyfans"
+          type="url"
+          className={inputCls}
+          placeholder="https://onlyfans.com/yourhandle"
+        />
+      </div>
+
+      <div className="grid gap-5 sm:grid-cols-3">
+        <div>
+          <label className={labelCls}>
+            Instagram <span className={optionalCls}>(opt.)</span>
+          </label>
+          <input name="instagram" className={inputCls} placeholder="@handle" />
+        </div>
+        <div>
+          <label className={labelCls}>
+            TikTok <span className={optionalCls}>(opt.)</span>
+          </label>
+          <input name="tiktok" className={inputCls} placeholder="@handle" />
+        </div>
+        <div>
+          <label className={labelCls}>
+            X / Twitter <span className={optionalCls}>(opt.)</span>
+          </label>
+          <input name="x_handle" className={inputCls} placeholder="@handle" />
+        </div>
+      </div>
+
+      <div>
+        <label className={labelCls}>
+          Additional Notes <span className={optionalCls}>(optional)</span>
+        </label>
+        <textarea
+          name="notes"
+          rows={5}
+          className={`${inputCls} resize-y min-h-[140px]`}
+          placeholder="Anything else we should know — content style, current revenue, goals, availability, etc."
+        />
       </div>
 
       {err && (
