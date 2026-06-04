@@ -54,7 +54,6 @@ export function ApplyForm() {
       lname: d.lname,
       email: d.email,
       phone: d.phone || null,
-      onlyfans: d.onlyfans || null,
       instagram: d.instagram || null,
       tiktok: d.tiktok || null,
       x_handle: d.x_handle || null,
