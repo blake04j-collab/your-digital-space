@@ -25,11 +25,15 @@ export type Database = {
           instagram: string | null
           lname: string | null
           niche: string | null
+          notes: string | null
+          onlyfans: string | null
           phone: string | null
           plan: string
           ref_code: string | null
+          status: string
           tiktok: string | null
           tiktok_followers: number | null
+          x_handle: string | null
         }
         Insert: {
           bio?: string | null
@@ -41,11 +45,15 @@ export type Database = {
           instagram?: string | null
           lname?: string | null
           niche?: string | null
+          notes?: string | null
+          onlyfans?: string | null
           phone?: string | null
           plan?: string
           ref_code?: string | null
+          status?: string
           tiktok?: string | null
           tiktok_followers?: number | null
+          x_handle?: string | null
         }
         Update: {
           bio?: string | null
@@ -57,11 +65,15 @@ export type Database = {
           instagram?: string | null
           lname?: string | null
           niche?: string | null
+          notes?: string | null
+          onlyfans?: string | null
           phone?: string | null
           plan?: string
           ref_code?: string | null
+          status?: string
           tiktok?: string | null
           tiktok_followers?: number | null
+          x_handle?: string | null
         }
         Relationships: []
       }
