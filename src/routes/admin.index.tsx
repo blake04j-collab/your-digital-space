@@ -367,13 +367,6 @@ function AdminDashboard() {
                               {a.instagram ?? "—"}
                             </td>
                             <td className="px-4 py-3 text-muted-foreground">{a.tiktok ?? "—"}</td>
-                            <td className="px-4 py-3 text-muted-foreground">
-                              {a.onlyfans ? (
-                                <span className="text-lime">link</span>
-                              ) : (
-                                "—"
-                              )}
-                            </td>
                             <td className="px-4 py-3">
                               <span
                                 className={`rounded-full px-2.5 py-0.5 text-[9px] uppercase tracking-[0.2em] ${STATUS_STYLES[status]}`}
