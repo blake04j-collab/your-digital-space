@@ -159,7 +159,6 @@ function AdminDashboard() {
           (a.tiktok ?? "").toLowerCase().includes(q) ||
           (a.instagram ?? "").toLowerCase().includes(q) ||
           (a.x_handle ?? "").toLowerCase().includes(q) ||
-          (a.onlyfans ?? "").toLowerCase().includes(q) ||
           (a.notes ?? "").toLowerCase().includes(q) ||
           (a.ref_code ?? "").toLowerCase().includes(q)
         );
