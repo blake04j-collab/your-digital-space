@@ -151,8 +151,9 @@ function AdminDashboard() {
         return;
       }
       setAuthorized(true);
-      const [appsRes, linksRes, clicksRes, viewsRes] = await Promise.all([
+      const [appsRes, vaRes, linksRes, clicksRes, viewsRes] = await Promise.all([
         supabase.from("applications").select("*").order("created_at", { ascending: false }),
+        supabase.from("va_applications").select("*").order("created_at", { ascending: false }),
         supabase.from("tracking_links").select("*").order("created_at", { ascending: false }),
         supabase
           .from("link_clicks")
@@ -166,6 +167,7 @@ function AdminDashboard() {
           .limit(5000),
       ]);
       setApps((appsRes.data as Application[]) ?? []);
+      setVaApps((vaRes.data as VAApplication[]) ?? []);
       setLinks((linksRes.data as TrackingLink[]) ?? []);
       setClicks((clicksRes.data as LinkClick[]) ?? []);
       setViews((viewsRes.data as PageView[]) ?? []);
