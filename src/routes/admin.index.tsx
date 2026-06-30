@@ -123,6 +123,7 @@ function AdminDashboard() {
   const [tab, setTab] = useState<Tab>("applications");
 
   const [apps, setApps] = useState<Application[]>([]);
+  const [vaApps, setVaApps] = useState<VAApplication[]>([]);
   const [links, setLinks] = useState<TrackingLink[]>([]);
   const [clicks, setClicks] = useState<LinkClick[]>([]);
   const [views, setViews] = useState<PageView[]>([]);
