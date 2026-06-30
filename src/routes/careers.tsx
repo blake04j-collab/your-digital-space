@@ -275,19 +275,6 @@ function CareersPage() {
                   </div>
                   <div className="grid gap-5 sm:grid-cols-2">
                     <div>
-                      <label className={labelCls}>Email Address</label>
-                      <input
-                        name="email"
-                        type="email"
-                        value={values.email}
-                        onChange={(e) => set("email", e.target.value)}
-                        className={inputCls(errors.email)}
-                        placeholder="you@email.com"
-                        autoComplete="email"
-                      />
-                      <FieldError msg={errors.email} />
-                    </div>
-                    <div>
                       <label className={labelCls}>Country</label>
                       <input
                         name="country"
@@ -298,21 +285,6 @@ function CareersPage() {
                         autoComplete="country-name"
                       />
                       <FieldError msg={errors.country} />
-                    </div>
-                  </div>
-                  <div className="grid gap-5 sm:grid-cols-2">
-                    <div>
-                      <label className={labelCls}>Age</label>
-                      <input
-                        name="age"
-                        type="number"
-                        min={16}
-                        max={99}
-                        value={values.age}
-                        onChange={(e) => set("age", Number(e.target.value))}
-                        className={inputCls(errors.age)}
-                      />
-                      <FieldError msg={errors.age} />
                     </div>
                     <div>
                       <label className={labelCls}>Discord Username</label>
@@ -326,6 +298,7 @@ function CareersPage() {
                       <FieldError msg={errors.discord_username} />
                     </div>
                   </div>
+
                 </section>
 
                 {/* Availability */}
