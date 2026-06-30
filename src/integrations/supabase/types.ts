@@ -176,6 +176,57 @@ export type Database = {
         }
         Relationships: []
       }
+      va_applications: {
+        Row: {
+          age: number
+          availability: string
+          caption_examples: string
+          country: string
+          created_at: string
+          discord_username: string
+          email: string
+          full_name: string
+          id: string
+          reason_for_fit: string
+          reddit_account_available: boolean
+          reddit_username: string | null
+          status: string
+          washington_community_answer: string
+        }
+        Insert: {
+          age: number
+          availability: string
+          caption_examples: string
+          country: string
+          created_at?: string
+          discord_username: string
+          email: string
+          full_name: string
+          id?: string
+          reason_for_fit: string
+          reddit_account_available?: boolean
+          reddit_username?: string | null
+          status?: string
+          washington_community_answer: string
+        }
+        Update: {
+          age?: number
+          availability?: string
+          caption_examples?: string
+          country?: string
+          created_at?: string
+          discord_username?: string
+          email?: string
+          full_name?: string
+          id?: string
+          reason_for_fit?: string
+          reddit_account_available?: boolean
+          reddit_username?: string | null
+          status?: string
+          washington_community_answer?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
