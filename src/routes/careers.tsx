@@ -255,10 +255,9 @@ function CareersPage() {
                 </p>
               </div>
 
-              <form onSubmit={onSubmit} noValidate className="space-y-10">
+              <form onSubmit={onSubmit} noValidate className="space-y-6">
                 {/* Basic info */}
-                <section className="space-y-5">
-                  <SectionHeader index={1} title="Basic Information" />
+                <SectionCard index={1} title="Basic Information">
                   <div>
                     <label className={labelCls}>Full Name</label>
                     <input
@@ -296,15 +295,16 @@ function CareersPage() {
                       <FieldError msg={errors.discord_username} />
                     </div>
                   </div>
-
-                </section>
+                </SectionCard>
 
                 {/* Availability */}
-                <section className="space-y-5">
-                  <SectionHeader index={2} title="Availability" />
+                <SectionCard index={2} title="Availability">
                   <div>
                     <label className={labelCls}>
-                      How many days per week can you work? (2–3 hrs/day, flexible)
+                      How many days per week can you work?
+                      <span className="normal-case tracking-normal text-muted-foreground/60">
+                        &nbsp;· 2–3 hrs/day, flexible
+                      </span>
                     </label>
                     <select
                       name="availability"
@@ -321,44 +321,48 @@ function CareersPage() {
                     </select>
                     <FieldError msg={errors.availability} />
                   </div>
-                </section>
+                </SectionCard>
 
                 {/* Reddit account */}
-                <section className="space-y-5">
-                  <SectionHeader index={3} title="Account Availability" />
+                <SectionCard index={3} title="Account Availability">
                   <div>
-                    <label className={labelCls}>
-                      Do you have an aged Reddit account with little to no karma that you can
-                      use for this role?
-                    </label>
-                    <div className="grid gap-2 sm:grid-cols-2">
-                      {(["yes", "no"] as const).map((opt) => (
-                        <label
-                          key={opt}
-                          className={`flex cursor-pointer items-center gap-3 rounded-xl border px-4 py-3.5 transition-colors ${
-                            values.reddit_account_available === opt
-                              ? "border-lime bg-lime-soft"
-                              : "border-hairline bg-background/60 hover:border-foreground/30"
-                          }`}
-                        >
-                          <input
-                            type="radio"
-                            name="reddit_account_available"
-                            value={opt}
-                            checked={values.reddit_account_available === opt}
-                            onChange={() => set("reddit_account_available", opt)}
-                            className="h-4 w-4 accent-lime"
-                          />
-                          <span className="text-sm capitalize text-foreground">{opt}</span>
-                        </label>
-                      ))}
+                    <p className="mb-4 text-sm leading-relaxed text-foreground/90">
+                      Do you have an aged Reddit account with little to no karma that you can use for this role?
+                    </p>
+                    <div className="grid grid-cols-2 gap-3">
+                      {(["yes", "no"] as const).map((opt) => {
+                        const active = values.reddit_account_available === opt;
+                        return (
+                          <label
+                            key={opt}
+                            className={`flex cursor-pointer items-center justify-center rounded-xl border px-4 py-3.5 text-sm font-medium capitalize transition-all ${
+                              active
+                                ? "border-lime bg-lime text-primary-foreground shadow-lime"
+                                : "border-hairline bg-background/40 text-muted-foreground hover:border-foreground/30 hover:text-foreground"
+                            }`}
+                          >
+                            <input
+                              type="radio"
+                              name="reddit_account_available"
+                              value={opt}
+                              checked={active}
+                              onChange={() => set("reddit_account_available", opt)}
+                              className="sr-only"
+                            />
+                            {opt}
+                          </label>
+                        );
+                      })}
                     </div>
                     <FieldError msg={errors.reddit_account_available} />
                   </div>
                   {values.reddit_account_available === "yes" && (
-                    <div>
+                    <div className="border-t border-hairline pt-5">
                       <label className={labelCls}>
-                        Reddit Username <span className="normal-case tracking-normal text-muted-foreground/60">(optional)</span>
+                        Reddit Username
+                        <span className="normal-case tracking-normal text-muted-foreground/60">
+                          (optional)
+                        </span>
                       </label>
                       <input
                         name="reddit_username"
@@ -370,16 +374,16 @@ function CareersPage() {
                       <FieldError msg={errors.reddit_username} />
                     </div>
                   )}
-                </section>
+                </SectionCard>
 
                 {/* Community task */}
-                <section className="space-y-5">
-                  <SectionHeader index={4} title="Community Knowledge Task" />
+                <SectionCard index={4} title="Community Knowledge Task">
                   <div>
-                    <label className={labelCls}>
-                      Given the location <span className="normal-case tracking-normal text-foreground">Washington State, USA</span>,
-                      list 3 online communities (subreddits) you would engage with.
-                    </label>
+                    <p className="mb-3 text-sm leading-relaxed text-foreground/90">
+                      Given the location{" "}
+                      <span className="text-lime">Washington State, USA</span>, list 3 online
+                      communities (subreddits) you would engage with.
+                    </p>
                     <textarea
                       name="washington_community_answer"
                       value={values.washington_community_answer}
@@ -392,15 +396,14 @@ function CareersPage() {
                     />
                     <FieldError msg={errors.washington_community_answer} />
                   </div>
-                </section>
+                </SectionCard>
 
                 {/* Caption examples */}
-                <section className="space-y-5">
-                  <SectionHeader index={5} title="Content Creation Task" />
+                <SectionCard index={5} title="Content Creation Task">
                   <div>
-                    <label className={labelCls}>
-                      Two example post captions you would write to encourage engagement.
-                    </label>
+                    <p className="mb-3 text-sm leading-relaxed text-foreground/90">
+                      Share two example post captions you would write to encourage engagement.
+                    </p>
                     <textarea
                       name="caption_examples"
                       value={values.caption_examples}
@@ -411,15 +414,14 @@ function CareersPage() {
                     />
                     <FieldError msg={errors.caption_examples} />
                   </div>
-                </section>
+                </SectionCard>
 
                 {/* Fit */}
-                <section className="space-y-5">
-                  <SectionHeader index={6} title="Why You're a Fit" />
+                <SectionCard index={6} title="Why You're a Fit">
                   <div>
-                    <label className={labelCls}>
+                    <p className="mb-3 text-sm leading-relaxed text-foreground/90">
                       Why do you think you're a good fit for this role?
-                    </label>
+                    </p>
                     <textarea
                       name="reason_for_fit"
                       value={values.reason_for_fit}
@@ -430,7 +432,7 @@ function CareersPage() {
                     />
                     <FieldError msg={errors.reason_for_fit} />
                   </div>
-                </section>
+                </SectionCard>
 
                 {serverErr && (
                   <p className="rounded-xl border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
@@ -438,11 +440,11 @@ function CareersPage() {
                   </p>
                 )}
 
-                <div className="space-y-3 pt-2 text-center">
+                <div className="space-y-3 pt-2">
                   <button
                     type="submit"
                     disabled={submitting}
-                    className="group inline-flex w-full items-center justify-center gap-2 overflow-hidden rounded-full bg-lime py-4 text-base font-semibold tracking-wide text-primary-foreground shadow-lime transition-all hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:px-12"
+                    className="group inline-flex w-full items-center justify-center gap-2 overflow-hidden rounded-2xl bg-lime py-4 text-sm font-bold uppercase tracking-[0.2em] text-primary-foreground shadow-lime transition-all hover:scale-[1.01] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {submitting ? (
                       <>
@@ -458,7 +460,7 @@ function CareersPage() {
                       </>
                     )}
                   </button>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-center text-xs text-muted-foreground">
                     Your information stays private. We respond to selected applicants only.
                   </p>
                 </div>
@@ -473,13 +475,27 @@ function CareersPage() {
   );
 }
 
-function SectionHeader({ index, title }: { index: number; title: string }) {
+function SectionCard({
+  index,
+  title,
+  children,
+}: {
+  index: number;
+  title: string;
+  children: React.ReactNode;
+}) {
   return (
-    <header className="flex items-center gap-2 border-b border-hairline pb-3">
-      <span className="grid h-7 w-7 place-items-center rounded-full border border-hairline text-[11px] font-semibold text-muted-foreground">
-        {index}
-      </span>
-      <h3 className="text-sm font-medium tracking-wide text-foreground">{title}</h3>
-    </header>
+    <section className="space-y-6 rounded-2xl border border-hairline bg-surface-1 p-6 sm:p-8">
+      <header className="flex items-center gap-4">
+        <span className="font-display text-sm font-bold uppercase tracking-[0.25em] text-lime">
+          {String(index).padStart(2, "0")}
+        </span>
+        <h3 className="font-display text-lg font-semibold uppercase tracking-wider text-foreground sm:text-xl">
+          {title}
+        </h3>
+      </header>
+      {children}
+    </section>
   );
 }
+
