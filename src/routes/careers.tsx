@@ -118,9 +118,7 @@ function CareersPage() {
     const d = parsed.data;
     const { error } = await supabase.from("va_applications").insert({
       full_name: d.full_name,
-      email: d.email,
       country: d.country,
-      age: d.age,
       discord_username: d.discord_username,
       availability: d.availability,
       reddit_account_available: d.reddit_account_available === "yes",
