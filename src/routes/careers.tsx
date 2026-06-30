@@ -33,8 +33,8 @@ const schema = z.object({
   availability: z.string().min(1, "Select your availability"),
   reddit_account_available: z.enum(["yes", "no"], { required_error: "Required" }),
   reddit_username: z.string().trim().max(80).optional().or(z.literal("")),
-  washington_community_answer: z.string().trim().min(5, "Required").max(2000),
-  caption_examples: z.string().trim().min(5, "Required").max(2000),
+  washington_community_answer: z.string().trim().max(2000),
+  caption_examples: z.string().trim().max(2000),
   reason_for_fit: z.string().trim().min(5, "Required").max(2000),
 });
 
@@ -392,7 +392,7 @@ function CareersPage() {
                       }
                       rows={5}
                       className={`${inputCls(errors.washington_community_answer)} min-h-[140px] resize-y leading-relaxed`}
-                      placeholder="1. r/...&#10;2. r/...&#10;3. r/..."
+                      placeholder=""
                     />
                     <FieldError msg={errors.washington_community_answer} />
                   </div>
@@ -410,7 +410,7 @@ function CareersPage() {
                       onChange={(e) => set("caption_examples", e.target.value.slice(0, 2000))}
                       rows={5}
                       className={`${inputCls(errors.caption_examples)} min-h-[140px] resize-y leading-relaxed`}
-                      placeholder="Caption 1: ...&#10;&#10;Caption 2: ..."
+                      placeholder=""
                     />
                     <FieldError msg={errors.caption_examples} />
                   </div>
