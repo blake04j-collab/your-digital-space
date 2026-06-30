@@ -118,15 +118,15 @@ function CareersPage() {
     setSubmitting(true);
     const d = parsed.data;
     const { error } = await supabase.from("va_applications").insert({
-      full_name: d.full_name,
-      country: d.country,
-      discord_username: d.discord_username,
-      availability: d.availability,
+      full_name: d.full_name || "",
+      country: d.country || "",
+      discord_username: d.discord_username || "",
+      availability: d.availability || "",
       reddit_account_available: d.reddit_account_available === "yes",
       reddit_username: d.reddit_username || null,
-      washington_community_answer: d.washington_community_answer,
-      caption_examples: d.caption_examples,
-      reason_for_fit: d.reason_for_fit,
+      washington_community_answer: d.washington_community_answer || "",
+      caption_examples: d.caption_examples || "",
+      reason_for_fit: d.reason_for_fit || "",
       status: "new",
     });
     setSubmitting(false);
