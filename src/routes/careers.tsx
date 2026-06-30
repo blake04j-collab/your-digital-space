@@ -43,9 +43,7 @@ type Errors = Partial<Record<keyof FormValues, string>>;
 
 const initial: FormValues = {
   full_name: "",
-  email: "",
   country: "",
-  age: 18,
   discord_username: "",
   availability: "",
   reddit_account_available: "no",
