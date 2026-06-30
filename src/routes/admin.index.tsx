@@ -983,3 +983,264 @@ function Field({
     </div>
   );
 }
+
+function VAPanel({
+  vaApps,
+  setVaApps,
+}: {
+  vaApps: VAApplication[];
+  setVaApps: React.Dispatch<React.SetStateAction<VAApplication[]>>;
+}) {
+  const [query, setQuery] = useState("");
+  const [filter, setFilter] = useState<"all" | VAStatus>("all");
+  const [sortDir, setSortDir] = useState<"newest" | "oldest">("newest");
+  const [selected, setSelected] = useState<VAApplication | null>(null);
+
+  const filtered = useMemo(() => {
+    const list = vaApps.filter((a) => {
+      const st = (a.status ?? "new") as VAStatus;
+      if (filter !== "all" && st !== filter) return false;
+      if (query) {
+        const q = query.toLowerCase();
+        return (
+          a.full_name.toLowerCase().includes(q) ||
+          a.email.toLowerCase().includes(q) ||
+          a.country.toLowerCase().includes(q) ||
+          a.discord_username.toLowerCase().includes(q) ||
+          (a.reddit_username ?? "").toLowerCase().includes(q)
+        );
+      }
+      return true;
+    });
+    list.sort((a, b) => {
+      const da = new Date(a.created_at).getTime();
+      const db = new Date(b.created_at).getTime();
+      return sortDir === "newest" ? db - da : da - db;
+    });
+    return list;
+  }, [vaApps, filter, query, sortDir]);
+
+  const stats = useMemo(() => {
+    const week = startOfWeek();
+    return {
+      total: vaApps.length,
+      week: vaApps.filter((a) => new Date(a.created_at).getTime() >= week).length,
+      new: vaApps.filter((a) => (a.status ?? "new") === "new").length,
+      contacted: vaApps.filter((a) => a.status === "contacted").length,
+    };
+  }, [vaApps]);
+
+  async function updateStatus(id: string, status: VAStatus) {
+    const { error } = await supabase.from("va_applications").update({ status }).eq("id", id);
+    if (!error) {
+      setVaApps((p) => p.map((a) => (a.id === id ? { ...a, status } : a)));
+      setSelected((s) => (s && s.id === id ? { ...s, status } : s));
+    }
+  }
+
+  async function deleteVA(id: string) {
+    if (!confirm("Delete this VA application?")) return;
+    const { error } = await supabase.from("va_applications").delete().eq("id", id);
+    if (!error) {
+      setVaApps((p) => p.filter((a) => a.id !== id));
+      setSelected(null);
+    }
+  }
+
+  return (
+    <>
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+        <StatCard label="Total VA apps" value={stats.total} />
+        <StatCard label="This week" value={stats.week} />
+        <StatCard label="New" value={stats.new} accent />
+        <StatCard label="Contacted" value={stats.contacted} />
+      </div>
+
+      <div className="mt-6 flex flex-wrap items-center gap-3">
+        <input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search name, email, country, Discord…"
+          className="min-w-[260px] flex-1 rounded-lg border border-hairline bg-surface-1 px-3.5 py-2.5 text-sm text-foreground outline-none focus:border-lime"
+        />
+        <div className="flex flex-wrap gap-1.5 rounded-full border border-hairline bg-surface-1 p-1">
+          {(["all", "new", "reviewed", "contacted", "archived"] as const).map((f) => (
+            <button
+              key={f}
+              onClick={() => setFilter(f)}
+              className={`rounded-full px-3.5 py-1.5 text-[10px] uppercase tracking-[0.2em] transition-colors ${
+                filter === f
+                  ? "bg-lime text-primary-foreground"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {f}
+            </button>
+          ))}
+        </div>
+        <button
+          onClick={() => setSortDir((s) => (s === "newest" ? "oldest" : "newest"))}
+          className="rounded-full border border-hairline bg-surface-1 px-3.5 py-2 text-[10px] uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground"
+        >
+          Sort: {sortDir}
+        </button>
+      </div>
+
+      <div className="mt-5 overflow-hidden rounded-2xl border border-hairline bg-surface-1">
+        {filtered.length === 0 ? (
+          <div className="p-12 text-center text-sm text-muted-foreground">
+            No VA applications match your filters.
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[1000px] text-left text-sm">
+              <thead className="border-b border-hairline text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                <tr>
+                  <th className="px-4 py-3">Date</th>
+                  <th className="px-4 py-3">Name</th>
+                  <th className="px-4 py-3">Email</th>
+                  <th className="px-4 py-3">Country</th>
+                  <th className="px-4 py-3">Age</th>
+                  <th className="px-4 py-3">Discord</th>
+                  <th className="px-4 py-3">Avail.</th>
+                  <th className="px-4 py-3">Reddit?</th>
+                  <th className="px-4 py-3">Reddit User</th>
+                  <th className="px-4 py-3">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map((a) => {
+                  const status = (a.status ?? "new") as VAStatus;
+                  return (
+                    <tr
+                      key={a.id}
+                      onClick={() => setSelected(a)}
+                      className="cursor-pointer border-b border-hairline/60 last:border-0 hover:bg-surface-2"
+                    >
+                      <td className="px-4 py-3 text-xs text-muted-foreground">
+                        {new Date(a.created_at).toLocaleDateString()}
+                      </td>
+                      <td className="px-4 py-3 text-foreground">{a.full_name}</td>
+                      <td className="px-4 py-3 text-muted-foreground">{a.email}</td>
+                      <td className="px-4 py-3 text-muted-foreground">{a.country}</td>
+                      <td className="px-4 py-3 text-muted-foreground">{a.age}</td>
+                      <td className="px-4 py-3 text-muted-foreground">{a.discord_username}</td>
+                      <td className="px-4 py-3 text-muted-foreground">{a.availability}</td>
+                      <td className="px-4 py-3 text-muted-foreground">
+                        {a.reddit_account_available ? "Yes" : "No"}
+                      </td>
+                      <td className="px-4 py-3 text-muted-foreground">
+                        {a.reddit_username ?? "—"}
+                      </td>
+                      <td className="px-4 py-3">
+                        <span
+                          className={`rounded-full px-2.5 py-0.5 text-[9px] uppercase tracking-[0.2em] ${VA_STATUS_STYLES[status]}`}
+                        >
+                          {status}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {selected && (
+        <div
+          onClick={() => setSelected(null)}
+          className="fixed inset-0 z-50 grid place-items-end bg-black/60 backdrop-blur-sm md:place-items-center"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-t-3xl border border-hairline bg-background p-7 md:rounded-3xl"
+          >
+            <div className="mb-5 flex items-start justify-between">
+              <div>
+                <div className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
+                  VA Application
+                </div>
+                <h2 className="mt-1 font-display text-3xl text-foreground">
+                  {selected.full_name}
+                </h2>
+                <span
+                  className={`mt-2 inline-block rounded-full px-2.5 py-0.5 text-[9px] uppercase tracking-[0.2em] ${
+                    VA_STATUS_STYLES[(selected.status ?? "new") as VAStatus]
+                  }`}
+                >
+                  {selected.status ?? "new"}
+                </span>
+              </div>
+              <button
+                onClick={() => setSelected(null)}
+                className="text-2xl leading-none text-muted-foreground hover:text-foreground"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="mb-5 flex flex-wrap gap-2">
+              {(["new", "reviewed", "contacted", "archived"] as const).map((s) => (
+                <button
+                  key={s}
+                  onClick={() => updateStatus(selected.id, s)}
+                  className={`rounded-full px-3.5 py-1.5 text-[10px] uppercase tracking-[0.2em] transition-colors ${
+                    (selected.status ?? "new") === s
+                      ? VA_STATUS_STYLES[s]
+                      : "border border-hairline bg-surface-1 text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  Mark {s}
+                </button>
+              ))}
+            </div>
+
+            <div className="space-y-3 text-sm">
+              <Field label="Email" value={selected.email} link={`mailto:${selected.email}`} />
+              <Field label="Country" value={selected.country} />
+              <Field label="Age" value={String(selected.age)} />
+              <Field label="Discord" value={selected.discord_username} />
+              <Field label="Availability" value={selected.availability} />
+              <Field
+                label="Reddit account available"
+                value={selected.reddit_account_available ? "Yes" : "No"}
+              />
+              {selected.reddit_username && (
+                <Field label="Reddit username" value={selected.reddit_username} />
+              )}
+              <Field
+                label="Washington communities (subreddits)"
+                value={selected.washington_community_answer}
+                multiline
+              />
+              <Field
+                label="Caption examples"
+                value={selected.caption_examples}
+                multiline
+              />
+              <Field label="Why they're a fit" value={selected.reason_for_fit} multiline />
+              <Field label="Submitted" value={new Date(selected.created_at).toLocaleString()} />
+            </div>
+
+            <div className="mt-6 flex gap-2">
+              <a
+                href={`mailto:${selected.email}`}
+                className="flex-1 rounded-xl bg-lime py-3 text-center font-display text-sm tracking-[0.2em] text-primary-foreground"
+              >
+                Reply ›
+              </a>
+              <button
+                onClick={() => deleteVA(selected.id)}
+                className="rounded-xl border border-destructive/40 bg-destructive/10 px-4 py-3 text-xs uppercase tracking-[0.2em] text-destructive hover:bg-destructive/20"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
