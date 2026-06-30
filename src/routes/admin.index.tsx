@@ -58,7 +58,33 @@ type PageView = {
   created_at: string;
 };
 
-type Tab = "applications" | "analytics" | "links";
+type Tab = "applications" | "va_apps" | "analytics" | "links";
+
+type VAStatus = "new" | "reviewed" | "contacted" | "archived";
+
+type VAApplication = {
+  id: string;
+  created_at: string;
+  full_name: string;
+  email: string;
+  country: string;
+  age: number;
+  discord_username: string;
+  availability: string;
+  reddit_account_available: boolean;
+  reddit_username: string | null;
+  washington_community_answer: string;
+  caption_examples: string;
+  reason_for_fit: string;
+  status: string;
+};
+
+const VA_STATUS_STYLES: Record<VAStatus, string> = {
+  new: "bg-lime text-primary-foreground",
+  reviewed: "bg-lime-soft text-lime border border-lime/40",
+  contacted: "border border-hairline bg-surface-2 text-foreground",
+  archived: "border border-hairline bg-surface-1 text-muted-foreground",
+};
 
 
 function startOfWeek() {
