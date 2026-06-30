@@ -414,6 +414,8 @@ function AdminDashboard() {
           </>
         )}
 
+        {tab === "va_apps" && <VAPanel vaApps={vaApps} setVaApps={setVaApps} />}
+
         {tab === "analytics" && <AnalyticsPanel views={views} apps={apps} />}
 
         {tab === "links" && (
