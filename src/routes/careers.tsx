@@ -28,9 +28,7 @@ export const Route = createFileRoute("/careers")({
 
 const schema = z.object({
   full_name: z.string().trim().min(1, "Required").max(120),
-  email: z.string().trim().email("Enter a valid email").max(255),
   country: z.string().trim().min(1, "Required").max(80),
-  age: z.coerce.number().int().min(16, "Must be 16+").max(99),
   discord_username: z.string().trim().min(1, "Required").max(80),
   availability: z.string().min(1, "Select your availability"),
   reddit_account_available: z.enum(["yes", "no"], { required_error: "Required" }),
@@ -45,9 +43,7 @@ type Errors = Partial<Record<keyof FormValues, string>>;
 
 const initial: FormValues = {
   full_name: "",
-  email: "",
   country: "",
-  age: 18,
   discord_username: "",
   availability: "",
   reddit_account_available: "no",
@@ -122,9 +118,7 @@ function CareersPage() {
     const d = parsed.data;
     const { error } = await supabase.from("va_applications").insert({
       full_name: d.full_name,
-      email: d.email,
       country: d.country,
-      age: d.age,
       discord_username: d.discord_username,
       availability: d.availability,
       reddit_account_available: d.reddit_account_available === "yes",
@@ -279,19 +273,6 @@ function CareersPage() {
                   </div>
                   <div className="grid gap-5 sm:grid-cols-2">
                     <div>
-                      <label className={labelCls}>Email Address</label>
-                      <input
-                        name="email"
-                        type="email"
-                        value={values.email}
-                        onChange={(e) => set("email", e.target.value)}
-                        className={inputCls(errors.email)}
-                        placeholder="you@email.com"
-                        autoComplete="email"
-                      />
-                      <FieldError msg={errors.email} />
-                    </div>
-                    <div>
                       <label className={labelCls}>Country</label>
                       <input
                         name="country"
@@ -302,21 +283,6 @@ function CareersPage() {
                         autoComplete="country-name"
                       />
                       <FieldError msg={errors.country} />
-                    </div>
-                  </div>
-                  <div className="grid gap-5 sm:grid-cols-2">
-                    <div>
-                      <label className={labelCls}>Age</label>
-                      <input
-                        name="age"
-                        type="number"
-                        min={16}
-                        max={99}
-                        value={values.age}
-                        onChange={(e) => set("age", Number(e.target.value))}
-                        className={inputCls(errors.age)}
-                      />
-                      <FieldError msg={errors.age} />
                     </div>
                     <div>
                       <label className={labelCls}>Discord Username</label>
@@ -330,6 +296,7 @@ function CareersPage() {
                       <FieldError msg={errors.discord_username} />
                     </div>
                   </div>
+
                 </section>
 
                 {/* Availability */}
@@ -361,8 +328,8 @@ function CareersPage() {
                   <SectionHeader index={3} title="Account Availability" />
                   <div>
                     <label className={labelCls}>
-                      Do you have an older / established Reddit account with normal activity that
-                      can be used for community engagement?
+                      Do you have an aged Reddit account with little to no karma that you can
+                      use for this role?
                     </label>
                     <div className="grid gap-2 sm:grid-cols-2">
                       {(["yes", "no"] as const).map((opt) => (

@@ -1,0 +1,1 @@
+ALTER TABLE public.va_applications ALTER COLUMN email DROP NOT NULL, ALTER COLUMN age DROP NOT NULL;
