@@ -178,13 +178,13 @@ export type Database = {
       }
       va_applications: {
         Row: {
-          age: number
+          age: number | null
           availability: string
           caption_examples: string
           country: string
           created_at: string
           discord_username: string
-          email: string
+          email: string | null
           full_name: string
           id: string
           reason_for_fit: string
@@ -194,13 +194,13 @@ export type Database = {
           washington_community_answer: string
         }
         Insert: {
-          age: number
+          age?: number | null
           availability: string
           caption_examples: string
           country: string
           created_at?: string
           discord_username: string
-          email: string
+          email?: string | null
           full_name: string
           id?: string
           reason_for_fit: string
@@ -210,13 +210,13 @@ export type Database = {
           washington_community_answer: string
         }
         Update: {
-          age?: number
+          age?: number | null
           availability?: string
           caption_examples?: string
           country?: string
           created_at?: string
           discord_username?: string
-          email?: string
+          email?: string | null
           full_name?: string
           id?: string
           reason_for_fit?: string
