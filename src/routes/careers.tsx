@@ -27,16 +27,17 @@ export const Route = createFileRoute("/careers")({
 });
 
 const schema = z.object({
-  full_name: z.string().trim().min(1, "Required").max(120),
-  country: z.string().trim().min(1, "Required").max(80),
-  discord_username: z.string().trim().min(1, "Required").max(80),
-  availability: z.string().min(1, "Select your availability"),
-  reddit_account_available: z.enum(["yes", "no"], { required_error: "Required" }),
+  full_name: z.string().trim().max(120).optional().or(z.literal("")),
+  country: z.string().trim().max(80).optional().or(z.literal("")),
+  discord_username: z.string().trim().max(80).optional().or(z.literal("")),
+  availability: z.string().max(80).optional().or(z.literal("")),
+  reddit_account_available: z.enum(["yes", "no"]).optional(),
   reddit_username: z.string().trim().max(80).optional().or(z.literal("")),
-  washington_community_answer: z.string().trim().max(2000),
-  caption_examples: z.string().trim().max(2000),
-  reason_for_fit: z.string().trim().min(5, "Required").max(2000),
+  washington_community_answer: z.string().trim().max(2000).optional().or(z.literal("")),
+  caption_examples: z.string().trim().max(2000).optional().or(z.literal("")),
+  reason_for_fit: z.string().trim().max(2000).optional().or(z.literal("")),
 });
+
 
 type FormValues = z.infer<typeof schema>;
 type Errors = Partial<Record<keyof FormValues, string>>;
