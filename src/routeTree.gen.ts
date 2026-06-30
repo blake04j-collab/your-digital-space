@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as CareersRouteImport } from './routes/careers'
 import { Route as L5RouteImport } from './routes/L5'
 import { Route as B1RouteImport } from './routes/B1'
 import { Route as RefRouteImport } from './routes/$ref'
@@ -16,6 +17,11 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
 
+const CareersRoute = CareersRouteImport.update({
+  id: '/careers',
+  path: '/careers',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const L5Route = L5RouteImport.update({
   id: '/L5',
   path: '/L5',
@@ -52,6 +58,7 @@ export interface FileRoutesByFullPath {
   '/$ref': typeof RefRoute
   '/B1': typeof B1Route
   '/L5': typeof L5Route
+  '/careers': typeof CareersRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/': typeof AdminIndexRoute
 }
@@ -60,6 +67,7 @@ export interface FileRoutesByTo {
   '/$ref': typeof RefRoute
   '/B1': typeof B1Route
   '/L5': typeof L5Route
+  '/careers': typeof CareersRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin': typeof AdminIndexRoute
 }
@@ -69,15 +77,31 @@ export interface FileRoutesById {
   '/$ref': typeof RefRoute
   '/B1': typeof B1Route
   '/L5': typeof L5Route
+  '/careers': typeof CareersRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/': typeof AdminIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/$ref' | '/B1' | '/L5' | '/admin/login' | '/admin/'
+  fullPaths:
+    | '/'
+    | '/$ref'
+    | '/B1'
+    | '/L5'
+    | '/careers'
+    | '/admin/login'
+    | '/admin/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/$ref' | '/B1' | '/L5' | '/admin/login' | '/admin'
-  id: '__root__' | '/' | '/$ref' | '/B1' | '/L5' | '/admin/login' | '/admin/'
+  to: '/' | '/$ref' | '/B1' | '/L5' | '/careers' | '/admin/login' | '/admin'
+  id:
+    | '__root__'
+    | '/'
+    | '/$ref'
+    | '/B1'
+    | '/L5'
+    | '/careers'
+    | '/admin/login'
+    | '/admin/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -85,12 +109,20 @@ export interface RootRouteChildren {
   RefRoute: typeof RefRoute
   B1Route: typeof B1Route
   L5Route: typeof L5Route
+  CareersRoute: typeof CareersRoute
   AdminLoginRoute: typeof AdminLoginRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/careers': {
+      id: '/careers'
+      path: '/careers'
+      fullPath: '/careers'
+      preLoaderRoute: typeof CareersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/L5': {
       id: '/L5'
       path: '/L5'
@@ -141,6 +173,7 @@ const rootRouteChildren: RootRouteChildren = {
   RefRoute: RefRoute,
   B1Route: B1Route,
   L5Route: L5Route,
+  CareersRoute: CareersRoute,
   AdminLoginRoute: AdminLoginRoute,
   AdminIndexRoute: AdminIndexRoute,
 }

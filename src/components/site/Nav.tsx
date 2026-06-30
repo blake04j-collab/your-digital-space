@@ -16,8 +16,9 @@ export function Nav() {
           </span>
         </a>
         <nav className="hidden items-center gap-8 text-sm text-muted-foreground md:flex">
-          <a href="#how" className="transition-colors hover:text-foreground">How it works</a>
-          <a href="#benefits" className="transition-colors hover:text-foreground">Benefits</a>
+          <a href="/#how" className="transition-colors hover:text-foreground">How it works</a>
+          <a href="/#benefits" className="transition-colors hover:text-foreground">Benefits</a>
+          <a href="/careers" className="transition-colors hover:text-foreground">Careers</a>
         </nav>
         <a
           href="#apply"
