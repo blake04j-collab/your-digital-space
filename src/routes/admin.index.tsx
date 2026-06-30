@@ -289,7 +289,7 @@ function AdminDashboard() {
                       : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
-                  {t}
+                  {t === "va_apps" ? "VA Apps" : t}
                 </button>
               ))}
             </div>
