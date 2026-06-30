@@ -310,7 +310,7 @@ function AdminDashboard() {
                 tab === t ? "bg-lime text-primary-foreground" : "text-muted-foreground"
               }`}
             >
-              {t}
+              {t === "va_apps" ? "VA Apps" : t}
             </button>
           ))}
         </div>
