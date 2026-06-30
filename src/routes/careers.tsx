@@ -28,9 +28,7 @@ export const Route = createFileRoute("/careers")({
 
 const schema = z.object({
   full_name: z.string().trim().min(1, "Required").max(120),
-  email: z.string().trim().email("Enter a valid email").max(255),
   country: z.string().trim().min(1, "Required").max(80),
-  age: z.coerce.number().int().min(16, "Must be 16+").max(99),
   discord_username: z.string().trim().min(1, "Required").max(80),
   availability: z.string().min(1, "Select your availability"),
   reddit_account_available: z.enum(["yes", "no"], { required_error: "Required" }),
