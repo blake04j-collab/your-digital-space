@@ -279,7 +279,7 @@ function AdminDashboard() {
           </div>
           <div className="flex items-center gap-2">
             <div className="hidden gap-1 rounded-full border border-hairline bg-surface-1 p-1 sm:flex">
-              {(["applications", "analytics", "links"] as const).map((t) => (
+              {(["applications", "va_apps", "analytics", "links"] as const).map((t) => (
                 <button
                   key={t}
                   onClick={() => setTab(t)}
@@ -302,7 +302,7 @@ function AdminDashboard() {
           </div>
         </div>
         <div className="flex gap-1 border-t border-hairline px-5 py-2 sm:hidden">
-          {(["applications", "analytics", "links"] as const).map((t) => (
+          {(["applications", "va_apps", "analytics", "links"] as const).map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
