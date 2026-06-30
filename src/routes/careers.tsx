@@ -328,8 +328,8 @@ function CareersPage() {
                   <SectionHeader index={3} title="Account Availability" />
                   <div>
                     <label className={labelCls}>
-                      Do you have an older / established Reddit account with normal activity that
-                      can be used for community engagement?
+                      Do you have an aged Reddit account with little to no karma that you can
+                      use for this role?
                     </label>
                     <div className="grid gap-2 sm:grid-cols-2">
                       {(["yes", "no"] as const).map((opt) => (
