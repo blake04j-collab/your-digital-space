@@ -1234,14 +1234,23 @@ function VAPanel({
             </div>
 
             <div className="mt-6 flex gap-2">
-              <a
-                href={`https://t.me/${selected.telegram_username.replace(/^@/, "")}`}
-                target="_blank"
-                rel="noreferrer"
-                className="flex-1 rounded-xl bg-lime py-3 text-center font-display text-sm tracking-[0.2em] text-primary-foreground"
-              >
-                Telegram ›
-              </a>
+              {selected.telegram_username ? (
+                <a
+                  href={`https://t.me/${selected.telegram_username.replace(/^@/, "")}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex-1 rounded-xl bg-lime py-3 text-center font-display text-sm tracking-[0.2em] text-primary-foreground"
+                >
+                  Telegram ›
+                </a>
+              ) : (
+                <a
+                  href={`mailto:${selected.email}`}
+                  className="flex-1 rounded-xl bg-lime py-3 text-center font-display text-sm tracking-[0.2em] text-primary-foreground"
+                >
+                  Reply ›
+                </a>
+              )}
               <button
                 onClick={() => deleteVA(selected.id)}
                 className="rounded-xl border border-destructive/40 bg-destructive/10 px-4 py-3 text-xs uppercase tracking-[0.2em] text-destructive hover:bg-destructive/20"
