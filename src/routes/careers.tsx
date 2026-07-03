@@ -360,7 +360,7 @@ function CareersPage() {
                 </SectionCard>
 
                 {/* Reddit account */}
-                <SectionCard index={3} title="Account Availability">
+                <SectionCard index={4} title="Account Availability">
                   <div>
                     <p className="mb-4 text-sm leading-relaxed text-foreground/90">
                       Do you have an aged Reddit account with little to no karma that you can use for this role?
@@ -413,7 +413,7 @@ function CareersPage() {
                 </SectionCard>
 
                 {/* Community task */}
-                <SectionCard index={4} title="Community Knowledge Task">
+                <SectionCard index={5} title="Community Knowledge Task">
                   <div>
                     <p className="mb-3 text-sm leading-relaxed text-foreground/90">
                       Given the location{" "}
@@ -435,7 +435,7 @@ function CareersPage() {
                 </SectionCard>
 
                 {/* Caption examples */}
-                <SectionCard index={5} title="Content Creation Task">
+                <SectionCard index={6} title="Content Creation Task">
                   <div>
                     <p className="mb-3 text-sm leading-relaxed text-foreground/90">
                       Share two example post captions you would write to encourage engagement.
@@ -453,7 +453,7 @@ function CareersPage() {
                 </SectionCard>
 
                 {/* Fit */}
-                <SectionCard index={6} title="Why You're a Fit">
+                <SectionCard index={7} title="Why You're a Fit">
                   <div>
                     <p className="mb-3 text-sm leading-relaxed text-foreground/90">
                       Why do you think you're a good fit for this role?
