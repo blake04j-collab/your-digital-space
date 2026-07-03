@@ -31,6 +31,11 @@ const schema = z.object({
   country: z.string().trim().max(80).optional().or(z.literal("")),
   discord_username: z.string().trim().max(80).optional().or(z.literal("")),
   availability: z.string().max(80).optional().or(z.literal("")),
+  telegram_username: z
+    .string()
+    .trim()
+    .min(1, { message: "Telegram username is required — this is how we will contact you." })
+    .max(80),
   reddit_account_available: z.enum(["yes", "no"]).optional(),
   reddit_username: z.string().trim().max(80).optional().or(z.literal("")),
   washington_community_answer: z.string().trim().max(2000).optional().or(z.literal("")),
