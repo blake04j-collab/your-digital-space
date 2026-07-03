@@ -1223,7 +1223,7 @@ function VAPanel({
             </div>
 
             <div className="mb-5 flex flex-wrap gap-2">
-              {(["new", "reviewed", "contacted", "archived"] as const).map((s) => (
+              {(["new", "reviewed", "contacted", "approved", "rejected", "archived"] as const).map((s) => (
                 <button
                   key={s}
                   onClick={() => updateStatus(selected.id, s)}
