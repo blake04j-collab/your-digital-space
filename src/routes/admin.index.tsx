@@ -1104,6 +1104,7 @@ function VAPanel({
                   <th className="px-4 py-3">Country</th>
                   <th className="px-4 py-3">Age</th>
                   <th className="px-4 py-3">Discord</th>
+                  <th className="px-4 py-3">Telegram</th>
                   <th className="px-4 py-3">Avail.</th>
                   <th className="px-4 py-3">Reddit?</th>
                   <th className="px-4 py-3">Reddit User</th>
@@ -1127,6 +1128,7 @@ function VAPanel({
                       <td className="px-4 py-3 text-muted-foreground">{a.country}</td>
                       <td className="px-4 py-3 text-muted-foreground">{a.age}</td>
                       <td className="px-4 py-3 text-muted-foreground">{a.discord_username}</td>
+                      <td className="px-4 py-3 text-muted-foreground">{a.telegram_username}</td>
                       <td className="px-4 py-3 text-muted-foreground">{a.availability}</td>
                       <td className="px-4 py-3 text-muted-foreground">
                         {a.reddit_account_available ? "Yes" : "No"}
