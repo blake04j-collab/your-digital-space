@@ -1206,6 +1206,11 @@ function VAPanel({
               <Field label="Country" value={selected.country} />
               <Field label="Age" value={String(selected.age)} />
               <Field label="Discord" value={selected.discord_username} />
+              <Field
+                label="Telegram"
+                value={selected.telegram_username}
+                link={`https://t.me/${selected.telegram_username.replace(/^@/, "")}`}
+              />
               <Field label="Availability" value={selected.availability} />
               <Field
                 label="Reddit account available"
