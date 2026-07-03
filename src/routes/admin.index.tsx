@@ -60,7 +60,7 @@ type PageView = {
 
 type Tab = "applications" | "va_apps" | "analytics" | "links";
 
-type VAStatus = "new" | "reviewed" | "contacted" | "archived";
+type VAStatus = "new" | "reviewed" | "contacted" | "archived" | "approved" | "rejected";
 
 type VAApplication = {
   id: string;
@@ -85,7 +85,10 @@ const VA_STATUS_STYLES: Record<VAStatus, string> = {
   reviewed: "bg-lime-soft text-lime border border-lime/40",
   contacted: "border border-hairline bg-surface-2 text-foreground",
   archived: "border border-hairline bg-surface-1 text-muted-foreground",
+  approved: "bg-emerald-500 text-white border border-emerald-400",
+  rejected: "bg-destructive/20 text-destructive border border-destructive/50",
 };
+
 
 
 function startOfWeek() {
