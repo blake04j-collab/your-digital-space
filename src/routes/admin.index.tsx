@@ -1005,9 +1005,10 @@ function VAPanel({
         const q = query.toLowerCase();
         return (
           a.full_name.toLowerCase().includes(q) ||
-          a.email.toLowerCase().includes(q) ||
+          (a.email ?? "").toLowerCase().includes(q) ||
           a.country.toLowerCase().includes(q) ||
           a.discord_username.toLowerCase().includes(q) ||
+          a.telegram_username.toLowerCase().includes(q) ||
           (a.reddit_username ?? "").toLowerCase().includes(q)
         );
       }
