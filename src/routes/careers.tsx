@@ -31,6 +31,11 @@ const schema = z.object({
   country: z.string().trim().max(80).optional().or(z.literal("")),
   discord_username: z.string().trim().max(80).optional().or(z.literal("")),
   availability: z.string().max(80).optional().or(z.literal("")),
+  telegram_username: z
+    .string()
+    .trim()
+    .min(1, { message: "Telegram username is required — this is how we will contact you." })
+    .max(80),
   reddit_account_available: z.enum(["yes", "no"]).optional(),
   reddit_username: z.string().trim().max(80).optional().or(z.literal("")),
   washington_community_answer: z.string().trim().max(2000).optional().or(z.literal("")),
@@ -47,6 +52,7 @@ const initial: FormValues = {
   country: "",
   discord_username: "",
   availability: "",
+  telegram_username: "",
   reddit_account_available: "no",
   reddit_username: "",
   washington_community_answer: "",
@@ -122,6 +128,7 @@ function CareersPage() {
       country: d.country || "",
       discord_username: d.discord_username || "",
       availability: d.availability || "",
+      telegram_username: d.telegram_username,
       reddit_account_available: d.reddit_account_available === "yes",
       reddit_username: d.reddit_username || null,
       washington_community_answer: d.washington_community_answer || "",
@@ -213,6 +220,7 @@ function CareersPage() {
                 "Ability to work independently",
                 "Familiarity with online communities (Reddit preferred)",
                 "Discord account required",
+                "Telegram account required — this is how we will contact you",
               ].map((t) => (
                 <li key={t} className="flex gap-3">
                   <span className="mt-0.5 grid h-5 w-5 flex-shrink-0 place-items-center rounded-full bg-lime/15 text-[10px] text-lime">
@@ -238,7 +246,8 @@ function CareersPage() {
                 </div>
                 <h3 className="font-display text-3xl text-lime">Thank you for applying.</h3>
                 <p className="mx-auto mt-3 max-w-md text-sm text-muted-foreground">
-                  Our team will review your application and reach out if you are selected.
+                  Our team will review your application and reach out to you on Telegram if you
+                  are selected.
                 </p>
               </div>
             </div>
@@ -298,8 +307,36 @@ function CareersPage() {
                   </div>
                 </SectionCard>
 
+                {/* Telegram contact */}
+                <SectionCard index={2} title="Telegram Contact">
+                  <div>
+                    <label className={labelCls}>
+                      Telegram Username
+                      <span className="ml-1.5 normal-case tracking-normal text-lime">*required</span>
+                    </label>
+                    <p className="mb-3 text-sm leading-relaxed text-foreground/90">
+                      This is how we will contact you if you are selected. Please make sure your
+                      username is correct.
+                    </p>
+                    <div className="relative">
+                      <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground">
+                        @
+                      </span>
+                      <input
+                        name="telegram_username"
+                        value={values.telegram_username}
+                        onChange={(e) => set("telegram_username", e.target.value)}
+                        className={`${inputCls(errors.telegram_username)} pl-9`}
+                        placeholder="your_username"
+                        autoComplete="off"
+                      />
+                    </div>
+                    <FieldError msg={errors.telegram_username} />
+                  </div>
+                </SectionCard>
+
                 {/* Availability */}
-                <SectionCard index={2} title="Availability">
+                <SectionCard index={3} title="Availability">
                   <div>
                     <label className={labelCls}>
                       How many days per week can you work?
@@ -325,7 +362,7 @@ function CareersPage() {
                 </SectionCard>
 
                 {/* Reddit account */}
-                <SectionCard index={3} title="Account Availability">
+                <SectionCard index={4} title="Account Availability">
                   <div>
                     <p className="mb-4 text-sm leading-relaxed text-foreground/90">
                       Do you have an aged Reddit account with little to no karma that you can use for this role?
@@ -378,7 +415,7 @@ function CareersPage() {
                 </SectionCard>
 
                 {/* Community task */}
-                <SectionCard index={4} title="Community Knowledge Task">
+                <SectionCard index={5} title="Community Knowledge Task">
                   <div>
                     <p className="mb-3 text-sm leading-relaxed text-foreground/90">
                       Given the location{" "}
@@ -400,7 +437,7 @@ function CareersPage() {
                 </SectionCard>
 
                 {/* Caption examples */}
-                <SectionCard index={5} title="Content Creation Task">
+                <SectionCard index={6} title="Content Creation Task">
                   <div>
                     <p className="mb-3 text-sm leading-relaxed text-foreground/90">
                       Share two example post captions you would write to encourage engagement.
@@ -418,7 +455,7 @@ function CareersPage() {
                 </SectionCard>
 
                 {/* Fit */}
-                <SectionCard index={6} title="Why You're a Fit">
+                <SectionCard index={7} title="Why You're a Fit">
                   <div>
                     <p className="mb-3 text-sm leading-relaxed text-foreground/90">
                       Why do you think you're a good fit for this role?

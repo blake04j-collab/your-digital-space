@@ -70,6 +70,7 @@ type VAApplication = {
   country: string;
   age: number;
   discord_username: string;
+  telegram_username: string;
   availability: string;
   reddit_account_available: boolean;
   reddit_username: string | null;
@@ -1004,9 +1005,10 @@ function VAPanel({
         const q = query.toLowerCase();
         return (
           a.full_name.toLowerCase().includes(q) ||
-          a.email.toLowerCase().includes(q) ||
+          (a.email ?? "").toLowerCase().includes(q) ||
           a.country.toLowerCase().includes(q) ||
           a.discord_username.toLowerCase().includes(q) ||
+          a.telegram_username.toLowerCase().includes(q) ||
           (a.reddit_username ?? "").toLowerCase().includes(q)
         );
       }
@@ -1060,7 +1062,7 @@ function VAPanel({
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search name, email, country, Discord…"
+          placeholder="Search name, email, country, Discord, Telegram…"
           className="min-w-[260px] flex-1 rounded-lg border border-hairline bg-surface-1 px-3.5 py-2.5 text-sm text-foreground outline-none focus:border-lime"
         />
         <div className="flex flex-wrap gap-1.5 rounded-full border border-hairline bg-surface-1 p-1">
@@ -1102,6 +1104,7 @@ function VAPanel({
                   <th className="px-4 py-3">Country</th>
                   <th className="px-4 py-3">Age</th>
                   <th className="px-4 py-3">Discord</th>
+                  <th className="px-4 py-3">Telegram</th>
                   <th className="px-4 py-3">Avail.</th>
                   <th className="px-4 py-3">Reddit?</th>
                   <th className="px-4 py-3">Reddit User</th>
@@ -1125,6 +1128,7 @@ function VAPanel({
                       <td className="px-4 py-3 text-muted-foreground">{a.country}</td>
                       <td className="px-4 py-3 text-muted-foreground">{a.age}</td>
                       <td className="px-4 py-3 text-muted-foreground">{a.discord_username}</td>
+                      <td className="px-4 py-3 text-muted-foreground">{a.telegram_username}</td>
                       <td className="px-4 py-3 text-muted-foreground">{a.availability}</td>
                       <td className="px-4 py-3 text-muted-foreground">
                         {a.reddit_account_available ? "Yes" : "No"}
@@ -1202,6 +1206,11 @@ function VAPanel({
               <Field label="Country" value={selected.country} />
               <Field label="Age" value={String(selected.age)} />
               <Field label="Discord" value={selected.discord_username} />
+              <Field
+                label="Telegram"
+                value={selected.telegram_username}
+                link={`https://t.me/${selected.telegram_username.replace(/^@/, "")}`}
+              />
               <Field label="Availability" value={selected.availability} />
               <Field
                 label="Reddit account available"
@@ -1225,12 +1234,23 @@ function VAPanel({
             </div>
 
             <div className="mt-6 flex gap-2">
-              <a
-                href={`mailto:${selected.email}`}
-                className="flex-1 rounded-xl bg-lime py-3 text-center font-display text-sm tracking-[0.2em] text-primary-foreground"
-              >
-                Reply ›
-              </a>
+              {selected.telegram_username ? (
+                <a
+                  href={`https://t.me/${selected.telegram_username.replace(/^@/, "")}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex-1 rounded-xl bg-lime py-3 text-center font-display text-sm tracking-[0.2em] text-primary-foreground"
+                >
+                  Telegram ›
+                </a>
+              ) : (
+                <a
+                  href={`mailto:${selected.email}`}
+                  className="flex-1 rounded-xl bg-lime py-3 text-center font-display text-sm tracking-[0.2em] text-primary-foreground"
+                >
+                  Reply ›
+                </a>
+              )}
               <button
                 onClick={() => deleteVA(selected.id)}
                 className="rounded-xl border border-destructive/40 bg-destructive/10 px-4 py-3 text-xs uppercase tracking-[0.2em] text-destructive hover:bg-destructive/20"

@@ -302,6 +302,7 @@ export type Database = {
           reddit_account_available: boolean
           reddit_username: string | null
           status: string
+          telegram_username: string
           washington_community_answer: string
         }
         Insert: {
@@ -318,6 +319,7 @@ export type Database = {
           reddit_account_available?: boolean
           reddit_username?: string | null
           status?: string
+          telegram_username?: string
           washington_community_answer: string
         }
         Update: {
@@ -334,6 +336,7 @@ export type Database = {
           reddit_account_available?: boolean
           reddit_username?: string | null
           status?: string
+          telegram_username?: string
           washington_community_answer?: string
         }
         Relationships: []
