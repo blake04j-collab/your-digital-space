@@ -70,6 +70,7 @@ type VAApplication = {
   country: string;
   age: number;
   discord_username: string;
+  telegram_username: string;
   availability: string;
   reddit_account_available: boolean;
   reddit_username: string | null;
