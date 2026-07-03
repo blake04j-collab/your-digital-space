@@ -1062,7 +1062,7 @@ function VAPanel({
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search name, email, country, Discord…"
+          placeholder="Search name, email, country, Discord, Telegram…"
           className="min-w-[260px] flex-1 rounded-lg border border-hairline bg-surface-1 px-3.5 py-2.5 text-sm text-foreground outline-none focus:border-lime"
         />
         <div className="flex flex-wrap gap-1.5 rounded-full border border-hairline bg-surface-1 p-1">
