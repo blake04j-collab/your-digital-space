@@ -60,7 +60,7 @@ type PageView = {
 
 type Tab = "applications" | "va_apps" | "analytics" | "links";
 
-type VAStatus = "new" | "reviewed" | "contacted" | "archived";
+type VAStatus = "new" | "reviewed" | "contacted" | "archived" | "approved" | "rejected";
 
 type VAApplication = {
   id: string;
@@ -85,7 +85,10 @@ const VA_STATUS_STYLES: Record<VAStatus, string> = {
   reviewed: "bg-lime-soft text-lime border border-lime/40",
   contacted: "border border-hairline bg-surface-2 text-foreground",
   archived: "border border-hairline bg-surface-1 text-muted-foreground",
+  approved: "bg-emerald-500 text-white border border-emerald-400",
+  rejected: "bg-destructive/20 text-destructive border border-destructive/50",
 };
+
 
 
 function startOfWeek() {
@@ -1066,7 +1069,7 @@ function VAPanel({
           className="min-w-[260px] flex-1 rounded-lg border border-hairline bg-surface-1 px-3.5 py-2.5 text-sm text-foreground outline-none focus:border-lime"
         />
         <div className="flex flex-wrap gap-1.5 rounded-full border border-hairline bg-surface-1 p-1">
-          {(["all", "new", "reviewed", "contacted", "archived"] as const).map((f) => (
+          {(["all", "new", "reviewed", "contacted", "approved", "rejected", "archived"] as const).map((f) => (
             <button
               key={f}
               onClick={() => setFilter(f)}
@@ -1095,20 +1098,17 @@ function VAPanel({
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[1000px] text-left text-sm">
+            <table className="w-full min-w-[900px] text-left text-sm">
               <thead className="border-b border-hairline text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
                 <tr>
                   <th className="px-4 py-3">Date</th>
                   <th className="px-4 py-3">Name</th>
-                  <th className="px-4 py-3">Email</th>
-                  <th className="px-4 py-3">Country</th>
-                  <th className="px-4 py-3">Age</th>
                   <th className="px-4 py-3">Discord</th>
                   <th className="px-4 py-3">Telegram</th>
-                  <th className="px-4 py-3">Avail.</th>
                   <th className="px-4 py-3">Reddit?</th>
                   <th className="px-4 py-3">Reddit User</th>
                   <th className="px-4 py-3">Status</th>
+                  <th className="px-4 py-3 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -1123,15 +1123,19 @@ function VAPanel({
                       <td className="px-4 py-3 text-xs text-muted-foreground">
                         {new Date(a.created_at).toLocaleDateString()}
                       </td>
-                      <td className="px-4 py-3 text-foreground">{a.full_name}</td>
-                      <td className="px-4 py-3 text-muted-foreground">{a.email}</td>
-                      <td className="px-4 py-3 text-muted-foreground">{a.country}</td>
-                      <td className="px-4 py-3 text-muted-foreground">{a.age}</td>
+                      <td className="px-4 py-3 font-medium text-foreground">{a.full_name}</td>
                       <td className="px-4 py-3 text-muted-foreground">{a.discord_username}</td>
                       <td className="px-4 py-3 text-muted-foreground">{a.telegram_username}</td>
-                      <td className="px-4 py-3 text-muted-foreground">{a.availability}</td>
-                      <td className="px-4 py-3 text-muted-foreground">
-                        {a.reddit_account_available ? "Yes" : "No"}
+                      <td className="px-4 py-3">
+                        <span
+                          className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+                            a.reddit_account_available
+                              ? "bg-emerald-500/15 text-emerald-500"
+                              : "bg-destructive/15 text-destructive"
+                          }`}
+                        >
+                          {a.reddit_account_available ? "Yes" : "No"}
+                        </span>
                       </td>
                       <td className="px-4 py-3 text-muted-foreground">
                         {a.reddit_username ?? "—"}
@@ -1143,6 +1147,38 @@ function VAPanel({
                           {status}
                         </span>
                       </td>
+                      <td className="px-4 py-3">
+                        <div className="flex justify-end gap-1.5">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              updateStatus(a.id, status === "approved" ? "new" : "approved");
+                            }}
+                            title={status === "approved" ? "Unapprove" : "Approve"}
+                            className={`rounded-md px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider transition-colors ${
+                              status === "approved"
+                                ? "bg-emerald-500 text-white"
+                                : "border border-emerald-500/40 text-emerald-500 hover:bg-emerald-500/10"
+                            }`}
+                          >
+                            ✓ Approve
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              updateStatus(a.id, status === "rejected" ? "new" : "rejected");
+                            }}
+                            title={status === "rejected" ? "Unreject" : "Reject"}
+                            className={`rounded-md px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider transition-colors ${
+                              status === "rejected"
+                                ? "bg-destructive text-white"
+                                : "border border-destructive/40 text-destructive hover:bg-destructive/10"
+                            }`}
+                          >
+                            ✕ Reject
+                          </button>
+                        </div>
+                      </td>
                     </tr>
                   );
                 })}
@@ -1151,6 +1187,7 @@ function VAPanel({
           </div>
         )}
       </div>
+
 
       {selected && (
         <div
@@ -1186,7 +1223,7 @@ function VAPanel({
             </div>
 
             <div className="mb-5 flex flex-wrap gap-2">
-              {(["new", "reviewed", "contacted", "archived"] as const).map((s) => (
+              {(["new", "reviewed", "contacted", "approved", "rejected", "archived"] as const).map((s) => (
                 <button
                   key={s}
                   onClick={() => updateStatus(selected.id, s)}
