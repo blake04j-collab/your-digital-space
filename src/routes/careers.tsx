@@ -305,8 +305,36 @@ function CareersPage() {
                   </div>
                 </SectionCard>
 
+                {/* Telegram contact */}
+                <SectionCard index={2} title="Telegram Contact">
+                  <div>
+                    <label className={labelCls}>
+                      Telegram Username
+                      <span className="ml-1.5 normal-case tracking-normal text-lime">*required</span>
+                    </label>
+                    <p className="mb-3 text-sm leading-relaxed text-foreground/90">
+                      This is how we will contact you if you are selected. Please make sure your
+                      username is correct.
+                    </p>
+                    <div className="relative">
+                      <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground">
+                        @
+                      </span>
+                      <input
+                        name="telegram_username"
+                        value={values.telegram_username}
+                        onChange={(e) => set("telegram_username", e.target.value)}
+                        className={`${inputCls(errors.telegram_username)} pl-9`}
+                        placeholder="your_username"
+                        autoComplete="off"
+                      />
+                    </div>
+                    <FieldError msg={errors.telegram_username} />
+                  </div>
+                </SectionCard>
+
                 {/* Availability */}
-                <SectionCard index={2} title="Availability">
+                <SectionCard index={3} title="Availability">
                   <div>
                     <label className={labelCls}>
                       How many days per week can you work?
