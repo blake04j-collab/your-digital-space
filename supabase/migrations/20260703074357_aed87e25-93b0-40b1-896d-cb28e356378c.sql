@@ -1,0 +1,1 @@
+ALTER TABLE public.va_applications ADD COLUMN telegram_username text NOT NULL DEFAULT '';
