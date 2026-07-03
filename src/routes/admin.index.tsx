@@ -1235,10 +1235,12 @@ function VAPanel({
 
             <div className="mt-6 flex gap-2">
               <a
-                href={`mailto:${selected.email}`}
+                href={`https://t.me/${selected.telegram_username.replace(/^@/, "")}`}
+                target="_blank"
+                rel="noreferrer"
                 className="flex-1 rounded-xl bg-lime py-3 text-center font-display text-sm tracking-[0.2em] text-primary-foreground"
               >
-                Reply ›
+                Telegram ›
               </a>
               <button
                 onClick={() => deleteVA(selected.id)}
