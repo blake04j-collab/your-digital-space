@@ -220,6 +220,7 @@ function CareersPage() {
                 "Ability to work independently",
                 "Familiarity with online communities (Reddit preferred)",
                 "Discord account required",
+                "Telegram account required — this is how we will contact you",
               ].map((t) => (
                 <li key={t} className="flex gap-3">
                   <span className="mt-0.5 grid h-5 w-5 flex-shrink-0 place-items-center rounded-full bg-lime/15 text-[10px] text-lime">
