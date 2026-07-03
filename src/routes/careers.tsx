@@ -245,7 +245,8 @@ function CareersPage() {
                 </div>
                 <h3 className="font-display text-3xl text-lime">Thank you for applying.</h3>
                 <p className="mx-auto mt-3 max-w-md text-sm text-muted-foreground">
-                  Our team will review your application and reach out if you are selected.
+                  Our team will review your application and reach out to you on Telegram if you
+                  are selected.
                 </p>
               </div>
             </div>
