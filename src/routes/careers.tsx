@@ -542,6 +542,7 @@ function CareersPage() {
                   </p>
                 </div>
               </form>
+              )}
             </>
           )}
         </div>
