@@ -266,6 +266,42 @@ export type Database = {
         }
         Relationships: []
       }
+      twitter_va_applications: {
+        Row: {
+          country: string
+          created_at: string
+          discord_username: string
+          id: string
+          status: string
+          telegram_username: string
+          twitter_account_available: boolean
+          twitter_username: string | null
+          updated_at: string
+        }
+        Insert: {
+          country?: string
+          created_at?: string
+          discord_username?: string
+          id?: string
+          status?: string
+          telegram_username?: string
+          twitter_account_available?: boolean
+          twitter_username?: string | null
+          updated_at?: string
+        }
+        Update: {
+          country?: string
+          created_at?: string
+          discord_username?: string
+          id?: string
+          status?: string
+          telegram_username?: string
+          twitter_account_available?: boolean
+          twitter_username?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
