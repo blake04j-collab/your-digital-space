@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
 import { trackPageView } from "@/lib/tracking";
+import { TwitterApplyForm } from "@/components/site/TwitterApplyForm";
 
 export const Route = createFileRoute("/careers")({
   head: () => ({
