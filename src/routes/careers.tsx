@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
 import { trackPageView } from "@/lib/tracking";
+import { TwitterApplyForm } from "@/components/site/TwitterApplyForm";
 
 export const Route = createFileRoute("/careers")({
   head: () => ({
@@ -87,6 +88,7 @@ function CareersPage() {
     trackPageView("/careers");
   }, []);
 
+  const [position, setPosition] = useState<"social" | "twitter">("social");
   const [values, setValues] = useState<FormValues>(initial);
   const [errors, setErrors] = useState<Errors>({});
   const [submitting, setSubmitting] = useState(false);
@@ -157,14 +159,49 @@ function CareersPage() {
             <span className="h-1.5 w-1.5 rounded-full bg-lime" /> Now Hiring · Remote
           </div>
           <h1 className="font-display text-[clamp(2.4rem,7vw,5.5rem)] leading-[0.95] tracking-wide text-foreground">
-            Become a Social Media<br />
+            Become a {position === "twitter" ? "Twitter / X" : "Social Media"}<br />
             <span className="text-lime">Virtual Assistant</span>
           </h1>
           <p className="mt-6 max-w-2xl text-base font-light leading-relaxed text-muted-foreground md:text-lg">
-            We're hiring remote virtual assistants to help with social media engagement and
-            community outreach for online creators. Flexible schedule, approximately 2–3 hours
-            per day.
+            We're hiring remote virtual assistants to help with{" "}
+            {position === "twitter"
+              ? "Twitter / X engagement and outreach for online creators."
+              : "social media engagement and community outreach for online creators."}{" "}
+            Flexible schedule, approximately 2–3 hours per day.
           </p>
+
+          {/* Position selector */}
+          <div className="mt-8">
+            <p className="mb-3 text-[11px] font-medium uppercase tracking-[0.25em] text-muted-foreground">
+              Select the position you're applying for
+            </p>
+            <div className="grid gap-3 sm:grid-cols-2 sm:max-w-xl">
+              {([
+                { key: "social", label: "Social Media VA", sub: "Reddit, communities, captions" },
+                { key: "twitter", label: "Twitter / X VA", sub: "Engagement & outreach on X" },
+              ] as const).map((opt) => {
+                const active = position === opt.key;
+                return (
+                  <button
+                    type="button"
+                    key={opt.key}
+                    onClick={() => setPosition(opt.key)}
+                    className={`rounded-2xl border px-5 py-4 text-left transition-all ${
+                      active
+                        ? "border-lime bg-lime/10 shadow-lime"
+                        : "border-hairline bg-surface-1 hover:border-foreground/30"
+                    }`}
+                  >
+                    <div className={`text-sm font-semibold ${active ? "text-lime" : "text-foreground"}`}>
+                      {opt.label}
+                    </div>
+                    <div className="mt-1 text-xs text-muted-foreground">{opt.sub}</div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
           <div className="mt-8 flex flex-wrap gap-3">
             <button
               onClick={scrollToForm}
@@ -265,7 +302,9 @@ function CareersPage() {
                 </p>
               </div>
 
+              {position === "twitter" ? <TwitterApplyForm /> : (
               <form onSubmit={onSubmit} noValidate className="space-y-6">
+
                 {/* Basic info */}
                 <SectionCard index={1} title="Basic Information">
                   <div>
@@ -503,6 +542,7 @@ function CareersPage() {
                   </p>
                 </div>
               </form>
+              )}
             </>
           )}
         </div>
