@@ -302,7 +302,9 @@ function CareersPage() {
                 </p>
               </div>
 
+              {position === "twitter" ? <TwitterApplyForm /> : (
               <form onSubmit={onSubmit} noValidate className="space-y-6">
+
                 {/* Basic info */}
                 <SectionCard index={1} title="Basic Information">
                   <div>
