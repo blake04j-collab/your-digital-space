@@ -88,6 +88,7 @@ function CareersPage() {
     trackPageView("/careers");
   }, []);
 
+  const [position, setPosition] = useState<"social" | "twitter">("social");
   const [values, setValues] = useState<FormValues>(initial);
   const [errors, setErrors] = useState<Errors>({});
   const [submitting, setSubmitting] = useState(false);
