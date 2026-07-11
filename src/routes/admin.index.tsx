@@ -1,6 +1,8 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import XTrackerPanel from "@/components/admin/XTrackerPanel";
+
 
 export const Route = createFileRoute("/admin/")({
   head: () => ({
@@ -58,7 +60,7 @@ type PageView = {
   created_at: string;
 };
 
-type Tab = "applications" | "va_apps" | "analytics" | "links";
+type Tab = "applications" | "va_apps" | "x_tracker" | "analytics" | "links";
 
 type VAStatus = "new" | "reviewed" | "contacted" | "archived" | "approved" | "rejected";
 
@@ -283,7 +285,7 @@ function AdminDashboard() {
           </div>
           <div className="flex items-center gap-2">
             <div className="hidden gap-1 rounded-full border border-hairline bg-surface-1 p-1 sm:flex">
-              {(["applications", "va_apps", "analytics", "links"] as const).map((t) => (
+              {(["applications", "va_apps", "x_tracker", "analytics", "links"] as const).map((t) => (
                 <button
                   key={t}
                   onClick={() => setTab(t)}
@@ -293,9 +295,10 @@ function AdminDashboard() {
                       : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
-                  {t === "va_apps" ? "VA Apps" : t}
+                  {t === "va_apps" ? "VA Apps" : t === "x_tracker" ? "X Tracker" : t}
                 </button>
               ))}
+
             </div>
             <button
               onClick={logout}
@@ -306,7 +309,7 @@ function AdminDashboard() {
           </div>
         </div>
         <div className="flex gap-1 border-t border-hairline px-5 py-2 sm:hidden">
-          {(["applications", "va_apps", "analytics", "links"] as const).map((t) => (
+          {(["applications", "va_apps", "x_tracker", "analytics", "links"] as const).map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
@@ -314,9 +317,10 @@ function AdminDashboard() {
                 tab === t ? "bg-lime text-primary-foreground" : "text-muted-foreground"
               }`}
             >
-              {t === "va_apps" ? "VA Apps" : t}
+              {t === "va_apps" ? "VA" : t === "x_tracker" ? "X" : t}
             </button>
           ))}
+
         </div>
       </header>
 
@@ -419,6 +423,10 @@ function AdminDashboard() {
         )}
 
         {tab === "va_apps" && <VAPanel vaApps={vaApps} setVaApps={setVaApps} />}
+
+        {tab === "x_tracker" && <XTrackerPanel />}
+
+
 
         {tab === "analytics" && <AnalyticsPanel views={views} apps={apps} />}
 

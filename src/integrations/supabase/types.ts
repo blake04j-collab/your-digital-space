@@ -377,6 +377,107 @@ export type Database = {
         }
         Relationships: []
       }
+      x_tracker_accounts: {
+        Row: {
+          created_at: string
+          current_views: number
+          employee_name: string
+          id: string
+          last_updated: string | null
+          notes: string | null
+          pinned_post_url: string | null
+          profile_url: string
+          rate_cents_per_1k: number
+          status: string
+          status_message: string | null
+          updated_at: string
+          weekly_starting_views: number
+          x_username: string
+        }
+        Insert: {
+          created_at?: string
+          current_views?: number
+          employee_name?: string
+          id?: string
+          last_updated?: string | null
+          notes?: string | null
+          pinned_post_url?: string | null
+          profile_url: string
+          rate_cents_per_1k?: number
+          status?: string
+          status_message?: string | null
+          updated_at?: string
+          weekly_starting_views?: number
+          x_username: string
+        }
+        Update: {
+          created_at?: string
+          current_views?: number
+          employee_name?: string
+          id?: string
+          last_updated?: string | null
+          notes?: string | null
+          pinned_post_url?: string | null
+          profile_url?: string
+          rate_cents_per_1k?: number
+          status?: string
+          status_message?: string | null
+          updated_at?: string
+          weekly_starting_views?: number
+          x_username?: string
+        }
+        Relationships: []
+      }
+      x_tracker_history: {
+        Row: {
+          account_id: string | null
+          created_at: string
+          employee_name: string
+          ending_views: number
+          id: string
+          starting_views: number
+          week_end: string
+          week_start: string
+          weekly_pay_cents: number
+          weekly_views: number
+          x_username: string
+        }
+        Insert: {
+          account_id?: string | null
+          created_at?: string
+          employee_name?: string
+          ending_views?: number
+          id?: string
+          starting_views?: number
+          week_end: string
+          week_start: string
+          weekly_pay_cents?: number
+          weekly_views?: number
+          x_username: string
+        }
+        Update: {
+          account_id?: string | null
+          created_at?: string
+          employee_name?: string
+          ending_views?: number
+          id?: string
+          starting_views?: number
+          week_end?: string
+          week_start?: string
+          weekly_pay_cents?: number
+          weekly_views?: number
+          x_username?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "x_tracker_history_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "x_tracker_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
