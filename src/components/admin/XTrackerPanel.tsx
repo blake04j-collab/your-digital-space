@@ -1,5 +1,18 @@
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useServerFn } from "@tanstack/react-start";
+import { fetchXViews } from "@/lib/x-views.functions";
+
+type RefreshProgress = {
+  total: number;
+  completed: number;
+  success: number;
+  failed: number;
+  currentUsername: string | null;
+  errors: { username: string; error: string }[];
+  done: boolean;
+  unavailable: boolean;
+};
 
 export type XAccount = {
   id: string;
@@ -63,6 +76,8 @@ export default function XTrackerPanel() {
   const [showAdd, setShowAdd] = useState(false);
   const [editing, setEditing] = useState<XAccount | null>(null);
   const [busy, setBusy] = useState(false);
+  const [progress, setProgress] = useState<RefreshProgress | null>(null);
+  const refreshView = useServerFn(fetchXViews);
 
   useEffect(() => {
     void refresh();
@@ -131,17 +146,96 @@ export default function XTrackerPanel() {
     return Array.from(map.values()).sort((a, b) => b.lifetimePay - a.lifetimePay);
   }, [accounts, history]);
 
-  async function updateViews(id: string, newViews: number) {
+  async function persistViews(id: string, newViews: number, statusMessage: string | null = null) {
     const { error } = await supabase
       .from("x_tracker_accounts")
       .update({
         current_views: newViews,
         last_updated: new Date().toISOString(),
         status: "updated",
-        status_message: null,
+        status_message: statusMessage,
       })
       .eq("id", id);
-    if (error) return alert(error.message);
+    if (error) throw new Error(error.message);
+  }
+
+  async function markError(id: string, message: string) {
+    await supabase
+      .from("x_tracker_accounts")
+      .update({ status: "error", status_message: message })
+      .eq("id", id);
+  }
+
+  async function refreshOneAccount(a: XAccount): Promise<{ ok: boolean; error?: string; unavailable?: boolean }> {
+    const res = await refreshView({ data: { pinnedPostUrl: a.pinned_post_url } });
+    if (!res.ok) {
+      await markError(a.id, res.error);
+      return { ok: false, error: res.error, unavailable: !res.configured };
+    }
+    await persistViews(a.id, res.views);
+    return { ok: true };
+  }
+
+  async function refreshSingle(a: XAccount) {
+    setBusy(true);
+    const r = await refreshOneAccount(a);
+    setBusy(false);
+    await refresh();
+    if (!r.ok) alert(r.error ?? "Refresh failed");
+  }
+
+  async function refreshAll() {
+    if (accounts.length === 0) return;
+    setProgress({
+      total: accounts.length,
+      completed: 0,
+      success: 0,
+      failed: 0,
+      currentUsername: accounts[0]?.x_username ?? null,
+      errors: [],
+      done: false,
+      unavailable: false,
+    });
+    let unavailable = false;
+    for (let i = 0; i < accounts.length; i++) {
+      const a = accounts[i];
+      setProgress((p) => (p ? { ...p, currentUsername: a.x_username } : p));
+      const r = await refreshOneAccount(a);
+      setProgress((p) => {
+        if (!p) return p;
+        const next = { ...p, completed: p.completed + 1, currentUsername: null };
+        if (r.ok) next.success += 1;
+        else {
+          next.failed += 1;
+          next.errors = [...p.errors, { username: a.x_username, error: r.error ?? "Unknown" }];
+          if (r.unavailable) next.unavailable = true;
+        }
+        return next;
+      });
+      if (r.unavailable) unavailable = true;
+      if (unavailable) {
+        // If X API isn't configured, no point continuing — mark rest as failed with same reason.
+        for (let j = i + 1; j < accounts.length; j++) {
+          const b = accounts[j];
+          await markError(b.id, "Automatic refresh unavailable — X API not connected.");
+          setProgress((p) =>
+            p
+              ? {
+                  ...p,
+                  completed: p.completed + 1,
+                  failed: p.failed + 1,
+                  errors: [
+                    ...p.errors,
+                    { username: b.x_username, error: "Automatic refresh unavailable — X API not connected." },
+                  ],
+                }
+              : p,
+          );
+        }
+        break;
+      }
+    }
+    setProgress((p) => (p ? { ...p, done: true, currentUsername: null } : p));
     await refresh();
   }
 
@@ -237,13 +331,20 @@ export default function XTrackerPanel() {
         <div>
           <h2 className="font-display text-2xl text-foreground">X View Tracker</h2>
           <p className="mt-1 text-xs text-muted-foreground">
-            Manual view entry per account. $3 per 1,000 weekly views. Weekly reset resets each account's baseline.
+            Views only refresh when you click Refresh. $3 per 1,000 weekly views. No background syncing.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
           <button
+            onClick={() => void refreshAll()}
+            disabled={busy || (progress !== null && !progress.done) || accounts.length === 0}
+            className="rounded-full bg-lime px-4 py-1.5 text-[10px] uppercase tracking-[0.2em] text-primary-foreground disabled:opacity-50"
+          >
+            {progress && !progress.done ? "Refreshing…" : "Refresh all accounts"}
+          </button>
+          <button
             onClick={() => setShowAdd(true)}
-            className="rounded-full bg-lime px-4 py-1.5 text-[10px] uppercase tracking-[0.2em] text-primary-foreground"
+            className="rounded-full border border-hairline bg-surface-1 px-4 py-1.5 text-[10px] uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground"
           >
             + Add account
           </button>
@@ -262,6 +363,66 @@ export default function XTrackerPanel() {
           </button>
         </div>
       </div>
+
+      {progress && (
+        <div className="mt-4 rounded-2xl border border-hairline bg-surface-1 p-4">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="text-sm text-foreground">
+              {progress.done ? (
+                progress.unavailable ? (
+                  <span className="text-destructive">
+                    Automatic refresh unavailable — X API is not connected.
+                  </span>
+                ) : progress.failed === 0 ? (
+                  <span className="text-lime">✓ Refresh complete — all {progress.success} accounts updated.</span>
+                ) : (
+                  <span>
+                    Refresh complete — <span className="text-lime">{progress.success} updated</span>,{" "}
+                    <span className="text-destructive">{progress.failed} failed</span>.
+                  </span>
+                )
+              ) : (
+                <span>
+                  Refreshing {progress.currentUsername ? `@${progress.currentUsername}` : "…"}
+                </span>
+              )}
+            </div>
+            {progress.done && (
+              <button
+                onClick={() => setProgress(null)}
+                className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground"
+              >
+                Dismiss
+              </button>
+            )}
+          </div>
+          <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-surface-2">
+            <div
+              className="h-full bg-lime transition-all"
+              style={{ width: `${(progress.completed / Math.max(1, progress.total)) * 100}%` }}
+            />
+          </div>
+          <div className="mt-2 grid grid-cols-2 gap-2 text-[10px] uppercase tracking-[0.2em] text-muted-foreground md:grid-cols-5">
+            <div>Total: <span className="text-foreground">{progress.total}</span></div>
+            <div>Done: <span className="text-foreground">{progress.completed}</span></div>
+            <div>Remaining: <span className="text-foreground">{progress.total - progress.completed}</span></div>
+            <div>Success: <span className="text-lime">{progress.success}</span></div>
+            <div>Failed: <span className="text-destructive">{progress.failed}</span></div>
+          </div>
+          {progress.errors.length > 0 && (
+            <details className="mt-3 text-xs text-muted-foreground">
+              <summary className="cursor-pointer hover:text-foreground">View {progress.errors.length} error(s)</summary>
+              <ul className="mt-2 space-y-1">
+                {progress.errors.map((e, i) => (
+                  <li key={i}>
+                    <span className="text-foreground">@{e.username}</span>: {e.error}
+                  </li>
+                ))}
+              </ul>
+            </details>
+          )}
+        </div>
+      )}
 
       <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">
         <TinyStat label="Accounts tracked" value={String(stats.active)} />
@@ -342,19 +503,11 @@ export default function XTrackerPanel() {
                         <td className="px-4 py-3 text-right">
                           <div className="flex justify-end gap-1.5">
                             <button
-                              onClick={() => {
-                                const v = prompt(
-                                  `Update total views for @${a.x_username}`,
-                                  String(a.current_views),
-                                );
-                                if (v == null) return;
-                                const n = Number(v.replace(/[,\s]/g, ""));
-                                if (!Number.isFinite(n) || n < 0) return alert("Invalid number");
-                                void updateViews(a.id, Math.floor(n));
-                              }}
-                              className="rounded-full bg-lime px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-primary-foreground"
+                              onClick={() => void refreshSingle(a)}
+                              disabled={busy || (progress !== null && !progress.done)}
+                              className="rounded-full bg-lime px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-primary-foreground disabled:opacity-50"
                             >
-                              Update views
+                              Refresh views
                             </button>
                             <button
                               onClick={() => setEditing(a)}
