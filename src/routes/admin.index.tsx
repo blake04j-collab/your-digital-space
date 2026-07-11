@@ -309,7 +309,7 @@ function AdminDashboard() {
           </div>
         </div>
         <div className="flex gap-1 border-t border-hairline px-5 py-2 sm:hidden">
-          {(["applications", "va_apps", "analytics", "links"] as const).map((t) => (
+          {(["applications", "va_apps", "x_tracker", "analytics", "links"] as const).map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
@@ -317,9 +317,10 @@ function AdminDashboard() {
                 tab === t ? "bg-lime text-primary-foreground" : "text-muted-foreground"
               }`}
             >
-              {t === "va_apps" ? "VA Apps" : t}
+              {t === "va_apps" ? "VA" : t === "x_tracker" ? "X" : t}
             </button>
           ))}
+
         </div>
       </header>
 
