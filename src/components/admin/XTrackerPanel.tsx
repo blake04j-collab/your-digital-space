@@ -503,19 +503,11 @@ export default function XTrackerPanel() {
                         <td className="px-4 py-3 text-right">
                           <div className="flex justify-end gap-1.5">
                             <button
-                              onClick={() => {
-                                const v = prompt(
-                                  `Update total views for @${a.x_username}`,
-                                  String(a.current_views),
-                                );
-                                if (v == null) return;
-                                const n = Number(v.replace(/[,\s]/g, ""));
-                                if (!Number.isFinite(n) || n < 0) return alert("Invalid number");
-                                void updateViews(a.id, Math.floor(n));
-                              }}
-                              className="rounded-full bg-lime px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-primary-foreground"
+                              onClick={() => void refreshSingle(a)}
+                              disabled={busy || (progress !== null && !progress.done)}
+                              className="rounded-full bg-lime px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-primary-foreground disabled:opacity-50"
                             >
-                              Update views
+                              Refresh views
                             </button>
                             <button
                               onClick={() => setEditing(a)}
