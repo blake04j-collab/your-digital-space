@@ -238,6 +238,8 @@ export default function XTrackerPanel() {
     setProgress((p) => (p ? { ...p, done: true, currentUsername: null } : p));
     await refresh();
   }
+
+  async function deleteAccount(id: string) {
     if (!confirm("Remove this account from tracking?")) return;
     const { error } = await supabase.from("x_tracker_accounts").delete().eq("id", id);
     if (error) return alert(error.message);
