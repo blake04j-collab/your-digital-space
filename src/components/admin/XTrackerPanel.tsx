@@ -331,7 +331,7 @@ export default function XTrackerPanel() {
         <div>
           <h2 className="font-display text-2xl text-foreground">X View Tracker</h2>
           <p className="mt-1 text-xs text-muted-foreground">
-            Manual view entry per account. $3 per 1,000 weekly views. Weekly reset resets each account's baseline.
+            Views only refresh when you click Refresh. $3 per 1,000 weekly views. No background syncing.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
