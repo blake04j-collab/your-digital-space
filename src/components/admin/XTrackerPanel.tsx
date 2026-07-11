@@ -146,21 +146,98 @@ export default function XTrackerPanel() {
     return Array.from(map.values()).sort((a, b) => b.lifetimePay - a.lifetimePay);
   }, [accounts, history]);
 
-  async function updateViews(id: string, newViews: number) {
+  async function persistViews(id: string, newViews: number, statusMessage: string | null = null) {
     const { error } = await supabase
       .from("x_tracker_accounts")
       .update({
         current_views: newViews,
         last_updated: new Date().toISOString(),
         status: "updated",
-        status_message: null,
+        status_message: statusMessage,
       })
       .eq("id", id);
-    if (error) return alert(error.message);
-    await refresh();
+    if (error) throw new Error(error.message);
   }
 
-  async function deleteAccount(id: string) {
+  async function markError(id: string, message: string) {
+    await supabase
+      .from("x_tracker_accounts")
+      .update({ status: "error", status_message: message })
+      .eq("id", id);
+  }
+
+  async function refreshOneAccount(a: XAccount): Promise<{ ok: boolean; error?: string; unavailable?: boolean }> {
+    const res = await refreshView({ data: { pinnedPostUrl: a.pinned_post_url } });
+    if (!res.ok) {
+      await markError(a.id, res.error);
+      return { ok: false, error: res.error, unavailable: !res.configured };
+    }
+    await persistViews(a.id, res.views);
+    return { ok: true };
+  }
+
+  async function refreshSingle(a: XAccount) {
+    setBusy(true);
+    const r = await refreshOneAccount(a);
+    setBusy(false);
+    await refresh();
+    if (!r.ok) alert(r.error ?? "Refresh failed");
+  }
+
+  async function refreshAll() {
+    if (accounts.length === 0) return;
+    setProgress({
+      total: accounts.length,
+      completed: 0,
+      success: 0,
+      failed: 0,
+      currentUsername: accounts[0]?.x_username ?? null,
+      errors: [],
+      done: false,
+      unavailable: false,
+    });
+    let unavailable = false;
+    for (let i = 0; i < accounts.length; i++) {
+      const a = accounts[i];
+      setProgress((p) => (p ? { ...p, currentUsername: a.x_username } : p));
+      const r = await refreshOneAccount(a);
+      setProgress((p) => {
+        if (!p) return p;
+        const next = { ...p, completed: p.completed + 1, currentUsername: null };
+        if (r.ok) next.success += 1;
+        else {
+          next.failed += 1;
+          next.errors = [...p.errors, { username: a.x_username, error: r.error ?? "Unknown" }];
+          if (r.unavailable) next.unavailable = true;
+        }
+        return next;
+      });
+      if (r.unavailable) unavailable = true;
+      if (unavailable) {
+        // If X API isn't configured, no point continuing — mark rest as failed with same reason.
+        for (let j = i + 1; j < accounts.length; j++) {
+          const b = accounts[j];
+          await markError(b.id, "Automatic refresh unavailable — X API not connected.");
+          setProgress((p) =>
+            p
+              ? {
+                  ...p,
+                  completed: p.completed + 1,
+                  failed: p.failed + 1,
+                  errors: [
+                    ...p.errors,
+                    { username: b.x_username, error: "Automatic refresh unavailable — X API not connected." },
+                  ],
+                }
+              : p,
+          );
+        }
+        break;
+      }
+    }
+    setProgress((p) => (p ? { ...p, done: true, currentUsername: null } : p));
+    await refresh();
+  }
     if (!confirm("Remove this account from tracking?")) return;
     const { error } = await supabase.from("x_tracker_accounts").delete().eq("id", id);
     if (error) return alert(error.message);
