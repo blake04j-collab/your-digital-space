@@ -60,7 +60,7 @@ type PageView = {
   created_at: string;
 };
 
-type Tab = "applications" | "va_apps" | "analytics" | "links";
+type Tab = "applications" | "va_apps" | "x_tracker" | "analytics" | "links";
 
 type VAStatus = "new" | "reviewed" | "contacted" | "archived" | "approved" | "rejected";
 
