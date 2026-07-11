@@ -74,8 +74,9 @@ export default function XTrackerPanel() {
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<ViewMode>("accounts");
   const [showAdd, setShowAdd] = useState(false);
-  const [editing, setEditing] = useState<XAccount | null>(null);
   const [busy, setBusy] = useState(false);
+  const [progress, setProgress] = useState<RefreshProgress | null>(null);
+  const refreshView = useServerFn(fetchXViews);
 
   useEffect(() => {
     void refresh();
