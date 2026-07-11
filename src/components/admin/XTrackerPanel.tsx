@@ -1,5 +1,18 @@
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useServerFn } from "@tanstack/react-start";
+import { fetchXViews } from "@/lib/x-views.functions";
+
+type RefreshProgress = {
+  total: number;
+  completed: number;
+  success: number;
+  failed: number;
+  currentUsername: string | null;
+  errors: { username: string; error: string }[];
+  done: boolean;
+  unavailable: boolean;
+};
 
 export type XAccount = {
   id: string;
