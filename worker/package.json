@@ -1,0 +1,19 @@
+{
+  "name": "x-scraper-worker",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Playwright-based X post view scraper. Called manually by the Cloud Agency admin dashboard.",
+  "scripts": {
+    "start": "node server.js",
+    "postinstall": "playwright install --with-deps chromium",
+    "login": "node login.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "playwright": "^1.47.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

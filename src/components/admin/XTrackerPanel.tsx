@@ -146,16 +146,24 @@ export default function XTrackerPanel() {
     return Array.from(map.values()).sort((a, b) => b.lifetimePay - a.lifetimePay);
   }, [accounts, history]);
 
-  async function persistViews(id: string, newViews: number, statusMessage: string | null = null) {
+  async function persistViews(a: XAccount, newViews: number, statusMessage: string | null = null) {
+    const previous = a.current_views ?? 0;
+    const gained = Math.max(0, newViews - previous);
+    const payoutCents = payFromViews(gained, a.rate_cents_per_1k);
+    const now = new Date().toISOString();
     const { error } = await supabase
       .from("x_tracker_accounts")
       .update({
+        previous_views: previous,
         current_views: newViews,
-        last_updated: new Date().toISOString(),
+        views_gained_since_last: gained,
+        payout_owed_cents: payoutCents,
+        last_refresh_at: now,
+        last_updated: now,
         status: "updated",
         status_message: statusMessage,
       })
-      .eq("id", id);
+      .eq("id", a.id);
     if (error) throw new Error(error.message);
   }
 
@@ -172,7 +180,7 @@ export default function XTrackerPanel() {
       await markError(a.id, res.error);
       return { ok: false, error: res.error, unavailable: !res.configured };
     }
-    await persistViews(a.id, res.views);
+    await persistViews(a, res.views);
     return { ok: true };
   }
 

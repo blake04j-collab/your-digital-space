@@ -383,14 +383,18 @@ export type Database = {
           current_views: number
           employee_name: string
           id: string
+          last_refresh_at: string | null
           last_updated: string | null
           notes: string | null
+          payout_owed_cents: number
           pinned_post_url: string | null
+          previous_views: number
           profile_url: string
           rate_cents_per_1k: number
           status: string
           status_message: string | null
           updated_at: string
+          views_gained_since_last: number
           weekly_starting_views: number
           x_username: string
         }
@@ -399,14 +403,18 @@ export type Database = {
           current_views?: number
           employee_name?: string
           id?: string
+          last_refresh_at?: string | null
           last_updated?: string | null
           notes?: string | null
+          payout_owed_cents?: number
           pinned_post_url?: string | null
+          previous_views?: number
           profile_url: string
           rate_cents_per_1k?: number
           status?: string
           status_message?: string | null
           updated_at?: string
+          views_gained_since_last?: number
           weekly_starting_views?: number
           x_username: string
         }
@@ -415,14 +423,18 @@ export type Database = {
           current_views?: number
           employee_name?: string
           id?: string
+          last_refresh_at?: string | null
           last_updated?: string | null
           notes?: string | null
+          payout_owed_cents?: number
           pinned_post_url?: string | null
+          previous_views?: number
           profile_url?: string
           rate_cents_per_1k?: number
           status?: string
           status_message?: string | null
           updated_at?: string
+          views_gained_since_last?: number
           weekly_starting_views?: number
           x_username?: string
         }

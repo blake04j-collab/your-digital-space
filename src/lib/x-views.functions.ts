@@ -1,24 +1,23 @@
 import { createServerFn } from "@tanstack/react-start";
 
-const GATEWAY_URL = "https://connector-gateway.lovable.dev/x";
-
-function extractTweetId(url: string): string | null {
-  const m = url.match(/status\/(\d+)/);
-  return m ? m[1] : null;
-}
-
+/**
+ * Calls the external Playwright scraper worker (self-hosted service, see /worker).
+ * Requires two env vars on the server:
+ *   - X_SCRAPER_URL     e.g. https://x-scraper.fly.dev
+ *   - X_SCRAPER_SECRET  shared secret matching the worker's SCRAPER_SECRET
+ */
 export const fetchXViews = createServerFn({ method: "POST" })
   .inputValidator((data: { pinnedPostUrl: string | null }) => data)
   .handler(async ({ data }) => {
-    const lovableKey = process.env.LOVABLE_API_KEY;
-    const xKey = process.env.X_API_KEY;
+    const url = process.env.X_SCRAPER_URL;
+    const secret = process.env.X_SCRAPER_SECRET;
 
-    if (!lovableKey || !xKey) {
+    if (!url || !secret) {
       return {
         ok: false as const,
         configured: false as const,
         error:
-          "Automatic refresh unavailable — X API is not connected. Connect the X connector to enable refreshes.",
+          "Automatic refresh unavailable — Playwright scraper worker is not configured. Deploy the /worker service and set X_SCRAPER_URL and X_SCRAPER_SECRET.",
       };
     }
 
@@ -30,57 +29,42 @@ export const fetchXViews = createServerFn({ method: "POST" })
       };
     }
 
-    const tweetId = extractTweetId(data.pinnedPostUrl);
-    if (!tweetId) {
-      return {
-        ok: false as const,
-        configured: true as const,
-        error: "Could not parse tweet ID from pinned post URL.",
-      };
-    }
-
     try {
-      const res = await fetch(
-        `${GATEWAY_URL}/2/tweets/${tweetId}?tweet.fields=public_metrics,non_public_metrics`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${lovableKey}`,
-            "X-Connection-Api-Key": xKey,
-          },
+      const res = await fetch(`${url.replace(/\/$/, "")}/scrape`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${secret}`,
         },
-      );
-      const body = await res.text();
+        body: JSON.stringify({ postUrl: data.pinnedPostUrl }),
+        // Playwright scrape can take a while; server fn has no built-in timeout,
+        // rely on the worker to enforce its own.
+      });
+
+      const text = await res.text();
       if (!res.ok) {
         return {
           ok: false as const,
           configured: true as const,
-          error: `X API ${res.status}: ${body.slice(0, 200)}`,
+          error: `Scraper ${res.status}: ${text.slice(0, 300)}`,
         };
       }
-      const json = JSON.parse(body) as {
-        data?: {
-          public_metrics?: { impression_count?: number };
-          non_public_metrics?: { impression_count?: number };
-        };
-      };
-      const views =
-        json.data?.non_public_metrics?.impression_count ??
-        json.data?.public_metrics?.impression_count;
-      if (typeof views !== "number") {
+
+      const json = JSON.parse(text) as { ok: boolean; views?: number; error?: string };
+      if (!json.ok || typeof json.views !== "number") {
         return {
           ok: false as const,
           configured: true as const,
-          error:
-            "X API returned no impression_count. Views are only available for tweets authored by the connected account.",
+          error: json.error ?? "Scraper returned no view count.",
         };
       }
-      return { ok: true as const, configured: true as const, views };
+
+      return { ok: true as const, configured: true as const, views: json.views };
     } catch (e) {
       return {
         ok: false as const,
         configured: true as const,
-        error: e instanceof Error ? e.message : "Unknown error",
+        error: e instanceof Error ? e.message : "Unknown scraper error",
       };
     }
   });
