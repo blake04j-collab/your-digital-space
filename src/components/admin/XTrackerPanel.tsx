@@ -336,8 +336,15 @@ export default function XTrackerPanel() {
         </div>
         <div className="flex flex-wrap gap-2">
           <button
+            onClick={() => void refreshAll()}
+            disabled={busy || (progress !== null && !progress.done) || accounts.length === 0}
+            className="rounded-full bg-lime px-4 py-1.5 text-[10px] uppercase tracking-[0.2em] text-primary-foreground disabled:opacity-50"
+          >
+            {progress && !progress.done ? "Refreshing…" : "Refresh all accounts"}
+          </button>
+          <button
             onClick={() => setShowAdd(true)}
-            className="rounded-full bg-lime px-4 py-1.5 text-[10px] uppercase tracking-[0.2em] text-primary-foreground"
+            className="rounded-full border border-hairline bg-surface-1 px-4 py-1.5 text-[10px] uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground"
           >
             + Add account
           </button>
@@ -356,6 +363,66 @@ export default function XTrackerPanel() {
           </button>
         </div>
       </div>
+
+      {progress && (
+        <div className="mt-4 rounded-2xl border border-hairline bg-surface-1 p-4">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="text-sm text-foreground">
+              {progress.done ? (
+                progress.unavailable ? (
+                  <span className="text-destructive">
+                    Automatic refresh unavailable — X API is not connected.
+                  </span>
+                ) : progress.failed === 0 ? (
+                  <span className="text-lime">✓ Refresh complete — all {progress.success} accounts updated.</span>
+                ) : (
+                  <span>
+                    Refresh complete — <span className="text-lime">{progress.success} updated</span>,{" "}
+                    <span className="text-destructive">{progress.failed} failed</span>.
+                  </span>
+                )
+              ) : (
+                <span>
+                  Refreshing {progress.currentUsername ? `@${progress.currentUsername}` : "…"}
+                </span>
+              )}
+            </div>
+            {progress.done && (
+              <button
+                onClick={() => setProgress(null)}
+                className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground"
+              >
+                Dismiss
+              </button>
+            )}
+          </div>
+          <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-surface-2">
+            <div
+              className="h-full bg-lime transition-all"
+              style={{ width: `${(progress.completed / Math.max(1, progress.total)) * 100}%` }}
+            />
+          </div>
+          <div className="mt-2 grid grid-cols-2 gap-2 text-[10px] uppercase tracking-[0.2em] text-muted-foreground md:grid-cols-5">
+            <div>Total: <span className="text-foreground">{progress.total}</span></div>
+            <div>Done: <span className="text-foreground">{progress.completed}</span></div>
+            <div>Remaining: <span className="text-foreground">{progress.total - progress.completed}</span></div>
+            <div>Success: <span className="text-lime">{progress.success}</span></div>
+            <div>Failed: <span className="text-destructive">{progress.failed}</span></div>
+          </div>
+          {progress.errors.length > 0 && (
+            <details className="mt-3 text-xs text-muted-foreground">
+              <summary className="cursor-pointer hover:text-foreground">View {progress.errors.length} error(s)</summary>
+              <ul className="mt-2 space-y-1">
+                {progress.errors.map((e, i) => (
+                  <li key={i}>
+                    <span className="text-foreground">@{e.username}</span>: {e.error}
+                  </li>
+                ))}
+              </ul>
+            </details>
+          )}
+        </div>
+      )}
 
       <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">
         <TinyStat label="Accounts tracked" value={String(stats.active)} />
