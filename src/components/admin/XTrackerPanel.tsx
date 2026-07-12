@@ -480,6 +480,22 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
                             ? new Date(a.last_screenshot_upload_at).toLocaleString()
                             : "—"}
                         </td>
+                        {!isManager && (
+                          <td className="px-4 py-3 text-xs">
+                            {a.added_by_user_id ? (
+                              managerEmailById.has(a.added_by_user_id) ? (
+                                <span className="rounded-full border border-lime/40 bg-lime-soft px-2 py-0.5 text-lime">
+                                  {managerEmailById.get(a.added_by_user_id)}
+                                </span>
+                              ) : (
+                                <span className="text-muted-foreground">Admin</span>
+                              )
+                            ) : (
+                              <span className="text-muted-foreground">—</span>
+                            )}
+                          </td>
+                        )}
+
                         <td className="px-4 py-3 text-right">
                           <div className="flex justify-end gap-1.5">
                             <button
