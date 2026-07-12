@@ -605,6 +605,54 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
         </div>
       )}
 
+      {view === "managers" && !isManager && (
+        <div className="mt-4 overflow-hidden rounded-2xl border border-hairline bg-surface-1">
+          {managerStats.length === 0 ? (
+            <div className="p-10 text-center text-sm text-muted-foreground">
+              No managers yet. Grant a user the manager role to see their commissions here.
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[900px] text-left text-sm">
+                <thead className="border-b border-hairline text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                  <tr>
+                    <th className="px-4 py-3">Manager</th>
+                    <th className="px-4 py-3">Accounts</th>
+                    <th className="px-4 py-3">Weekly views</th>
+                    <th className="px-4 py-3">Lifetime commission (10%)</th>
+                    <th className="px-4 py-3">Already paid</th>
+                    <th className="px-4 py-3">Unpaid balance</th>
+                    <th className="px-4 py-3 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {managerStats.map((m) => (
+                    <tr key={m.user_id} className="border-b border-hairline/60 last:border-0">
+                      <td className="px-4 py-3 text-foreground">{m.email}</td>
+                      <td className="px-4 py-3 text-muted-foreground">{m.accountsCount}</td>
+                      <td className="px-4 py-3 text-muted-foreground">{fmt(m.weeklyViews)}</td>
+                      <td className="px-4 py-3 text-foreground">{money(m.lifetimeCommissionCents)}</td>
+                      <td className="px-4 py-3 text-muted-foreground">{money(m.paid_baseline_cents)}</td>
+                      <td className="px-4 py-3 font-medium text-lime">{money(m.unpaidCommissionCents)}</td>
+                      <td className="px-4 py-3 text-right">
+                        <button
+                          onClick={() => resetManagerCommission(m)}
+                          disabled={m.unpaidCommissionCents === 0}
+                          className="rounded-full border border-lime bg-lime-soft px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-lime disabled:opacity-40"
+                        >
+                          Mark paid & reset
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
+
+
       {(showAdd || editing) && (
         <AccountForm
           account={editing}
