@@ -85,7 +85,10 @@ async function signedUrl(path: string): Promise<string | null> {
 
 type ViewMode = "accounts" | "history" | "earnings" | "screenshots";
 
-export default function XTrackerPanel() {
+const MANAGER_COMMISSION_PCT = 0.10;
+
+export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "manager" }) {
+  const isManager = role === "manager";
   const [accounts, setAccounts] = useState<XAccount[]>([]);
   const [history, setHistory] = useState<XHistory[]>([]);
   const [screenshots, setScreenshots] = useState<XScreenshot[]>([]);
@@ -95,9 +98,14 @@ export default function XTrackerPanel() {
   const [editing, setEditing] = useState<XAccount | null>(null);
   const [uploading, setUploading] = useState<XAccount | null>(null);
   const [busy, setBusy] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
-    void refresh();
+    (async () => {
+      const { data } = await supabase.auth.getUser();
+      setUserId(data.user?.id ?? null);
+      await refresh();
+    })();
   }, []);
 
   async function refresh() {
@@ -120,6 +128,7 @@ export default function XTrackerPanel() {
     setScreenshots(((s as unknown as { data: XScreenshot[] | null }).data) ?? []);
     setLoading(false);
   }
+
 
   const stats = useMemo(() => {
     const totalWeekly = accounts.reduce(
