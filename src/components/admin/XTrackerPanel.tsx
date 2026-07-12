@@ -654,6 +654,7 @@ function ScreenshotUploadModal({
         screenshot_url: path,
         detected_views: detected,
         uploaded_at: now,
+        added_by_user_id: userId,
       } as never);
       if (sErr) throw new Error(sErr.message);
 
