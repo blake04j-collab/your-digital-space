@@ -126,6 +126,7 @@ function AdminDashboard() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [authorized, setAuthorized] = useState(false);
+  const [role, setRole] = useState<"admin" | "manager" | null>(null);
   const [tab, setTab] = useState<Tab>("applications");
 
   const [apps, setApps] = useState<Application[]>([]);
@@ -151,35 +152,44 @@ function AdminDashboard() {
         .select("role")
         .eq("user_id", sessionData.session.user.id);
       const isAdmin = roles?.some((r) => r.role === "admin");
-      if (!isAdmin) {
+      const isManager = roles?.some((r) => (r.role as string) === "manager");
+      if (!isAdmin && !isManager) {
         setAuthorized(false);
         setLoading(false);
         return;
       }
       setAuthorized(true);
-      const [appsRes, vaRes, linksRes, clicksRes, viewsRes] = await Promise.all([
-        supabase.from("applications").select("*").order("created_at", { ascending: false }),
-        supabase.from("va_applications").select("*").order("created_at", { ascending: false }),
-        supabase.from("tracking_links").select("*").order("created_at", { ascending: false }),
-        supabase
-          .from("link_clicks")
-          .select("*")
-          .order("created_at", { ascending: false })
-          .limit(2000),
-        supabase
-          .from("page_views")
-          .select("id,path,created_at")
-          .order("created_at", { ascending: false })
-          .limit(5000),
-      ]);
-      setApps((appsRes.data as Application[]) ?? []);
-      setVaApps((vaRes.data as VAApplication[]) ?? []);
-      setLinks((linksRes.data as TrackingLink[]) ?? []);
-      setClicks((clicksRes.data as LinkClick[]) ?? []);
-      setViews((viewsRes.data as PageView[]) ?? []);
+      setRole(isAdmin ? "admin" : "manager");
+
+      if (isAdmin) {
+        const [appsRes, vaRes, linksRes, clicksRes, viewsRes] = await Promise.all([
+          supabase.from("applications").select("*").order("created_at", { ascending: false }),
+          supabase.from("va_applications").select("*").order("created_at", { ascending: false }),
+          supabase.from("tracking_links").select("*").order("created_at", { ascending: false }),
+          supabase
+            .from("link_clicks")
+            .select("*")
+            .order("created_at", { ascending: false })
+            .limit(2000),
+          supabase
+            .from("page_views")
+            .select("id,path,created_at")
+            .order("created_at", { ascending: false })
+            .limit(5000),
+        ]);
+        setApps((appsRes.data as Application[]) ?? []);
+        setVaApps((vaRes.data as VAApplication[]) ?? []);
+        setLinks((linksRes.data as TrackingLink[]) ?? []);
+        setClicks((clicksRes.data as LinkClick[]) ?? []);
+        setViews((viewsRes.data as PageView[]) ?? []);
+      } else {
+        // Manager: only the X Tracker tab is available
+        setTab("x_tracker");
+      }
       setLoading(false);
     })();
   }, [navigate]);
+
 
   const filtered = useMemo(() => {
     const list = apps.filter((a) => {
