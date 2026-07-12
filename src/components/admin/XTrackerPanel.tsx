@@ -852,7 +852,7 @@ function ScreenshotHistory({ rows, hideMoney = false }: { rows: XScreenshot[]; h
                     <td className="px-4 py-3 text-muted-foreground">{fmt(r.previous_views)}</td>
                     <td className="px-4 py-3 text-foreground">{fmt(r.new_views)}</td>
                     <td className="px-4 py-3 text-foreground">{fmt(r.views_gained)}</td>
-                    <td className="px-4 py-3 text-lime">{money(r.payout_cents)}</td>
+                    {!hideMoney && <td className="px-4 py-3 text-lime">{money(r.payout_cents)}</td>}
                     <td className="px-4 py-3">
                       {u ? (
                         <button
