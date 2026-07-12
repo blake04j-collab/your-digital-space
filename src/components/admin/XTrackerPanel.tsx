@@ -24,7 +24,15 @@ export type XAccount = {
   screenshot_url: string | null;
   created_at: string;
   updated_at: string;
+  added_by_user_id: string | null;
 };
+
+export type ManagerRow = {
+  user_id: string;
+  email: string;
+  paid_baseline_cents: number;
+};
+
 
 export type XHistory = {
   id: string;
@@ -83,7 +91,7 @@ async function signedUrl(path: string): Promise<string | null> {
   return data?.signedUrl ?? null;
 }
 
-type ViewMode = "accounts" | "history" | "earnings" | "screenshots";
+type ViewMode = "accounts" | "history" | "earnings" | "screenshots" | "managers";
 
 const MANAGER_COMMISSION_PCT = 0.10;
 
@@ -92,6 +100,7 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
   const [accounts, setAccounts] = useState<XAccount[]>([]);
   const [history, setHistory] = useState<XHistory[]>([]);
   const [screenshots, setScreenshots] = useState<XScreenshot[]>([]);
+  const [managers, setManagers] = useState<ManagerRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<ViewMode>("accounts");
   const [showAdd, setShowAdd] = useState(false);
@@ -99,6 +108,7 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
   const [uploading, setUploading] = useState<XAccount | null>(null);
   const [busy, setBusy] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
+  const [myUnpaidCommissionCents, setMyUnpaidCommissionCents] = useState<number>(0);
 
   useEffect(() => {
     (async () => {
@@ -110,7 +120,7 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
 
   async function refresh() {
     setLoading(true);
-    const [a, h, s] = await Promise.all([
+    const promises: Array<PromiseLike<{ data: unknown }>> = [
       supabase.from("x_tracker_accounts").select("*").order("created_at", { ascending: false }),
       supabase
         .from("x_tracker_history")
@@ -121,13 +131,33 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
         .from("x_tracker_screenshots" as never)
         .select("*")
         .order("uploaded_at", { ascending: false })
-        .limit(500),
-    ]);
+        .limit(500) as unknown as PromiseLike<{ data: unknown }>,
+    ];
+    if (!isManager) {
+      promises.push(supabase.rpc("list_managers" as never) as unknown as PromiseLike<{ data: unknown }>);
+    } else {
+      promises.push(
+        supabase.rpc("get_my_manager_commission" as never) as unknown as PromiseLike<{ data: unknown }>,
+      );
+    }
+    const results = await Promise.all(promises);
+    const [a, h, s, extra] = results;
     setAccounts((a.data as XAccount[]) ?? []);
     setHistory((h.data as XHistory[]) ?? []);
-    setScreenshots(((s as unknown as { data: XScreenshot[] | null }).data) ?? []);
+    setScreenshots((s.data as XScreenshot[]) ?? []);
+    if (!isManager) {
+      setManagers((extra?.data as ManagerRow[]) ?? []);
+    } else {
+      const row = Array.isArray(extra?.data) ? (extra.data[0] as { unpaid_commission_cents?: number } | undefined) : undefined;
+      setMyUnpaidCommissionCents(Number(row?.unpaid_commission_cents ?? 0));
+    }
     setLoading(false);
   }
+
+
+
+
+
 
 
   const stats = useMemo(() => {
@@ -177,6 +207,70 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
     }
     return Array.from(map.values()).sort((a, b) => b.lifetimePay - a.lifetimePay);
   }, [accounts, history]);
+
+  const managerStats = useMemo(() => {
+    // Map account_id -> manager user_id for history lookup
+    const accountManager = new Map<string, string>();
+    for (const a of accounts) {
+      if (a.added_by_user_id) accountManager.set(a.id, a.added_by_user_id);
+    }
+    // Build per-manager tallies keyed by user_id
+    const map = new Map<string, { accountsCount: number; weeklyViews: number; lifetimePayCents: number }>();
+    for (const m of managers) {
+      map.set(m.user_id, { accountsCount: 0, weeklyViews: 0, lifetimePayCents: 0 });
+    }
+    for (const a of accounts) {
+      const mgr = a.added_by_user_id;
+      if (!mgr || !map.has(mgr)) continue;
+      const entry = map.get(mgr)!;
+      const wViews = Math.max(0, a.current_views - a.weekly_starting_views);
+      const wPay = payFromViews(wViews, a.rate_cents_per_1k);
+      entry.accountsCount += 1;
+      entry.weeklyViews += wViews;
+      entry.lifetimePayCents += wPay;
+    }
+    for (const h of history) {
+      if (!h.account_id) continue;
+      const mgr = accountManager.get(h.account_id);
+      if (!mgr || !map.has(mgr)) continue;
+      map.get(mgr)!.lifetimePayCents += h.weekly_pay_cents;
+    }
+    return managers.map((m) => {
+      const s = map.get(m.user_id) ?? { accountsCount: 0, weeklyViews: 0, lifetimePayCents: 0 };
+      const lifetimeCommissionCents = Math.round(s.lifetimePayCents * MANAGER_COMMISSION_PCT);
+      const unpaidCommissionCents = Math.max(0, lifetimeCommissionCents - m.paid_baseline_cents);
+      return {
+        ...m,
+        accountsCount: s.accountsCount,
+        weeklyViews: s.weeklyViews,
+        lifetimeCommissionCents,
+        unpaidCommissionCents,
+      };
+    });
+  }, [accounts, history, managers]);
+
+  const managerEmailById = useMemo(() => {
+    const m = new Map<string, string>();
+    for (const r of managers) m.set(r.user_id, r.email);
+    return m;
+  }, [managers]);
+
+  async function resetManagerCommission(m: (typeof managerStats)[number]) {
+    if (
+      !confirm(
+        `Mark ${m.email}'s commission as fully paid?\n\nUnpaid balance will reset to $0.00 (currently ${money(m.unpaidCommissionCents)}). Future views will start accruing from zero.`,
+      )
+    )
+      return;
+    const { error } = await supabase.rpc("reset_manager_commission" as never, {
+      _manager: m.user_id,
+      _lifetime_cents: m.lifetimeCommissionCents,
+    } as never);
+    if (error) return alert(error.message);
+    await refresh();
+  }
+
+
 
   async function deleteAccount(id: string) {
     if (!confirm("Remove this account from tracking?")) return;
@@ -264,7 +358,7 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
   }
 
   // Manager commission: 10% of what their added accounts would pay at $3/1k
-  const managerCommissionCents = Math.round(stats.totalWeeklyPay * MANAGER_COMMISSION_PCT);
+  const managerCommissionCents = myUnpaidCommissionCents;
 
   return (
     <div>
@@ -319,10 +413,10 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
         )}
       </div>
 
-      <div className="mt-5 flex gap-1 rounded-full border border-hairline bg-surface-1 p-1 w-fit">
+      <div className="mt-5 flex gap-1 rounded-full border border-hairline bg-surface-1 p-1 w-fit flex-wrap">
         {((isManager
           ? (["accounts", "screenshots"] as const)
-          : (["accounts", "screenshots", "earnings", "history"] as const)
+          : (["accounts", "screenshots", "earnings", "history", "managers"] as const)
         ) as readonly ViewMode[]).map((v) => (
           <button
             key={v}
@@ -335,6 +429,7 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
           </button>
         ))}
       </div>
+
 
       {view === "accounts" && (
         <div className="mt-4 overflow-hidden rounded-2xl border border-hairline bg-surface-1">
@@ -354,8 +449,10 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
                     <th className="px-4 py-3">Gained</th>
                     {!isManager && <th className="px-4 py-3">Owed</th>}
                     <th className="px-4 py-3">Last upload</th>
+                    {!isManager && <th className="px-4 py-3">Added by</th>}
                     <th className="px-4 py-3 text-right">Actions</th>
                   </tr>
+
                 </thead>
                 <tbody>
                   {accounts.map((a) => {
@@ -395,6 +492,22 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
                             ? new Date(a.last_screenshot_upload_at).toLocaleString()
                             : "—"}
                         </td>
+                        {!isManager && (
+                          <td className="px-4 py-3 text-xs">
+                            {a.added_by_user_id ? (
+                              managerEmailById.has(a.added_by_user_id) ? (
+                                <span className="rounded-full border border-lime/40 bg-lime-soft px-2 py-0.5 text-lime">
+                                  {managerEmailById.get(a.added_by_user_id)}
+                                </span>
+                              ) : (
+                                <span className="text-muted-foreground">Admin</span>
+                              )
+                            ) : (
+                              <span className="text-muted-foreground">—</span>
+                            )}
+                          </td>
+                        )}
+
                         <td className="px-4 py-3 text-right">
                           <div className="flex justify-end gap-1.5">
                             <button
@@ -503,6 +616,54 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
           )}
         </div>
       )}
+
+      {view === "managers" && !isManager && (
+        <div className="mt-4 overflow-hidden rounded-2xl border border-hairline bg-surface-1">
+          {managerStats.length === 0 ? (
+            <div className="p-10 text-center text-sm text-muted-foreground">
+              No managers yet. Grant a user the manager role to see their commissions here.
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[900px] text-left text-sm">
+                <thead className="border-b border-hairline text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                  <tr>
+                    <th className="px-4 py-3">Manager</th>
+                    <th className="px-4 py-3">Accounts</th>
+                    <th className="px-4 py-3">Weekly views</th>
+                    <th className="px-4 py-3">Lifetime commission (10%)</th>
+                    <th className="px-4 py-3">Already paid</th>
+                    <th className="px-4 py-3">Unpaid balance</th>
+                    <th className="px-4 py-3 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {managerStats.map((m) => (
+                    <tr key={m.user_id} className="border-b border-hairline/60 last:border-0">
+                      <td className="px-4 py-3 text-foreground">{m.email}</td>
+                      <td className="px-4 py-3 text-muted-foreground">{m.accountsCount}</td>
+                      <td className="px-4 py-3 text-muted-foreground">{fmt(m.weeklyViews)}</td>
+                      <td className="px-4 py-3 text-foreground">{money(m.lifetimeCommissionCents)}</td>
+                      <td className="px-4 py-3 text-muted-foreground">{money(m.paid_baseline_cents)}</td>
+                      <td className="px-4 py-3 font-medium text-lime">{money(m.unpaidCommissionCents)}</td>
+                      <td className="px-4 py-3 text-right">
+                        <button
+                          onClick={() => resetManagerCommission(m)}
+                          disabled={m.unpaidCommissionCents === 0}
+                          className="rounded-full border border-lime bg-lime-soft px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-lime disabled:opacity-40"
+                        >
+                          Mark paid & reset
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
+
 
       {(showAdd || editing) && (
         <AccountForm
