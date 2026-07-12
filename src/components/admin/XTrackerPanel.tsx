@@ -561,10 +561,12 @@ function readAsDataUrl(file: File): Promise<string> {
 
 function ScreenshotUploadModal({
   account,
+  userId,
   onClose,
   onSaved,
 }: {
   account: XAccount;
+  userId: string | null;
   onClose: () => void;
   onSaved: () => void;
 }) {
