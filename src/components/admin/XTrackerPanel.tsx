@@ -791,7 +791,7 @@ function MiniStat({ label, value, accent }: { label: string; value: string; acce
 
 /* -------------------------- Screenshot history view --------------------------- */
 
-function ScreenshotHistory({ rows }: { rows: XScreenshot[] }) {
+function ScreenshotHistory({ rows, hideMoney = false }: { rows: XScreenshot[]; hideMoney?: boolean }) {
   const [urls, setUrls] = useState<Record<string, string>>({});
   const [lightbox, setLightbox] = useState<string | null>(null);
 
