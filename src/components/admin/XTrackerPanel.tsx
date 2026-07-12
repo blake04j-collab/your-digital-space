@@ -196,6 +196,70 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
     return Array.from(map.values()).sort((a, b) => b.lifetimePay - a.lifetimePay);
   }, [accounts, history]);
 
+  const managerStats = useMemo(() => {
+    // Map account_id -> manager user_id for history lookup
+    const accountManager = new Map<string, string>();
+    for (const a of accounts) {
+      if (a.added_by_user_id) accountManager.set(a.id, a.added_by_user_id);
+    }
+    // Build per-manager tallies keyed by user_id
+    const map = new Map<string, { accountsCount: number; weeklyViews: number; lifetimePayCents: number }>();
+    for (const m of managers) {
+      map.set(m.user_id, { accountsCount: 0, weeklyViews: 0, lifetimePayCents: 0 });
+    }
+    for (const a of accounts) {
+      const mgr = a.added_by_user_id;
+      if (!mgr || !map.has(mgr)) continue;
+      const entry = map.get(mgr)!;
+      const wViews = Math.max(0, a.current_views - a.weekly_starting_views);
+      const wPay = payFromViews(wViews, a.rate_cents_per_1k);
+      entry.accountsCount += 1;
+      entry.weeklyViews += wViews;
+      entry.lifetimePayCents += wPay;
+    }
+    for (const h of history) {
+      if (!h.account_id) continue;
+      const mgr = accountManager.get(h.account_id);
+      if (!mgr || !map.has(mgr)) continue;
+      map.get(mgr)!.lifetimePayCents += h.weekly_pay_cents;
+    }
+    return managers.map((m) => {
+      const s = map.get(m.user_id) ?? { accountsCount: 0, weeklyViews: 0, lifetimePayCents: 0 };
+      const lifetimeCommissionCents = Math.round(s.lifetimePayCents * MANAGER_COMMISSION_PCT);
+      const unpaidCommissionCents = Math.max(0, lifetimeCommissionCents - m.paid_baseline_cents);
+      return {
+        ...m,
+        accountsCount: s.accountsCount,
+        weeklyViews: s.weeklyViews,
+        lifetimeCommissionCents,
+        unpaidCommissionCents,
+      };
+    });
+  }, [accounts, history, managers]);
+
+  const managerEmailById = useMemo(() => {
+    const m = new Map<string, string>();
+    for (const r of managers) m.set(r.user_id, r.email);
+    return m;
+  }, [managers]);
+
+  async function resetManagerCommission(m: (typeof managerStats)[number]) {
+    if (
+      !confirm(
+        `Mark ${m.email}'s commission as fully paid?\n\nUnpaid balance will reset to $0.00 (currently ${money(m.unpaidCommissionCents)}). Future views will start accruing from zero.`,
+      )
+    )
+      return;
+    const { error } = await supabase.rpc("reset_manager_commission" as never, {
+      _manager: m.user_id,
+      _lifetime_cents: m.lifetimeCommissionCents,
+    } as never);
+    if (error) return alert(error.message);
+    await refresh();
+  }
+
+
+
   async function deleteAccount(id: string) {
     if (!confirm("Remove this account from tracking?")) return;
     const { error } = await supabase.from("x_tracker_accounts").delete().eq("id", id);
