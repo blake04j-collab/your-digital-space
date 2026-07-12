@@ -437,8 +437,10 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
                     <th className="px-4 py-3">Gained</th>
                     {!isManager && <th className="px-4 py-3">Owed</th>}
                     <th className="px-4 py-3">Last upload</th>
+                    {!isManager && <th className="px-4 py-3">Added by</th>}
                     <th className="px-4 py-3 text-right">Actions</th>
                   </tr>
+
                 </thead>
                 <tbody>
                   {accounts.map((a) => {
