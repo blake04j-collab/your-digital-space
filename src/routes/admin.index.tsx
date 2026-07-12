@@ -126,6 +126,7 @@ function AdminDashboard() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [authorized, setAuthorized] = useState(false);
+  const [role, setRole] = useState<"admin" | "manager" | null>(null);
   const [tab, setTab] = useState<Tab>("applications");
 
   const [apps, setApps] = useState<Application[]>([]);
@@ -151,35 +152,44 @@ function AdminDashboard() {
         .select("role")
         .eq("user_id", sessionData.session.user.id);
       const isAdmin = roles?.some((r) => r.role === "admin");
-      if (!isAdmin) {
+      const isManager = roles?.some((r) => (r.role as string) === "manager");
+      if (!isAdmin && !isManager) {
         setAuthorized(false);
         setLoading(false);
         return;
       }
       setAuthorized(true);
-      const [appsRes, vaRes, linksRes, clicksRes, viewsRes] = await Promise.all([
-        supabase.from("applications").select("*").order("created_at", { ascending: false }),
-        supabase.from("va_applications").select("*").order("created_at", { ascending: false }),
-        supabase.from("tracking_links").select("*").order("created_at", { ascending: false }),
-        supabase
-          .from("link_clicks")
-          .select("*")
-          .order("created_at", { ascending: false })
-          .limit(2000),
-        supabase
-          .from("page_views")
-          .select("id,path,created_at")
-          .order("created_at", { ascending: false })
-          .limit(5000),
-      ]);
-      setApps((appsRes.data as Application[]) ?? []);
-      setVaApps((vaRes.data as VAApplication[]) ?? []);
-      setLinks((linksRes.data as TrackingLink[]) ?? []);
-      setClicks((clicksRes.data as LinkClick[]) ?? []);
-      setViews((viewsRes.data as PageView[]) ?? []);
+      setRole(isAdmin ? "admin" : "manager");
+
+      if (isAdmin) {
+        const [appsRes, vaRes, linksRes, clicksRes, viewsRes] = await Promise.all([
+          supabase.from("applications").select("*").order("created_at", { ascending: false }),
+          supabase.from("va_applications").select("*").order("created_at", { ascending: false }),
+          supabase.from("tracking_links").select("*").order("created_at", { ascending: false }),
+          supabase
+            .from("link_clicks")
+            .select("*")
+            .order("created_at", { ascending: false })
+            .limit(2000),
+          supabase
+            .from("page_views")
+            .select("id,path,created_at")
+            .order("created_at", { ascending: false })
+            .limit(5000),
+        ]);
+        setApps((appsRes.data as Application[]) ?? []);
+        setVaApps((vaRes.data as VAApplication[]) ?? []);
+        setLinks((linksRes.data as TrackingLink[]) ?? []);
+        setClicks((clicksRes.data as LinkClick[]) ?? []);
+        setViews((viewsRes.data as PageView[]) ?? []);
+      } else {
+        // Manager: only the X Tracker tab is available
+        setTab("x_tracker");
+      }
       setLoading(false);
     })();
   }, [navigate]);
+
 
   const filtered = useMemo(() => {
     const list = apps.filter((a) => {
@@ -285,7 +295,10 @@ function AdminDashboard() {
           </div>
           <div className="flex items-center gap-2">
             <div className="hidden gap-1 rounded-full border border-hairline bg-surface-1 p-1 sm:flex">
-              {(["applications", "va_apps", "x_tracker", "analytics", "links"] as const).map((t) => (
+              {((role === "manager"
+                ? (["x_tracker"] as const)
+                : (["applications", "va_apps", "x_tracker", "analytics", "links"] as const)
+              ) as readonly Tab[]).map((t) => (
                 <button
                   key={t}
                   onClick={() => setTab(t)}
@@ -309,7 +322,10 @@ function AdminDashboard() {
           </div>
         </div>
         <div className="flex gap-1 border-t border-hairline px-5 py-2 sm:hidden">
-          {(["applications", "va_apps", "x_tracker", "analytics", "links"] as const).map((t) => (
+          {((role === "manager"
+            ? (["x_tracker"] as const)
+            : (["applications", "va_apps", "x_tracker", "analytics", "links"] as const)
+          ) as readonly Tab[]).map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
@@ -322,6 +338,7 @@ function AdminDashboard() {
           ))}
 
         </div>
+
       </header>
 
       <main className="mx-auto max-w-7xl px-5 py-8">
@@ -424,7 +441,7 @@ function AdminDashboard() {
 
         {tab === "va_apps" && <VAPanel vaApps={vaApps} setVaApps={setVaApps} />}
 
-        {tab === "x_tracker" && <XTrackerPanel />}
+        {tab === "x_tracker" && <XTrackerPanel role={role ?? "admin"} />}
 
 
 

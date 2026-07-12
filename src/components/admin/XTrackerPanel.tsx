@@ -85,7 +85,10 @@ async function signedUrl(path: string): Promise<string | null> {
 
 type ViewMode = "accounts" | "history" | "earnings" | "screenshots";
 
-export default function XTrackerPanel() {
+const MANAGER_COMMISSION_PCT = 0.10;
+
+export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "manager" }) {
+  const isManager = role === "manager";
   const [accounts, setAccounts] = useState<XAccount[]>([]);
   const [history, setHistory] = useState<XHistory[]>([]);
   const [screenshots, setScreenshots] = useState<XScreenshot[]>([]);
@@ -95,9 +98,14 @@ export default function XTrackerPanel() {
   const [editing, setEditing] = useState<XAccount | null>(null);
   const [uploading, setUploading] = useState<XAccount | null>(null);
   const [busy, setBusy] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
-    void refresh();
+    (async () => {
+      const { data } = await supabase.auth.getUser();
+      setUserId(data.user?.id ?? null);
+      await refresh();
+    })();
   }, []);
 
   async function refresh() {
@@ -120,6 +128,7 @@ export default function XTrackerPanel() {
     setScreenshots(((s as unknown as { data: XScreenshot[] | null }).data) ?? []);
     setLoading(false);
   }
+
 
   const stats = useMemo(() => {
     const totalWeekly = accounts.reduce(
@@ -254,13 +263,20 @@ export default function XTrackerPanel() {
     return <div className="p-8 text-center text-sm text-muted-foreground">Loading X Tracker…</div>;
   }
 
+  // Manager commission: 10% of what their added accounts would pay at $3/1k
+  const managerCommissionCents = Math.round(stats.totalWeeklyPay * MANAGER_COMMISSION_PCT);
+
   return (
     <div>
       <div className="mb-3 flex items-start justify-between gap-3">
         <div>
-          <h2 className="font-display text-2xl text-foreground">X View Tracker</h2>
+          <h2 className="font-display text-2xl text-foreground">
+            {isManager ? "Your X Accounts" : "X View Tracker"}
+          </h2>
           <p className="mt-1 text-xs text-muted-foreground">
-            Upload a screenshot of each account's post — OCR reads the view count, you confirm, payroll updates. $3 per 1,000 weekly views.
+            {isManager
+              ? "Add X accounts you're managing and upload weekly screenshots. You earn 10% commission on the views your accounts generate."
+              : "Upload a screenshot of each account's post — OCR reads the view count, you confirm, payroll updates. $3 per 1,000 weekly views."}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -270,31 +286,44 @@ export default function XTrackerPanel() {
           >
             + Add account
           </button>
-          <button
-            onClick={exportPayrollCsv}
-            className="rounded-full border border-hairline bg-surface-1 px-4 py-1.5 text-[10px] uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground"
-          >
-            Export payroll
-          </button>
-          <button
-            onClick={closeWeek}
-            disabled={busy}
-            className="rounded-full border border-lime bg-lime-soft px-4 py-1.5 text-[10px] uppercase tracking-[0.2em] text-lime disabled:opacity-50"
-          >
-            {busy ? "Working…" : "Close week & reset"}
-          </button>
+          {!isManager && (
+            <>
+              <button
+                onClick={exportPayrollCsv}
+                className="rounded-full border border-hairline bg-surface-1 px-4 py-1.5 text-[10px] uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground"
+              >
+                Export payroll
+              </button>
+              <button
+                onClick={closeWeek}
+                disabled={busy}
+                className="rounded-full border border-lime bg-lime-soft px-4 py-1.5 text-[10px] uppercase tracking-[0.2em] text-lime disabled:opacity-50"
+              >
+                {busy ? "Working…" : "Close week & reset"}
+              </button>
+            </>
+          )}
         </div>
       </div>
 
       <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">
-        <TinyStat label="Accounts tracked" value={String(stats.active)} />
+        <TinyStat label={isManager ? "Your accounts" : "Accounts tracked"} value={String(stats.active)} />
         <TinyStat label="Weekly views" value={fmt(stats.totalWeekly)} />
-        <TinyStat label="Weekly pay" value={money(stats.totalWeeklyPay)} accent />
-        <TinyStat label="Last 30 days pay" value={money(stats.monthPay)} />
+        {isManager ? (
+          <TinyStat label="Your commission (10%)" value={money(managerCommissionCents)} accent />
+        ) : (
+          <>
+            <TinyStat label="Weekly pay" value={money(stats.totalWeeklyPay)} accent />
+            <TinyStat label="Last 30 days pay" value={money(stats.monthPay)} />
+          </>
+        )}
       </div>
 
       <div className="mt-5 flex gap-1 rounded-full border border-hairline bg-surface-1 p-1 w-fit">
-        {(["accounts", "screenshots", "earnings", "history"] as const).map((v) => (
+        {((isManager
+          ? (["accounts", "screenshots"] as const)
+          : (["accounts", "screenshots", "earnings", "history"] as const)
+        ) as readonly ViewMode[]).map((v) => (
           <button
             key={v}
             onClick={() => setView(v)}
@@ -319,11 +348,11 @@ export default function XTrackerPanel() {
                 <thead className="border-b border-hairline text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
                   <tr>
                     <th className="px-4 py-3">Account</th>
-                    <th className="px-4 py-3">Employee</th>
+                    <th className="px-4 py-3">{isManager ? "Contact" : "Employee"}</th>
                     <th className="px-4 py-3">Previous</th>
                     <th className="px-4 py-3">Current</th>
                     <th className="px-4 py-3">Gained</th>
-                    <th className="px-4 py-3">Owed</th>
+                    {!isManager && <th className="px-4 py-3">Owed</th>}
                     <th className="px-4 py-3">Last upload</th>
                     <th className="px-4 py-3 text-right">Actions</th>
                   </tr>
@@ -358,7 +387,9 @@ export default function XTrackerPanel() {
                         <td className="px-4 py-3 text-muted-foreground">{fmt(a.previous_views ?? 0)}</td>
                         <td className="px-4 py-3 text-foreground">{fmt(a.current_views)}</td>
                         <td className="px-4 py-3 text-foreground">{fmt(gained)}</td>
-                        <td className="px-4 py-3 font-medium text-lime">{money(owed)}</td>
+                        {!isManager && (
+                          <td className="px-4 py-3 font-medium text-lime">{money(owed)}</td>
+                        )}
                         <td className="px-4 py-3 text-xs text-muted-foreground">
                           {a.last_screenshot_upload_at
                             ? new Date(a.last_screenshot_upload_at).toLocaleString()
@@ -397,8 +428,9 @@ export default function XTrackerPanel() {
       )}
 
       {view === "screenshots" && (
-        <ScreenshotHistory rows={screenshots} />
+        <ScreenshotHistory rows={screenshots} hideMoney={isManager} />
       )}
+
 
       {view === "earnings" && (
         <div className="mt-4 overflow-hidden rounded-2xl border border-hairline bg-surface-1">
@@ -475,6 +507,7 @@ export default function XTrackerPanel() {
       {(showAdd || editing) && (
         <AccountForm
           account={editing}
+          userId={userId}
           onClose={() => {
             setShowAdd(false);
             setEditing(null);
@@ -490,6 +523,7 @@ export default function XTrackerPanel() {
       {uploading && (
         <ScreenshotUploadModal
           account={uploading}
+          userId={userId}
           onClose={() => setUploading(null)}
           onSaved={async () => {
             setUploading(null);
@@ -527,10 +561,12 @@ function readAsDataUrl(file: File): Promise<string> {
 
 function ScreenshotUploadModal({
   account,
+  userId,
   onClose,
   onSaved,
 }: {
   account: XAccount;
+  userId: string | null;
   onClose: () => void;
   onSaved: () => void;
 }) {
@@ -618,6 +654,7 @@ function ScreenshotUploadModal({
         screenshot_url: path,
         detected_views: detected,
         uploaded_at: now,
+        added_by_user_id: userId,
       } as never);
       if (sErr) throw new Error(sErr.message);
 
@@ -759,7 +796,7 @@ function MiniStat({ label, value, accent }: { label: string; value: string; acce
 
 /* -------------------------- Screenshot history view --------------------------- */
 
-function ScreenshotHistory({ rows }: { rows: XScreenshot[] }) {
+function ScreenshotHistory({ rows, hideMoney = false }: { rows: XScreenshot[]; hideMoney?: boolean }) {
   const [urls, setUrls] = useState<Record<string, string>>({});
   const [lightbox, setLightbox] = useState<string | null>(null);
 
@@ -802,7 +839,8 @@ function ScreenshotHistory({ rows }: { rows: XScreenshot[] }) {
                 <th className="px-4 py-3">Previous</th>
                 <th className="px-4 py-3">New</th>
                 <th className="px-4 py-3">Gained</th>
-                <th className="px-4 py-3">Owed</th>
+                {!hideMoney && <th className="px-4 py-3">Owed</th>}
+
                 <th className="px-4 py-3">Screenshot</th>
               </tr>
             </thead>
@@ -819,7 +857,7 @@ function ScreenshotHistory({ rows }: { rows: XScreenshot[] }) {
                     <td className="px-4 py-3 text-muted-foreground">{fmt(r.previous_views)}</td>
                     <td className="px-4 py-3 text-foreground">{fmt(r.new_views)}</td>
                     <td className="px-4 py-3 text-foreground">{fmt(r.views_gained)}</td>
-                    <td className="px-4 py-3 text-lime">{money(r.payout_cents)}</td>
+                    {!hideMoney && <td className="px-4 py-3 text-lime">{money(r.payout_cents)}</td>}
                     <td className="px-4 py-3">
                       {u ? (
                         <button
@@ -856,10 +894,12 @@ function ScreenshotHistory({ rows }: { rows: XScreenshot[] }) {
 
 function AccountForm({
   account,
+  userId,
   onClose,
   onSaved,
 }: {
   account: XAccount | null;
+  userId: string | null;
   onClose: () => void;
   onSaved: () => void;
 }) {
@@ -957,6 +997,7 @@ function AccountForm({
             screenshot_url: screenshotPath!,
             detected_views: detected,
             uploaded_at: now,
+            added_by_user_id: userId,
           } as never);
         }
       } else {
@@ -977,7 +1018,8 @@ function AccountForm({
             last_refresh_at: now,
             last_screenshot_upload_at: now,
             status: "updated",
-          })
+            added_by_user_id: userId,
+          } as never)
           .select()
           .single();
         if (iErr) throw new Error(iErr.message);
@@ -994,6 +1036,7 @@ function AccountForm({
             screenshot_url: screenshotPath,
             detected_views: detected,
             uploaded_at: now,
+            added_by_user_id: userId,
           } as never);
         }
       }
