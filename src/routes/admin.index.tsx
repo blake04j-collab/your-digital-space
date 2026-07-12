@@ -441,7 +441,7 @@ function AdminDashboard() {
 
         {tab === "va_apps" && <VAPanel vaApps={vaApps} setVaApps={setVaApps} />}
 
-        {tab === "x_tracker" && <XTrackerPanel />}
+        {tab === "x_tracker" && <XTrackerPanel role={role ?? "admin"} />}
 
 
 
