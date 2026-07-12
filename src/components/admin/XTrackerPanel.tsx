@@ -1036,6 +1036,7 @@ function AccountForm({
             screenshot_url: screenshotPath,
             detected_views: detected,
             uploaded_at: now,
+            added_by_user_id: userId,
           } as never);
         }
       }
