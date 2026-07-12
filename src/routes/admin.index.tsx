@@ -295,7 +295,10 @@ function AdminDashboard() {
           </div>
           <div className="flex items-center gap-2">
             <div className="hidden gap-1 rounded-full border border-hairline bg-surface-1 p-1 sm:flex">
-              {(["applications", "va_apps", "x_tracker", "analytics", "links"] as const).map((t) => (
+              {((role === "manager"
+                ? (["x_tracker"] as const)
+                : (["applications", "va_apps", "x_tracker", "analytics", "links"] as const)
+              ) as readonly Tab[]).map((t) => (
                 <button
                   key={t}
                   onClick={() => setTab(t)}
@@ -319,7 +322,10 @@ function AdminDashboard() {
           </div>
         </div>
         <div className="flex gap-1 border-t border-hairline px-5 py-2 sm:hidden">
-          {(["applications", "va_apps", "x_tracker", "analytics", "links"] as const).map((t) => (
+          {((role === "manager"
+            ? (["x_tracker"] as const)
+            : (["applications", "va_apps", "x_tracker", "analytics", "links"] as const)
+          ) as readonly Tab[]).map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
@@ -332,6 +338,7 @@ function AdminDashboard() {
           ))}
 
         </div>
+
       </header>
 
       <main className="mx-auto max-w-7xl px-5 py-8">
