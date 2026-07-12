@@ -358,7 +358,7 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
   }
 
   // Manager commission: 10% of what their added accounts would pay at $3/1k
-  const managerCommissionCents = Math.round(stats.totalWeeklyPay * MANAGER_COMMISSION_PCT);
+  const managerCommissionCents = myUnpaidCommissionCents;
 
   return (
     <div>
