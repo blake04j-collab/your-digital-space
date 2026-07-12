@@ -119,7 +119,7 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
 
   async function refresh() {
     setLoading(true);
-    const promises: Promise<unknown>[] = [
+    const promises: Array<PromiseLike<{ data: unknown }>> = [
       supabase.from("x_tracker_accounts").select("*").order("created_at", { ascending: false }),
       supabase
         .from("x_tracker_history")
@@ -130,19 +130,20 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
         .from("x_tracker_screenshots" as never)
         .select("*")
         .order("uploaded_at", { ascending: false })
-        .limit(500),
+        .limit(500) as unknown as PromiseLike<{ data: unknown }>,
     ];
     if (!isManager) {
-      promises.push(supabase.rpc("list_managers" as never));
+      promises.push(supabase.rpc("list_managers" as never) as unknown as PromiseLike<{ data: unknown }>);
     }
     const results = await Promise.all(promises);
-    const [a, h, s, m] = results as Array<{ data: unknown }>;
+    const [a, h, s, m] = results;
     setAccounts((a.data as XAccount[]) ?? []);
     setHistory((h.data as XHistory[]) ?? []);
     setScreenshots((s.data as XScreenshot[]) ?? []);
     if (!isManager) setManagers((m?.data as ManagerRow[]) ?? []);
     setLoading(false);
   }
+
 
 
 
