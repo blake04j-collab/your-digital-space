@@ -507,6 +507,7 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
       {(showAdd || editing) && (
         <AccountForm
           account={editing}
+          userId={userId}
           onClose={() => {
             setShowAdd(false);
             setEditing(null);
@@ -522,6 +523,7 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
       {uploading && (
         <ScreenshotUploadModal
           account={uploading}
+          userId={userId}
           onClose={() => setUploading(null)}
           onSaved={async () => {
             setUploading(null);
