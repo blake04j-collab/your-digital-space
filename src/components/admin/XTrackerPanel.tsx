@@ -24,7 +24,15 @@ export type XAccount = {
   screenshot_url: string | null;
   created_at: string;
   updated_at: string;
+  added_by_user_id: string | null;
 };
+
+export type ManagerRow = {
+  user_id: string;
+  email: string;
+  paid_baseline_cents: number;
+};
+
 
 export type XHistory = {
   id: string;
