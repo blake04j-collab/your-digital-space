@@ -863,39 +863,146 @@ function AccountForm({
   onClose: () => void;
   onSaved: () => void;
 }) {
+  const isEdit = !!account;
+  const runOcr = useServerFn(extractViewsFromScreenshot);
   const [xUsername, setX] = useState(account?.x_username ?? "");
-  const [employee, setEmployee] = useState(account?.employee_name ?? "");
-  const [profile, setProfile] = useState(account?.profile_url ?? "");
-  const [pinned, setPinned] = useState(account?.pinned_post_url ?? "");
-  const [notes, setNotes] = useState(account?.notes ?? "");
-  const [currentViews, setCurrentViews] = useState(String(account?.current_views ?? 0));
-  const [baseline, setBaseline] = useState(String(account?.weekly_starting_views ?? 0));
+  const [contact, setContact] = useState(account?.employee_name ?? "");
   const [rate, setRate] = useState(String((account?.rate_cents_per_1k ?? 300) / 100));
+
+  const [file, setFile] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string | null>(account?.screenshot_url ? null : null);
+  const [ocrBusy, setOcrBusy] = useState(false);
+  const [detected, setDetected] = useState<number | null>(null);
+  const [views, setViews] = useState<string>(isEdit ? String(account?.current_views ?? 0) : "");
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  async function handleFile(f: File) {
+    setError(null);
+    setFile(f);
+    const dataUrl = await readAsDataUrl(f);
+    setPreview(dataUrl);
+    setOcrBusy(true);
+    const res = await runOcr({ data: { imageDataUrl: dataUrl } });
+    setOcrBusy(false);
+    if (!res.ok) {
+      setError(res.error);
+      setDetected(null);
+      return;
+    }
+    setDetected(res.views);
+    setViews(String(res.views));
+  }
 
   async function save() {
-    if (!xUsername.trim()) return alert("X username required");
-    const u = xUsername.replace(/^@/, "").trim();
-    const p = profile.trim() || `https://x.com/${u}`;
+    setError(null);
+    if (!xUsername.trim()) return setError("X username required");
+    if (!contact.trim()) return setError("Discord or Telegram username required");
+    if (!isEdit && !file) return setError("Upload a screenshot of the pinned post");
+    const finalViews = Math.max(0, Math.floor(Number(views) || 0));
+
     setSaving(true);
-    const payload = {
-      x_username: u,
-      employee_name: employee.trim(),
-      profile_url: p,
-      pinned_post_url: pinned.trim() || null,
-      notes: notes.trim() || null,
-      current_views: Math.max(0, Math.floor(Number(currentViews) || 0)),
-      weekly_starting_views: Math.max(0, Math.floor(Number(baseline) || 0)),
-      rate_cents_per_1k: Math.max(0, Math.round(Number(rate) * 100)),
-      last_updated: new Date().toISOString(),
-      status: "updated" as const,
-    };
-    const { error } = account
-      ? await supabase.from("x_tracker_accounts").update(payload).eq("id", account.id)
-      : await supabase.from("x_tracker_accounts").insert(payload);
-    setSaving(false);
-    if (error) return alert(error.message);
-    onSaved();
+    try {
+      const u = xUsername.replace(/^@/, "").trim();
+      const now = new Date().toISOString();
+      const rateCents = Math.max(0, Math.round(Number(rate) * 100));
+
+      let screenshotPath: string | null = account?.screenshot_url ?? null;
+      if (file) {
+        const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+        const accountId = account?.id ?? crypto.randomUUID();
+        const path = `${accountId}/${Date.now()}.${ext}`;
+        const up = await supabase.storage
+          .from(BUCKET)
+          .upload(path, file, { upsert: false, contentType: file.type || undefined });
+        if (up.error) throw new Error(up.error.message);
+        screenshotPath = path;
+      }
+
+      if (isEdit && account) {
+        const previous = account.current_views ?? 0;
+        const gained = Math.max(0, finalViews - previous);
+        const payout = payFromViews(gained, rateCents);
+        const { error: uErr } = await supabase
+          .from("x_tracker_accounts")
+          .update({
+            x_username: u,
+            employee_name: contact.trim(),
+            profile_url: `https://x.com/${u}`,
+            rate_cents_per_1k: rateCents,
+            current_views: finalViews,
+            previous_views: previous,
+            views_gained_since_last: gained,
+            payout_owed_cents: payout,
+            screenshot_url: screenshotPath,
+            last_updated: now,
+            last_refresh_at: file ? now : account.last_refresh_at,
+            last_screenshot_upload_at: file ? now : account.last_screenshot_upload_at,
+            status: "updated",
+            status_message: null,
+          })
+          .eq("id", account.id);
+        if (uErr) throw new Error(uErr.message);
+        if (file) {
+          await supabase.from("x_tracker_screenshots" as never).insert({
+            account_id: account.id,
+            x_username: u,
+            employee_name: contact.trim(),
+            previous_views: previous,
+            new_views: finalViews,
+            views_gained: gained,
+            payout_cents: payout,
+            rate_cents_per_1k: rateCents,
+            screenshot_url: screenshotPath!,
+            detected_views: detected,
+            uploaded_at: now,
+          } as never);
+        }
+      } else {
+        const { data: inserted, error: iErr } = await supabase
+          .from("x_tracker_accounts")
+          .insert({
+            x_username: u,
+            employee_name: contact.trim(),
+            profile_url: `https://x.com/${u}`,
+            rate_cents_per_1k: rateCents,
+            current_views: finalViews,
+            previous_views: 0,
+            views_gained_since_last: 0,
+            payout_owed_cents: 0,
+            weekly_starting_views: finalViews,
+            screenshot_url: screenshotPath,
+            last_updated: now,
+            last_refresh_at: now,
+            last_screenshot_upload_at: now,
+            status: "updated",
+          })
+          .select()
+          .single();
+        if (iErr) throw new Error(iErr.message);
+        if (inserted && screenshotPath) {
+          await supabase.from("x_tracker_screenshots" as never).insert({
+            account_id: inserted.id,
+            x_username: u,
+            employee_name: contact.trim(),
+            previous_views: 0,
+            new_views: finalViews,
+            views_gained: 0,
+            payout_cents: 0,
+            rate_cents_per_1k: rateCents,
+            screenshot_url: screenshotPath,
+            detected_views: detected,
+            uploaded_at: now,
+          } as never);
+        }
+      }
+      onSaved();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Save failed.");
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
@@ -909,46 +1016,77 @@ function AccountForm({
       >
         <div className="mb-4 flex items-center justify-between">
           <h3 className="font-display text-xl text-foreground">
-            {account ? "Edit account" : "Add X account"}
+            {isEdit ? "Edit account" : "Add X account"}
           </h3>
           <button onClick={onClose} className="text-2xl text-muted-foreground hover:text-foreground">
             ×
           </button>
         </div>
         <div className="space-y-3 text-sm">
+          <Input
+            label="Discord or Telegram username"
+            value={contact}
+            onChange={setContact}
+            placeholder="@handle"
+          />
           <Input label="X username" value={xUsername} onChange={setX} placeholder="username (no @)" />
-          <Input label="Employee name" value={employee} onChange={setEmployee} />
-          <Input label="Profile URL" value={profile} onChange={setProfile} placeholder="auto if blank" />
-          <Input label="Pinned post URL (optional)" value={pinned} onChange={setPinned} />
-          <div className="grid grid-cols-2 gap-3">
-            <Input label="Current views" value={currentViews} onChange={setCurrentViews} type="number" />
-            <Input
-              label="Baseline (week start)"
-              value={baseline}
-              onChange={setBaseline}
-              type="number"
-            />
-          </div>
           <Input label="Rate ($/1k views)" value={rate} onChange={setRate} type="number" />
+
           <div>
             <label className="mb-1 block text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-              Notes
+              Pinned post screenshot {isEdit && "(optional — replaces current)"}
             </label>
-            <textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              rows={3}
-              className="w-full rounded-lg border border-hairline bg-surface-1 px-3 py-2 text-sm text-foreground outline-none focus:border-lime"
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) void handleFile(f);
+              }}
+            />
+            <button
+              type="button"
+              onClick={() => fileRef.current?.click()}
+              className="w-full rounded-2xl border border-dashed border-hairline bg-surface-1 p-6 text-center hover:border-lime hover:text-lime"
+            >
+              {preview ? (
+                <img src={preview} alt="preview" className="mx-auto max-h-44 rounded-xl object-contain" />
+              ) : (
+                <span className="text-sm text-muted-foreground">
+                  {isEdit ? "Click to upload a new screenshot" : "Click to upload screenshot"}
+                </span>
+              )}
+            </button>
+          </div>
+
+          <div className="rounded-xl border border-hairline bg-surface-1 p-3">
+            <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+              View count {ocrBusy ? "(reading…)" : detected !== null ? `(OCR detected ${fmt(detected)})` : ""}
+            </div>
+            <input
+              type="number"
+              value={views}
+              onChange={(e) => setViews(e.target.value)}
+              placeholder="0"
+              className="mt-1 w-full rounded-lg border border-hairline bg-background px-3 py-2 text-lg text-foreground outline-none focus:border-lime"
             />
           </div>
+
+          {error && (
+            <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-2 text-xs text-destructive">
+              {error}
+            </div>
+          )}
         </div>
         <div className="mt-5 flex gap-2">
           <button
             onClick={save}
-            disabled={saving}
+            disabled={saving || ocrBusy}
             className="flex-1 rounded-xl bg-lime py-3 font-display text-sm tracking-[0.2em] text-primary-foreground disabled:opacity-50"
           >
-            {saving ? "Saving…" : account ? "Save changes" : "Add account"}
+            {saving ? "Saving…" : isEdit ? "Save changes" : "Add account"}
           </button>
           <button
             onClick={onClose}
@@ -961,6 +1099,7 @@ function AccountForm({
     </div>
   );
 }
+
 
 function Input({
   label,
