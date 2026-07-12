@@ -379,6 +379,7 @@ export type Database = {
       }
       x_tracker_accounts: {
         Row: {
+          added_by_user_id: string | null
           created_at: string
           current_views: number
           employee_name: string
@@ -401,6 +402,7 @@ export type Database = {
           x_username: string
         }
         Insert: {
+          added_by_user_id?: string | null
           created_at?: string
           current_views?: number
           employee_name?: string
@@ -423,6 +425,7 @@ export type Database = {
           x_username: string
         }
         Update: {
+          added_by_user_id?: string | null
           created_at?: string
           current_views?: number
           employee_name?: string
@@ -449,6 +452,7 @@ export type Database = {
       x_tracker_history: {
         Row: {
           account_id: string | null
+          added_by_user_id: string | null
           created_at: string
           employee_name: string
           ending_views: number
@@ -462,6 +466,7 @@ export type Database = {
         }
         Insert: {
           account_id?: string | null
+          added_by_user_id?: string | null
           created_at?: string
           employee_name?: string
           ending_views?: number
@@ -475,6 +480,7 @@ export type Database = {
         }
         Update: {
           account_id?: string | null
+          added_by_user_id?: string | null
           created_at?: string
           employee_name?: string
           ending_views?: number
@@ -499,6 +505,7 @@ export type Database = {
       x_tracker_screenshots: {
         Row: {
           account_id: string | null
+          added_by_user_id: string | null
           created_at: string
           detected_views: number | null
           employee_name: string
@@ -514,6 +521,7 @@ export type Database = {
         }
         Insert: {
           account_id?: string | null
+          added_by_user_id?: string | null
           created_at?: string
           detected_views?: number | null
           employee_name?: string
@@ -529,6 +537,7 @@ export type Database = {
         }
         Update: {
           account_id?: string | null
+          added_by_user_id?: string | null
           created_at?: string
           detected_views?: number | null
           employee_name?: string
