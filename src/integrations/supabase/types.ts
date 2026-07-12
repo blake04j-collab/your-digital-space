@@ -593,6 +593,14 @@ export type Database = {
         Args: { payload: Json; queue_name: string }
         Returns: number
       }
+      get_my_manager_commission: {
+        Args: never
+        Returns: {
+          lifetime_commission_cents: number
+          paid_baseline_cents: number
+          unpaid_commission_cents: number
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
