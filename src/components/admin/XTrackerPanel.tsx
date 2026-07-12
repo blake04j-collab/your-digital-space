@@ -834,7 +834,8 @@ function ScreenshotHistory({ rows, hideMoney = false }: { rows: XScreenshot[]; h
                 <th className="px-4 py-3">Previous</th>
                 <th className="px-4 py-3">New</th>
                 <th className="px-4 py-3">Gained</th>
-                <th className="px-4 py-3">Owed</th>
+                {!hideMoney && <th className="px-4 py-3">Owed</th>}
+
                 <th className="px-4 py-3">Screenshot</th>
               </tr>
             </thead>
