@@ -91,7 +91,7 @@ async function signedUrl(path: string): Promise<string | null> {
   return data?.signedUrl ?? null;
 }
 
-type ViewMode = "accounts" | "history" | "earnings" | "screenshots";
+type ViewMode = "accounts" | "history" | "earnings" | "screenshots" | "managers";
 
 const MANAGER_COMMISSION_PCT = 0.10;
 
@@ -100,6 +100,7 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
   const [accounts, setAccounts] = useState<XAccount[]>([]);
   const [history, setHistory] = useState<XHistory[]>([]);
   const [screenshots, setScreenshots] = useState<XScreenshot[]>([]);
+  const [managers, setManagers] = useState<ManagerRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<ViewMode>("accounts");
   const [showAdd, setShowAdd] = useState(false);
@@ -118,7 +119,7 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
 
   async function refresh() {
     setLoading(true);
-    const [a, h, s] = await Promise.all([
+    const promises: Promise<unknown>[] = [
       supabase.from("x_tracker_accounts").select("*").order("created_at", { ascending: false }),
       supabase
         .from("x_tracker_history")
@@ -130,12 +131,20 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
         .select("*")
         .order("uploaded_at", { ascending: false })
         .limit(500),
-    ]);
+    ];
+    if (!isManager) {
+      promises.push(supabase.rpc("list_managers" as never));
+    }
+    const results = await Promise.all(promises);
+    const [a, h, s, m] = results as Array<{ data: unknown }>;
     setAccounts((a.data as XAccount[]) ?? []);
     setHistory((h.data as XHistory[]) ?? []);
-    setScreenshots(((s as unknown as { data: XScreenshot[] | null }).data) ?? []);
+    setScreenshots((s.data as XScreenshot[]) ?? []);
+    if (!isManager) setManagers((m?.data as ManagerRow[]) ?? []);
     setLoading(false);
   }
+
+
 
 
   const stats = useMemo(() => {
