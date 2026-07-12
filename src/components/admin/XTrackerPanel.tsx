@@ -401,10 +401,10 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
         )}
       </div>
 
-      <div className="mt-5 flex gap-1 rounded-full border border-hairline bg-surface-1 p-1 w-fit">
+      <div className="mt-5 flex gap-1 rounded-full border border-hairline bg-surface-1 p-1 w-fit flex-wrap">
         {((isManager
           ? (["accounts", "screenshots"] as const)
-          : (["accounts", "screenshots", "earnings", "history"] as const)
+          : (["accounts", "screenshots", "earnings", "history", "managers"] as const)
         ) as readonly ViewMode[]).map((v) => (
           <button
             key={v}
@@ -417,6 +417,7 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
           </button>
         ))}
       </div>
+
 
       {view === "accounts" && (
         <div className="mt-4 overflow-hidden rounded-2xl border border-hairline bg-surface-1">
