@@ -377,6 +377,24 @@ export type Database = {
         }
         Relationships: []
       }
+      x_manager_commission_baseline: {
+        Row: {
+          paid_baseline_cents: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          paid_baseline_cents?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          paid_baseline_cents?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       x_tracker_accounts: {
         Row: {
           added_by_user_id: string | null
@@ -582,6 +600,14 @@ export type Database = {
         }
         Returns: boolean
       }
+      list_managers: {
+        Args: never
+        Returns: {
+          email: string
+          paid_baseline_cents: number
+          user_id: string
+        }[]
+      }
       move_to_dlq: {
         Args: {
           dlq_name: string
@@ -598,6 +624,10 @@ export type Database = {
           msg_id: number
           read_ct: number
         }[]
+      }
+      reset_manager_commission: {
+        Args: { _lifetime_cents: number; _manager: string }
+        Returns: undefined
       }
     }
     Enums: {
