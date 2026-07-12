@@ -1,18 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useServerFn } from "@tanstack/react-start";
-import { fetchXViews } from "@/lib/x-views.functions";
-
-type RefreshProgress = {
-  total: number;
-  completed: number;
-  success: number;
-  failed: number;
-  currentUsername: string | null;
-  errors: { username: string; error: string }[];
-  done: boolean;
-  unavailable: boolean;
-};
+import { extractViewsFromScreenshot } from "@/lib/x-views.functions";
 
 export type XAccount = {
   id: string;
@@ -22,11 +11,17 @@ export type XAccount = {
   profile_url: string;
   pinned_post_url: string | null;
   current_views: number;
+  previous_views: number | null;
+  views_gained_since_last: number | null;
+  payout_owed_cents: number | null;
   weekly_starting_views: number;
   rate_cents_per_1k: number;
   status: string;
   status_message: string | null;
   last_updated: string | null;
+  last_refresh_at: string | null;
+  last_screenshot_upload_at: string | null;
+  screenshot_url: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -44,6 +39,23 @@ export type XHistory = {
   weekly_pay_cents: number;
   created_at: string;
 };
+
+export type XScreenshot = {
+  id: string;
+  account_id: string | null;
+  x_username: string;
+  employee_name: string;
+  previous_views: number;
+  new_views: number;
+  views_gained: number;
+  payout_cents: number;
+  rate_cents_per_1k: number;
+  screenshot_url: string;
+  detected_views: number | null;
+  uploaded_at: string;
+};
+
+const BUCKET = "x-screenshots";
 
 function fmt(n: number) {
   return new Intl.NumberFormat().format(n);
@@ -66,18 +78,23 @@ function ymd(d: Date) {
   return d.toISOString().slice(0, 10);
 }
 
-type ViewMode = "accounts" | "history" | "earnings";
+async function signedUrl(path: string): Promise<string | null> {
+  const { data } = await supabase.storage.from(BUCKET).createSignedUrl(path, 60 * 60 * 24 * 7);
+  return data?.signedUrl ?? null;
+}
+
+type ViewMode = "accounts" | "history" | "earnings" | "screenshots";
 
 export default function XTrackerPanel() {
   const [accounts, setAccounts] = useState<XAccount[]>([]);
   const [history, setHistory] = useState<XHistory[]>([]);
+  const [screenshots, setScreenshots] = useState<XScreenshot[]>([]);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<ViewMode>("accounts");
   const [showAdd, setShowAdd] = useState(false);
   const [editing, setEditing] = useState<XAccount | null>(null);
+  const [uploading, setUploading] = useState<XAccount | null>(null);
   const [busy, setBusy] = useState(false);
-  const [progress, setProgress] = useState<RefreshProgress | null>(null);
-  const refreshView = useServerFn(fetchXViews);
 
   useEffect(() => {
     void refresh();
@@ -85,16 +102,22 @@ export default function XTrackerPanel() {
 
   async function refresh() {
     setLoading(true);
-    const [a, h] = await Promise.all([
+    const [a, h, s] = await Promise.all([
       supabase.from("x_tracker_accounts").select("*").order("created_at", { ascending: false }),
       supabase
         .from("x_tracker_history")
         .select("*")
         .order("week_start", { ascending: false })
         .limit(500),
+      supabase
+        .from("x_tracker_screenshots" as never)
+        .select("*")
+        .order("uploaded_at", { ascending: false })
+        .limit(500),
     ]);
     setAccounts((a.data as XAccount[]) ?? []);
     setHistory((h.data as XHistory[]) ?? []);
+    setScreenshots(((s as unknown as { data: XScreenshot[] | null }).data) ?? []);
     setLoading(false);
   }
 
@@ -146,107 +169,6 @@ export default function XTrackerPanel() {
     return Array.from(map.values()).sort((a, b) => b.lifetimePay - a.lifetimePay);
   }, [accounts, history]);
 
-  async function persistViews(a: XAccount, newViews: number, statusMessage: string | null = null) {
-    const previous = a.current_views ?? 0;
-    const gained = Math.max(0, newViews - previous);
-    const payoutCents = payFromViews(gained, a.rate_cents_per_1k);
-    const now = new Date().toISOString();
-    const { error } = await supabase
-      .from("x_tracker_accounts")
-      .update({
-        previous_views: previous,
-        current_views: newViews,
-        views_gained_since_last: gained,
-        payout_owed_cents: payoutCents,
-        last_refresh_at: now,
-        last_updated: now,
-        status: "updated",
-        status_message: statusMessage,
-      })
-      .eq("id", a.id);
-    if (error) throw new Error(error.message);
-  }
-
-  async function markError(id: string, message: string) {
-    await supabase
-      .from("x_tracker_accounts")
-      .update({ status: "error", status_message: message })
-      .eq("id", id);
-  }
-
-  async function refreshOneAccount(a: XAccount): Promise<{ ok: boolean; error?: string; unavailable?: boolean }> {
-    const res = await refreshView({ data: { pinnedPostUrl: a.pinned_post_url } });
-    if (!res.ok) {
-      await markError(a.id, res.error);
-      return { ok: false, error: res.error, unavailable: !res.configured };
-    }
-    await persistViews(a, res.views);
-    return { ok: true };
-  }
-
-  async function refreshSingle(a: XAccount) {
-    setBusy(true);
-    const r = await refreshOneAccount(a);
-    setBusy(false);
-    await refresh();
-    if (!r.ok) alert(r.error ?? "Refresh failed");
-  }
-
-  async function refreshAll() {
-    if (accounts.length === 0) return;
-    setProgress({
-      total: accounts.length,
-      completed: 0,
-      success: 0,
-      failed: 0,
-      currentUsername: accounts[0]?.x_username ?? null,
-      errors: [],
-      done: false,
-      unavailable: false,
-    });
-    let unavailable = false;
-    for (let i = 0; i < accounts.length; i++) {
-      const a = accounts[i];
-      setProgress((p) => (p ? { ...p, currentUsername: a.x_username } : p));
-      const r = await refreshOneAccount(a);
-      setProgress((p) => {
-        if (!p) return p;
-        const next = { ...p, completed: p.completed + 1, currentUsername: null };
-        if (r.ok) next.success += 1;
-        else {
-          next.failed += 1;
-          next.errors = [...p.errors, { username: a.x_username, error: r.error ?? "Unknown" }];
-          if (r.unavailable) next.unavailable = true;
-        }
-        return next;
-      });
-      if (r.unavailable) unavailable = true;
-      if (unavailable) {
-        // If X API isn't configured, no point continuing — mark rest as failed with same reason.
-        for (let j = i + 1; j < accounts.length; j++) {
-          const b = accounts[j];
-          await markError(b.id, "Automatic refresh unavailable — X API not connected.");
-          setProgress((p) =>
-            p
-              ? {
-                  ...p,
-                  completed: p.completed + 1,
-                  failed: p.failed + 1,
-                  errors: [
-                    ...p.errors,
-                    { username: b.x_username, error: "Automatic refresh unavailable — X API not connected." },
-                  ],
-                }
-              : p,
-          );
-        }
-        break;
-      }
-    }
-    setProgress((p) => (p ? { ...p, done: true, currentUsername: null } : p));
-    await refresh();
-  }
-
   async function deleteAccount(id: string) {
     if (!confirm("Remove this account from tracking?")) return;
     const { error } = await supabase.from("x_tracker_accounts").delete().eq("id", id);
@@ -264,7 +186,6 @@ export default function XTrackerPanel() {
     setBusy(true);
     const now = new Date();
     const weekStart = startOfWeekDate();
-    // Previous week's Sunday
     const weekEnd = new Date(weekStart);
     weekEnd.setDate(weekEnd.getDate() - 1);
     const prevWeekStart = new Date(weekStart);
@@ -339,17 +260,10 @@ export default function XTrackerPanel() {
         <div>
           <h2 className="font-display text-2xl text-foreground">X View Tracker</h2>
           <p className="mt-1 text-xs text-muted-foreground">
-            Views only refresh when you click Refresh. $3 per 1,000 weekly views. No background syncing.
+            Upload a screenshot of each account's post — OCR reads the view count, you confirm, payroll updates. $3 per 1,000 weekly views.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <button
-            onClick={() => void refreshAll()}
-            disabled={busy || (progress !== null && !progress.done) || accounts.length === 0}
-            className="rounded-full bg-lime px-4 py-1.5 text-[10px] uppercase tracking-[0.2em] text-primary-foreground disabled:opacity-50"
-          >
-            {progress && !progress.done ? "Refreshing…" : "Refresh all accounts"}
-          </button>
           <button
             onClick={() => setShowAdd(true)}
             className="rounded-full border border-hairline bg-surface-1 px-4 py-1.5 text-[10px] uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground"
@@ -372,66 +286,6 @@ export default function XTrackerPanel() {
         </div>
       </div>
 
-      {progress && (
-        <div className="mt-4 rounded-2xl border border-hairline bg-surface-1 p-4">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <div className="text-sm text-foreground">
-              {progress.done ? (
-                progress.unavailable ? (
-                  <span className="text-destructive">
-                    Automatic refresh unavailable — X API is not connected.
-                  </span>
-                ) : progress.failed === 0 ? (
-                  <span className="text-lime">✓ Refresh complete — all {progress.success} accounts updated.</span>
-                ) : (
-                  <span>
-                    Refresh complete — <span className="text-lime">{progress.success} updated</span>,{" "}
-                    <span className="text-destructive">{progress.failed} failed</span>.
-                  </span>
-                )
-              ) : (
-                <span>
-                  Refreshing {progress.currentUsername ? `@${progress.currentUsername}` : "…"}
-                </span>
-              )}
-            </div>
-            {progress.done && (
-              <button
-                onClick={() => setProgress(null)}
-                className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground"
-              >
-                Dismiss
-              </button>
-            )}
-          </div>
-          <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-surface-2">
-            <div
-              className="h-full bg-lime transition-all"
-              style={{ width: `${(progress.completed / Math.max(1, progress.total)) * 100}%` }}
-            />
-          </div>
-          <div className="mt-2 grid grid-cols-2 gap-2 text-[10px] uppercase tracking-[0.2em] text-muted-foreground md:grid-cols-5">
-            <div>Total: <span className="text-foreground">{progress.total}</span></div>
-            <div>Done: <span className="text-foreground">{progress.completed}</span></div>
-            <div>Remaining: <span className="text-foreground">{progress.total - progress.completed}</span></div>
-            <div>Success: <span className="text-lime">{progress.success}</span></div>
-            <div>Failed: <span className="text-destructive">{progress.failed}</span></div>
-          </div>
-          {progress.errors.length > 0 && (
-            <details className="mt-3 text-xs text-muted-foreground">
-              <summary className="cursor-pointer hover:text-foreground">View {progress.errors.length} error(s)</summary>
-              <ul className="mt-2 space-y-1">
-                {progress.errors.map((e, i) => (
-                  <li key={i}>
-                    <span className="text-foreground">@{e.username}</span>: {e.error}
-                  </li>
-                ))}
-              </ul>
-            </details>
-          )}
-        </div>
-      )}
-
       <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">
         <TinyStat label="Accounts tracked" value={String(stats.active)} />
         <TinyStat label="Weekly views" value={fmt(stats.totalWeekly)} />
@@ -440,7 +294,7 @@ export default function XTrackerPanel() {
       </div>
 
       <div className="mt-5 flex gap-1 rounded-full border border-hairline bg-surface-1 p-1 w-fit">
-        {(["accounts", "earnings", "history"] as const).map((v) => (
+        {(["accounts", "screenshots", "earnings", "history"] as const).map((v) => (
           <button
             key={v}
             onClick={() => setView(v)}
@@ -461,23 +315,23 @@ export default function XTrackerPanel() {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[900px] text-left text-sm">
+              <table className="w-full min-w-[1000px] text-left text-sm">
                 <thead className="border-b border-hairline text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
                   <tr>
                     <th className="px-4 py-3">Account</th>
                     <th className="px-4 py-3">Employee</th>
-                    <th className="px-4 py-3">Baseline</th>
+                    <th className="px-4 py-3">Previous</th>
                     <th className="px-4 py-3">Current</th>
-                    <th className="px-4 py-3">Weekly views</th>
-                    <th className="px-4 py-3">Weekly pay</th>
-                    <th className="px-4 py-3">Updated</th>
+                    <th className="px-4 py-3">Gained</th>
+                    <th className="px-4 py-3">Owed</th>
+                    <th className="px-4 py-3">Last upload</th>
                     <th className="px-4 py-3 text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {accounts.map((a) => {
-                    const w = Math.max(0, a.current_views - a.weekly_starting_views);
-                    const pay = payFromViews(w, a.rate_cents_per_1k);
+                    const gained = a.views_gained_since_last ?? 0;
+                    const owed = a.payout_owed_cents ?? 0;
                     return (
                       <tr key={a.id} className="border-b border-hairline/60 last:border-0 hover:bg-surface-2">
                         <td className="px-4 py-3">
@@ -501,21 +355,22 @@ export default function XTrackerPanel() {
                           )}
                         </td>
                         <td className="px-4 py-3 text-muted-foreground">{a.employee_name || "—"}</td>
-                        <td className="px-4 py-3 text-muted-foreground">{fmt(a.weekly_starting_views)}</td>
+                        <td className="px-4 py-3 text-muted-foreground">{fmt(a.previous_views ?? 0)}</td>
                         <td className="px-4 py-3 text-foreground">{fmt(a.current_views)}</td>
-                        <td className="px-4 py-3 text-foreground">{fmt(w)}</td>
-                        <td className="px-4 py-3 font-medium text-lime">{money(pay)}</td>
+                        <td className="px-4 py-3 text-foreground">{fmt(gained)}</td>
+                        <td className="px-4 py-3 font-medium text-lime">{money(owed)}</td>
                         <td className="px-4 py-3 text-xs text-muted-foreground">
-                          {a.last_updated ? new Date(a.last_updated).toLocaleString() : "—"}
+                          {a.last_screenshot_upload_at
+                            ? new Date(a.last_screenshot_upload_at).toLocaleString()
+                            : "—"}
                         </td>
                         <td className="px-4 py-3 text-right">
                           <div className="flex justify-end gap-1.5">
                             <button
-                              onClick={() => void refreshSingle(a)}
-                              disabled={busy || (progress !== null && !progress.done)}
-                              className="rounded-full bg-lime px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-primary-foreground disabled:opacity-50"
+                              onClick={() => setUploading(a)}
+                              className="rounded-full bg-lime px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-primary-foreground"
                             >
-                              Refresh views
+                              Upload screenshot
                             </button>
                             <button
                               onClick={() => setEditing(a)}
@@ -539,6 +394,10 @@ export default function XTrackerPanel() {
             </div>
           )}
         </div>
+      )}
+
+      {view === "screenshots" && (
+        <ScreenshotHistory rows={screenshots} />
       )}
 
       {view === "earnings" && (
@@ -627,6 +486,17 @@ export default function XTrackerPanel() {
           }}
         />
       )}
+
+      {uploading && (
+        <ScreenshotUploadModal
+          account={uploading}
+          onClose={() => setUploading(null)}
+          onSaved={async () => {
+            setUploading(null);
+            await refresh();
+          }}
+        />
+      )}
     </div>
   );
 }
@@ -643,6 +513,346 @@ function TinyStat({ label, value, accent }: { label: string; value: string; acce
     </div>
   );
 }
+
+/* ------------------------------ Screenshot upload ----------------------------- */
+
+function readAsDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(String(r.result));
+    r.onerror = () => reject(r.error);
+    r.readAsDataURL(file);
+  });
+}
+
+function ScreenshotUploadModal({
+  account,
+  onClose,
+  onSaved,
+}: {
+  account: XAccount;
+  onClose: () => void;
+  onSaved: () => void;
+}) {
+  const runOcr = useServerFn(extractViewsFromScreenshot);
+  const [file, setFile] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
+  const [ocrBusy, setOcrBusy] = useState(false);
+  const [detected, setDetected] = useState<number | null>(null);
+  const [override, setOverride] = useState<string>("");
+  const [error, setError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const previousViews = account.current_views ?? 0;
+  const finalViews = Math.max(0, Math.floor(Number(override) || 0));
+  const gained = Math.max(0, finalViews - previousViews);
+  const payout = payFromViews(gained, account.rate_cents_per_1k);
+
+  async function handleFile(f: File) {
+    setError(null);
+    setFile(f);
+    const dataUrl = await readAsDataUrl(f);
+    setPreview(dataUrl);
+    setOcrBusy(true);
+    const res = await runOcr({ data: { imageDataUrl: dataUrl } });
+    setOcrBusy(false);
+    if (!res.ok) {
+      setError(res.error);
+      setDetected(null);
+      return;
+    }
+    setDetected(res.views);
+    setOverride(String(res.views));
+  }
+
+  async function confirm() {
+    if (!file) return setError("Choose a screenshot first.");
+    if (!override.trim()) return setError("Enter or confirm the view count.");
+    if (finalViews < previousViews) {
+      if (
+        !confirm_(
+          `New views (${fmt(finalViews)}) is lower than previous (${fmt(previousViews)}). Save anyway?`,
+        )
+      )
+        return;
+    }
+    setSaving(true);
+    try {
+      const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+      const path = `${account.id}/${Date.now()}.${ext}`;
+      const up = await supabase.storage
+        .from(BUCKET)
+        .upload(path, file, { upsert: false, contentType: file.type || undefined });
+      if (up.error) throw new Error(up.error.message);
+      const signed = await signedUrl(path);
+      if (!signed) throw new Error("Could not sign uploaded screenshot URL.");
+
+      const now = new Date().toISOString();
+      const { error: accErr } = await supabase
+        .from("x_tracker_accounts")
+        .update({
+          previous_views: previousViews,
+          current_views: finalViews,
+          views_gained_since_last: gained,
+          payout_owed_cents: payout,
+          last_refresh_at: now,
+          last_updated: now,
+          last_screenshot_upload_at: now,
+          screenshot_url: path,
+          status: "updated",
+          status_message: null,
+        })
+        .eq("id", account.id);
+      if (accErr) throw new Error(accErr.message);
+
+      const { error: sErr } = await supabase.from("x_tracker_screenshots" as never).insert({
+        account_id: account.id,
+        x_username: account.x_username,
+        employee_name: account.employee_name,
+        previous_views: previousViews,
+        new_views: finalViews,
+        views_gained: gained,
+        payout_cents: payout,
+        rate_cents_per_1k: account.rate_cents_per_1k,
+        screenshot_url: path,
+        detected_views: detected,
+        uploaded_at: now,
+      } as never);
+      if (sErr) throw new Error(sErr.message);
+
+      onSaved();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Save failed.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  function confirm_(msg: string) {
+    return window.confirm(msg);
+  }
+
+  return (
+    <div
+      onClick={onClose}
+      className="fixed inset-0 z-50 grid place-items-center bg-black/60 p-5 backdrop-blur-sm"
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="w-full max-w-2xl rounded-3xl border border-hairline bg-background p-6"
+      >
+        <div className="mb-4 flex items-center justify-between">
+          <div>
+            <h3 className="font-display text-xl text-foreground">
+              Upload view screenshot — @{account.x_username}
+            </h3>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Screenshot must show the total views/impressions of the pinned post. OCR will auto-fill the count — verify and edit before saving.
+            </p>
+          </div>
+          <button onClick={onClose} className="text-2xl text-muted-foreground hover:text-foreground">
+            ×
+          </button>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-2">
+          <div>
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) void handleFile(f);
+              }}
+            />
+            <button
+              onClick={() => fileRef.current?.click()}
+              className="w-full rounded-2xl border border-dashed border-hairline bg-surface-1 p-8 text-center hover:border-lime hover:text-lime"
+            >
+              {preview ? (
+                <img src={preview} alt="preview" className="mx-auto max-h-64 rounded-xl object-contain" />
+              ) : (
+                <span className="text-sm text-muted-foreground">Click to choose a screenshot</span>
+              )}
+            </button>
+            {file && (
+              <button
+                onClick={() => fileRef.current?.click()}
+                className="mt-2 w-full text-[10px] uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground"
+              >
+                Replace image
+              </button>
+            )}
+          </div>
+
+          <div className="space-y-3 text-sm">
+            <div className="rounded-2xl border border-hairline bg-surface-1 p-4">
+              <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                Detected by OCR
+              </div>
+              <div className="mt-1 font-display text-2xl text-foreground">
+                {ocrBusy ? "Reading…" : detected !== null ? fmt(detected) : "—"}
+              </div>
+            </div>
+
+            <div>
+              <label className="mb-1 block text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                Final view count (editable)
+              </label>
+              <input
+                type="number"
+                value={override}
+                onChange={(e) => setOverride(e.target.value)}
+                className="w-full rounded-lg border border-hairline bg-surface-1 px-3 py-2 text-lg text-foreground outline-none focus:border-lime"
+              />
+            </div>
+
+            <div className="grid grid-cols-3 gap-2">
+              <MiniStat label="Previous" value={fmt(previousViews)} />
+              <MiniStat label="Gained" value={fmt(gained)} />
+              <MiniStat label="Owed" value={money(payout)} accent />
+            </div>
+
+            {error && (
+              <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-2 text-xs text-destructive">
+                {error}
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="mt-5 flex gap-2">
+          <button
+            onClick={confirm}
+            disabled={saving || ocrBusy || !file}
+            className="flex-1 rounded-xl bg-lime py-3 font-display text-sm tracking-[0.2em] text-primary-foreground disabled:opacity-50"
+          >
+            {saving ? "Saving…" : "Confirm & update payroll"}
+          </button>
+          <button
+            onClick={onClose}
+            className="rounded-xl border border-hairline px-4 py-3 text-xs uppercase tracking-[0.2em] text-muted-foreground"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MiniStat({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
+  return (
+    <div
+      className={`rounded-xl border p-3 ${
+        accent ? "border-lime/40 bg-lime-soft" : "border-hairline bg-surface-1"
+      }`}
+    >
+      <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">{label}</div>
+      <div className={`mt-0.5 text-sm ${accent ? "text-lime" : "text-foreground"}`}>{value}</div>
+    </div>
+  );
+}
+
+/* -------------------------- Screenshot history view --------------------------- */
+
+function ScreenshotHistory({ rows }: { rows: XScreenshot[] }) {
+  const [urls, setUrls] = useState<Record<string, string>>({});
+  const [lightbox, setLightbox] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const paths = rows.map((r) => r.screenshot_url).filter(Boolean);
+      const entries: [string, string][] = [];
+      for (const p of paths) {
+        if (urls[p]) continue;
+        const u = await signedUrl(p);
+        if (u) entries.push([p, u]);
+      }
+      if (!cancelled && entries.length) setUrls((prev) => ({ ...prev, ...Object.fromEntries(entries) }));
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rows]);
+
+  if (rows.length === 0) {
+    return (
+      <div className="mt-4 rounded-2xl border border-hairline bg-surface-1 p-10 text-center text-sm text-muted-foreground">
+        No screenshots uploaded yet. Upload one from the accounts tab.
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <div className="mt-4 overflow-hidden rounded-2xl border border-hairline bg-surface-1">
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[1000px] text-left text-sm">
+            <thead className="border-b border-hairline text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+              <tr>
+                <th className="px-4 py-3">Uploaded</th>
+                <th className="px-4 py-3">Account</th>
+                <th className="px-4 py-3">Employee</th>
+                <th className="px-4 py-3">Previous</th>
+                <th className="px-4 py-3">New</th>
+                <th className="px-4 py-3">Gained</th>
+                <th className="px-4 py-3">Owed</th>
+                <th className="px-4 py-3">Screenshot</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((r) => {
+                const u = urls[r.screenshot_url];
+                return (
+                  <tr key={r.id} className="border-b border-hairline/60 last:border-0">
+                    <td className="px-4 py-3 text-xs text-muted-foreground">
+                      {new Date(r.uploaded_at).toLocaleString()}
+                    </td>
+                    <td className="px-4 py-3 text-foreground">@{r.x_username}</td>
+                    <td className="px-4 py-3 text-muted-foreground">{r.employee_name || "—"}</td>
+                    <td className="px-4 py-3 text-muted-foreground">{fmt(r.previous_views)}</td>
+                    <td className="px-4 py-3 text-foreground">{fmt(r.new_views)}</td>
+                    <td className="px-4 py-3 text-foreground">{fmt(r.views_gained)}</td>
+                    <td className="px-4 py-3 text-lime">{money(r.payout_cents)}</td>
+                    <td className="px-4 py-3">
+                      {u ? (
+                        <button
+                          onClick={() => setLightbox(u)}
+                          className="block h-14 w-20 overflow-hidden rounded-md border border-hairline"
+                        >
+                          <img src={u} alt="screenshot" className="h-full w-full object-cover" />
+                        </button>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">loading…</span>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {lightbox && (
+        <div
+          onClick={() => setLightbox(null)}
+          className="fixed inset-0 z-50 grid place-items-center bg-black/80 p-6"
+        >
+          <img src={lightbox} alt="screenshot" className="max-h-[90vh] max-w-[90vw] rounded-xl" />
+        </div>
+      )}
+    </>
+  );
+}
+
+/* -------------------------------- Account form -------------------------------- */
 
 function AccountForm({
   account,

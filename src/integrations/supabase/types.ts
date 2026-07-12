@@ -384,6 +384,7 @@ export type Database = {
           employee_name: string
           id: string
           last_refresh_at: string | null
+          last_screenshot_upload_at: string | null
           last_updated: string | null
           notes: string | null
           payout_owed_cents: number
@@ -391,6 +392,7 @@ export type Database = {
           previous_views: number
           profile_url: string
           rate_cents_per_1k: number
+          screenshot_url: string | null
           status: string
           status_message: string | null
           updated_at: string
@@ -404,6 +406,7 @@ export type Database = {
           employee_name?: string
           id?: string
           last_refresh_at?: string | null
+          last_screenshot_upload_at?: string | null
           last_updated?: string | null
           notes?: string | null
           payout_owed_cents?: number
@@ -411,6 +414,7 @@ export type Database = {
           previous_views?: number
           profile_url: string
           rate_cents_per_1k?: number
+          screenshot_url?: string | null
           status?: string
           status_message?: string | null
           updated_at?: string
@@ -424,6 +428,7 @@ export type Database = {
           employee_name?: string
           id?: string
           last_refresh_at?: string | null
+          last_screenshot_upload_at?: string | null
           last_updated?: string | null
           notes?: string | null
           payout_owed_cents?: number
@@ -431,6 +436,7 @@ export type Database = {
           previous_views?: number
           profile_url?: string
           rate_cents_per_1k?: number
+          screenshot_url?: string | null
           status?: string
           status_message?: string | null
           updated_at?: string
@@ -483,6 +489,62 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "x_tracker_history_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "x_tracker_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      x_tracker_screenshots: {
+        Row: {
+          account_id: string | null
+          created_at: string
+          detected_views: number | null
+          employee_name: string
+          id: string
+          new_views: number
+          payout_cents: number
+          previous_views: number
+          rate_cents_per_1k: number
+          screenshot_url: string
+          uploaded_at: string
+          views_gained: number
+          x_username: string
+        }
+        Insert: {
+          account_id?: string | null
+          created_at?: string
+          detected_views?: number | null
+          employee_name?: string
+          id?: string
+          new_views?: number
+          payout_cents?: number
+          previous_views?: number
+          rate_cents_per_1k?: number
+          screenshot_url: string
+          uploaded_at?: string
+          views_gained?: number
+          x_username: string
+        }
+        Update: {
+          account_id?: string | null
+          created_at?: string
+          detected_views?: number | null
+          employee_name?: string
+          id?: string
+          new_views?: number
+          payout_cents?: number
+          previous_views?: number
+          rate_cents_per_1k?: number
+          screenshot_url?: string
+          uploaded_at?: string
+          views_gained?: number
+          x_username?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "x_tracker_screenshots_account_id_fkey"
             columns: ["account_id"]
             isOneToOne: false
             referencedRelation: "x_tracker_accounts"
