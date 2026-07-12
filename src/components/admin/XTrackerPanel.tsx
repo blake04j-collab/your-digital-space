@@ -893,10 +893,12 @@ function ScreenshotHistory({ rows, hideMoney = false }: { rows: XScreenshot[]; h
 
 function AccountForm({
   account,
+  userId,
   onClose,
   onSaved,
 }: {
   account: XAccount | null;
+  userId: string | null;
   onClose: () => void;
   onSaved: () => void;
 }) {
