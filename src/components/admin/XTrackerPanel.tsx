@@ -108,6 +108,7 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
   const [uploading, setUploading] = useState<XAccount | null>(null);
   const [busy, setBusy] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
+  const [myUnpaidCommissionCents, setMyUnpaidCommissionCents] = useState<number>(0);
 
   useEffect(() => {
     (async () => {
@@ -134,15 +135,26 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
     ];
     if (!isManager) {
       promises.push(supabase.rpc("list_managers" as never) as unknown as PromiseLike<{ data: unknown }>);
+    } else {
+      promises.push(
+        supabase.rpc("get_my_manager_commission" as never) as unknown as PromiseLike<{ data: unknown }>,
+      );
     }
     const results = await Promise.all(promises);
-    const [a, h, s, m] = results;
+    const [a, h, s, extra] = results;
     setAccounts((a.data as XAccount[]) ?? []);
     setHistory((h.data as XHistory[]) ?? []);
     setScreenshots((s.data as XScreenshot[]) ?? []);
-    if (!isManager) setManagers((m?.data as ManagerRow[]) ?? []);
+    if (!isManager) {
+      setManagers((extra?.data as ManagerRow[]) ?? []);
+    } else {
+      const row = Array.isArray(extra?.data) ? (extra.data[0] as { unpaid_commission_cents?: number } | undefined) : undefined;
+      setMyUnpaidCommissionCents(Number(row?.unpaid_commission_cents ?? 0));
+    }
     setLoading(false);
   }
+
+
 
 
 
