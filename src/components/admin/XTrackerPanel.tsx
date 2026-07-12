@@ -1018,7 +1018,8 @@ function AccountForm({
             last_refresh_at: now,
             last_screenshot_upload_at: now,
             status: "updated",
-          })
+            added_by_user_id: userId,
+          } as never)
           .select()
           .single();
         if (iErr) throw new Error(iErr.message);
