@@ -127,6 +127,8 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
   const [userId, setUserId] = useState<string | null>(null);
   const [myUnpaidCommissionCents, setMyUnpaidCommissionCents] = useState<number>(0);
   const [employees, setEmployees] = useState<EmployeeRow[]>([]);
+  const [myEmployees, setMyEmployees] = useState<EmployeeRow[]>([]);
+  const [myInviteCodes, setMyInviteCodes] = useState<InviteCodeRow[]>([]);
   const [myWallet, setMyWallet] = useState<WalletRow | null>(null);
 
   useEffect(() => {
