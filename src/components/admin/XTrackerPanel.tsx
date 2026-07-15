@@ -701,6 +701,57 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
         </div>
       )}
 
+      {view === "employees" && !isRestricted && (
+        <div className="mt-4 overflow-hidden rounded-2xl border border-hairline bg-surface-1">
+          {employees.length === 0 ? (
+            <div className="p-10 text-center text-sm text-muted-foreground">
+              No employees yet. Share the invite code with your team so they can sign up at /employee/login.
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[900px] text-left text-sm">
+                <thead className="border-b border-hairline text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                  <tr>
+                    <th className="px-4 py-3">Employee</th>
+                    <th className="px-4 py-3">Accounts</th>
+                    <th className="px-4 py-3">Weekly views</th>
+                    <th className="px-4 py-3">USDT address</th>
+                    <th className="px-4 py-3">Network</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {employees.map((e) => (
+                    <tr key={e.user_id} className="border-b border-hairline/60 last:border-0">
+                      <td className="px-4 py-3 text-foreground">{e.email}</td>
+                      <td className="px-4 py-3 text-muted-foreground">{e.account_count}</td>
+                      <td className="px-4 py-3 text-muted-foreground">{fmt(e.weekly_views)}</td>
+                      <td className="px-4 py-3">
+                        {e.usdt_address ? (
+                          <button
+                            onClick={() => {
+                              navigator.clipboard.writeText(e.usdt_address);
+                            }}
+                            title="Click to copy"
+                            className="font-mono text-xs text-foreground hover:text-lime break-all text-left"
+                          >
+                            {e.usdt_address}
+                          </button>
+                        ) : (
+                          <span className="text-muted-foreground italic">Not set</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-muted-foreground">{e.usdt_network || "—"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
+
+
+
 
       {(showAdd || editing) && (
         <AccountForm
