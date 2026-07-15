@@ -91,7 +91,7 @@ async function signedUrl(path: string): Promise<string | null> {
   return data?.signedUrl ?? null;
 }
 
-type ViewMode = "accounts" | "history" | "earnings" | "screenshots" | "managers" | "employees";
+type ViewMode = "accounts" | "history" | "earnings" | "screenshots" | "managers" | "employees" | "team";
 
 type EmployeeRow = {
   user_id: string;
@@ -100,7 +100,11 @@ type EmployeeRow = {
   weekly_views: number;
   usdt_address: string;
   usdt_network: string;
+  manager_user_id?: string | null;
+  manager_email?: string | null;
 };
+
+type InviteCodeRow = { code: string; label: string | null; active: boolean; created_at: string };
 
 type WalletRow = { user_id: string; usdt_address: string; network: string };
 
