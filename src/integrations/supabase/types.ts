@@ -242,6 +242,27 @@ export type Database = {
         }
         Relationships: []
       }
+      payout_wallets: {
+        Row: {
+          network: string
+          updated_at: string
+          usdt_address: string
+          user_id: string
+        }
+        Insert: {
+          network?: string
+          updated_at?: string
+          usdt_address?: string
+          user_id: string
+        }
+        Update: {
+          network?: string
+          updated_at?: string
+          usdt_address?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       suppressed_emails: {
         Row: {
           created_at: string
@@ -640,6 +661,8 @@ export type Database = {
         Returns: {
           account_count: number
           email: string
+          usdt_address: string
+          usdt_network: string
           user_id: string
           weekly_views: number
         }[]

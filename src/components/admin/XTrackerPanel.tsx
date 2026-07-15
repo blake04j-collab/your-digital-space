@@ -91,7 +91,18 @@ async function signedUrl(path: string): Promise<string | null> {
   return data?.signedUrl ?? null;
 }
 
-type ViewMode = "accounts" | "history" | "earnings" | "screenshots" | "managers";
+type ViewMode = "accounts" | "history" | "earnings" | "screenshots" | "managers" | "employees";
+
+type EmployeeRow = {
+  user_id: string;
+  email: string;
+  account_count: number;
+  weekly_views: number;
+  usdt_address: string;
+  usdt_network: string;
+};
+
+type WalletRow = { user_id: string; usdt_address: string; network: string };
 
 const MANAGER_COMMISSION_PCT = 0.10;
 
@@ -111,6 +122,8 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
   const [busy, setBusy] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [myUnpaidCommissionCents, setMyUnpaidCommissionCents] = useState<number>(0);
+  const [employees, setEmployees] = useState<EmployeeRow[]>([]);
+  const [myWallet, setMyWallet] = useState<WalletRow | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -151,9 +164,18 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
     setScreenshots((s.data as XScreenshot[]) ?? []);
     if (role === "admin") {
       setManagers((extra?.data as ManagerRow[]) ?? []);
+      const { data: emps } = await supabase.rpc("list_employees" as never);
+      setEmployees(((emps as unknown) as EmployeeRow[]) ?? []);
     } else if (isManager) {
       const row = Array.isArray(extra?.data) ? (extra.data[0] as { unpaid_commission_cents?: number } | undefined) : undefined;
       setMyUnpaidCommissionCents(Number(row?.unpaid_commission_cents ?? 0));
+    }
+    if (isRestricted) {
+      const { data: w } = await supabase
+        .from("payout_wallets" as never)
+        .select("*")
+        .maybeSingle();
+      setMyWallet((w as WalletRow | null) ?? null);
     }
     setLoading(false);
   }
@@ -420,10 +442,18 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
         )}
       </div>
 
+      {isRestricted && (
+        <WalletCard
+          userId={userId}
+          wallet={myWallet}
+          onSaved={(w) => setMyWallet(w)}
+        />
+      )}
+
       <div className="mt-5 flex gap-1 rounded-full border border-hairline bg-surface-1 p-1 w-fit flex-wrap">
         {((isRestricted
           ? (["accounts", "screenshots"] as const)
-          : (["accounts", "screenshots", "earnings", "history", "managers"] as const)
+          : (["accounts", "screenshots", "earnings", "history", "managers", "employees"] as const)
         ) as readonly ViewMode[]).map((v) => (
           <button
             key={v}
@@ -671,6 +701,57 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
         </div>
       )}
 
+      {view === "employees" && !isRestricted && (
+        <div className="mt-4 overflow-hidden rounded-2xl border border-hairline bg-surface-1">
+          {employees.length === 0 ? (
+            <div className="p-10 text-center text-sm text-muted-foreground">
+              No employees yet. Share the invite code with your team so they can sign up at /employee/login.
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[900px] text-left text-sm">
+                <thead className="border-b border-hairline text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                  <tr>
+                    <th className="px-4 py-3">Employee</th>
+                    <th className="px-4 py-3">Accounts</th>
+                    <th className="px-4 py-3">Weekly views</th>
+                    <th className="px-4 py-3">USDT address</th>
+                    <th className="px-4 py-3">Network</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {employees.map((e) => (
+                    <tr key={e.user_id} className="border-b border-hairline/60 last:border-0">
+                      <td className="px-4 py-3 text-foreground">{e.email}</td>
+                      <td className="px-4 py-3 text-muted-foreground">{e.account_count}</td>
+                      <td className="px-4 py-3 text-muted-foreground">{fmt(e.weekly_views)}</td>
+                      <td className="px-4 py-3">
+                        {e.usdt_address ? (
+                          <button
+                            onClick={() => {
+                              navigator.clipboard.writeText(e.usdt_address);
+                            }}
+                            title="Click to copy"
+                            className="font-mono text-xs text-foreground hover:text-lime break-all text-left"
+                          >
+                            {e.usdt_address}
+                          </button>
+                        ) : (
+                          <span className="text-muted-foreground italic">Not set</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-muted-foreground">{e.usdt_network || "—"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
+
+
+
 
       {(showAdd || editing) && (
         <AccountForm
@@ -712,6 +793,91 @@ function TinyStat({ label, value, accent }: { label: string; value: string; acce
     >
       <div className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground">{label}</div>
       <div className={`mt-1 font-display text-2xl ${accent ? "text-lime" : "text-foreground"}`}>{value}</div>
+    </div>
+  );
+}
+
+function WalletCard({
+  userId,
+  wallet,
+  onSaved,
+}: {
+  userId: string | null;
+  wallet: WalletRow | null;
+  onSaved: (w: WalletRow) => void;
+}) {
+  const [address, setAddress] = useState(wallet?.usdt_address ?? "");
+  const [network, setNetwork] = useState(wallet?.network ?? "TRC20");
+  const [saving, setSaving] = useState(false);
+  const [savedFlash, setSavedFlash] = useState(false);
+
+  useEffect(() => {
+    setAddress(wallet?.usdt_address ?? "");
+    setNetwork(wallet?.network ?? "TRC20");
+  }, [wallet]);
+
+  async function save() {
+    if (!userId) return;
+    setSaving(true);
+    const { data, error } = await (supabase
+      .from("payout_wallets" as never) as unknown as {
+        upsert: (v: unknown) => { select: (s: string) => { single: () => Promise<{ data: unknown; error: { message: string } | null }> } };
+      })
+      .upsert({ user_id: userId, usdt_address: address.trim(), network })
+      .select("*")
+      .single();
+    setSaving(false);
+    if (error) return alert(error.message);
+    onSaved(data as unknown as WalletRow);
+    setSavedFlash(true);
+    setTimeout(() => setSavedFlash(false), 1800);
+  }
+
+  return (
+    <div className="mt-5 rounded-2xl border border-hairline bg-surface-1 p-4">
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <div className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
+            Payout wallet
+          </div>
+          <div className="mt-1 text-sm text-foreground">
+            USDT address for payments
+          </div>
+        </div>
+        {savedFlash && (
+          <span className="text-[10px] uppercase tracking-[0.2em] text-lime">Saved</span>
+        )}
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-[1fr_140px_auto]">
+        <input
+          type="text"
+          value={address}
+          onChange={(e) => setAddress(e.target.value)}
+          placeholder="Paste your USDT wallet address"
+          className="rounded-lg border border-hairline bg-background px-3 py-2 font-mono text-xs text-foreground"
+        />
+        <select
+          value={network}
+          onChange={(e) => setNetwork(e.target.value)}
+          className="rounded-lg border border-hairline bg-background px-3 py-2 text-xs text-foreground"
+        >
+          <option value="TRC20">TRC20 (Tron)</option>
+          <option value="ERC20">ERC20 (Ethereum)</option>
+          <option value="BEP20">BEP20 (BSC)</option>
+          <option value="SOL">Solana</option>
+          <option value="Other">Other</option>
+        </select>
+        <button
+          onClick={save}
+          disabled={saving || !address.trim()}
+          className="rounded-full border border-lime bg-lime-soft px-4 py-2 text-[10px] uppercase tracking-[0.2em] text-lime disabled:opacity-40"
+        >
+          {saving ? "Saving…" : "Save"}
+        </button>
+      </div>
+      <p className="mt-2 text-[11px] text-muted-foreground">
+        Double-check the network and address — payments sent on the wrong network cannot be recovered.
+      </p>
     </div>
   );
 }
