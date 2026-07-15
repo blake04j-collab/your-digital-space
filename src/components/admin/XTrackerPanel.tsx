@@ -164,9 +164,18 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
     setScreenshots((s.data as XScreenshot[]) ?? []);
     if (role === "admin") {
       setManagers((extra?.data as ManagerRow[]) ?? []);
+      const { data: emps } = await supabase.rpc("list_employees" as never);
+      setEmployees((emps as EmployeeRow[]) ?? []);
     } else if (isManager) {
       const row = Array.isArray(extra?.data) ? (extra.data[0] as { unpaid_commission_cents?: number } | undefined) : undefined;
       setMyUnpaidCommissionCents(Number(row?.unpaid_commission_cents ?? 0));
+    }
+    if (isRestricted) {
+      const { data: w } = await supabase
+        .from("payout_wallets" as never)
+        .select("*")
+        .maybeSingle();
+      setMyWallet((w as WalletRow | null) ?? null);
     }
     setLoading(false);
   }
