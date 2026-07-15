@@ -797,6 +797,89 @@ function TinyStat({ label, value, accent }: { label: string; value: string; acce
   );
 }
 
+function WalletCard({
+  userId,
+  wallet,
+  onSaved,
+}: {
+  userId: string | null;
+  wallet: WalletRow | null;
+  onSaved: (w: WalletRow) => void;
+}) {
+  const [address, setAddress] = useState(wallet?.usdt_address ?? "");
+  const [network, setNetwork] = useState(wallet?.network ?? "TRC20");
+  const [saving, setSaving] = useState(false);
+  const [savedFlash, setSavedFlash] = useState(false);
+
+  useEffect(() => {
+    setAddress(wallet?.usdt_address ?? "");
+    setNetwork(wallet?.network ?? "TRC20");
+  }, [wallet]);
+
+  async function save() {
+    if (!userId) return;
+    setSaving(true);
+    const { data, error } = await supabase
+      .from("payout_wallets" as never)
+      .upsert({ user_id: userId, usdt_address: address.trim(), network })
+      .select("*")
+      .single();
+    setSaving(false);
+    if (error) return alert(error.message);
+    onSaved(data as unknown as WalletRow);
+    setSavedFlash(true);
+    setTimeout(() => setSavedFlash(false), 1800);
+  }
+
+  return (
+    <div className="mt-5 rounded-2xl border border-hairline bg-surface-1 p-4">
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <div className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
+            Payout wallet
+          </div>
+          <div className="mt-1 text-sm text-foreground">
+            USDT address for payments
+          </div>
+        </div>
+        {savedFlash && (
+          <span className="text-[10px] uppercase tracking-[0.2em] text-lime">Saved</span>
+        )}
+      </div>
+      <div className="mt-3 grid gap-2 md:grid-cols-[1fr_140px_auto]">
+        <input
+          type="text"
+          value={address}
+          onChange={(e) => setAddress(e.target.value)}
+          placeholder="Paste your USDT wallet address"
+          className="rounded-lg border border-hairline bg-background px-3 py-2 font-mono text-xs text-foreground"
+        />
+        <select
+          value={network}
+          onChange={(e) => setNetwork(e.target.value)}
+          className="rounded-lg border border-hairline bg-background px-3 py-2 text-xs text-foreground"
+        >
+          <option value="TRC20">TRC20 (Tron)</option>
+          <option value="ERC20">ERC20 (Ethereum)</option>
+          <option value="BEP20">BEP20 (BSC)</option>
+          <option value="SOL">Solana</option>
+          <option value="Other">Other</option>
+        </select>
+        <button
+          onClick={save}
+          disabled={saving || !address.trim()}
+          className="rounded-full border border-lime bg-lime-soft px-4 py-2 text-[10px] uppercase tracking-[0.2em] text-lime disabled:opacity-40"
+        >
+          {saving ? "Saving…" : "Save"}
+        </button>
+      </div>
+      <p className="mt-2 text-[11px] text-muted-foreground">
+        Double-check the network and address — payments sent on the wrong network cannot be recovered.
+      </p>
+    </div>
+  );
+}
+
 /* ------------------------------ Screenshot upload ----------------------------- */
 
 function readAsDataUrl(file: File): Promise<string> {
