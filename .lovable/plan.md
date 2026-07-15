@@ -1,58 +1,32 @@
-# Employee Self-Serve X Account Tracking
+# Fix: employees (and managers) can't upload X account screenshots
 
-Let 100+ employees sign up on their own, add and track their own X accounts, and upload weekly screenshots — without manual approval. Gated by a shared invite code so strangers can't just wander in.
+## Root cause
 
-## User flow
+The RLS error surfacing in the "Add X account" modal is coming from `storage.objects`, not `x_tracker_accounts`. The `x-screenshots` bucket currently has policies only for:
 
-1. Employee visits `/employee/login`, enters name + email + password + **invite code**.
-2. If code matches, account is auto-created and `employee` role granted via a secure server function.
-3. Employee lands on `/employee` — sees only their own X accounts, can add new ones (same simplified flow: username + pinned post screenshot), and upload weekly screenshots.
-4. They see views and views gained. **No payout, rate, or commission info anywhere.**
-5. Admin sees every employee's accounts in the existing admin panel with an "Added by" column (same pattern as managers).
+- `admin` — full access
+- `manager` — upload only when an `x_tracker_accounts` row already exists with `added_by_user_id = auth.uid()` and a folder matching that account id
 
-## Database changes
+There is **no policy for `employee`** at all, so every employee upload fails RLS. The manager upload policy is also broken for the "add new account" flow because the code uploads the screenshot to `<newAccountId>/<ts>.jpg` **before** inserting the account row — so the `EXISTS` check finds nothing and blocks the upload for managers too on first-time add.
 
-- Add `'employee'` to the `app_role` enum.
-- New table `employee_invite_codes` (code, active, created_at) — admin-managed. Server function verifies against active codes.
-- Update RLS on `x_tracker_accounts`, `x_tracker_history`, `x_tracker_screenshots`:
-  - Employees: SELECT/INSERT/UPDATE only where `added_by_user_id = auth.uid()`.
-  - Admins: unchanged (see all).
-  - Managers: unchanged (see own).
+## Fix
 
-## Auth setup
+One migration adding storage policies. The screenshot path is always `<accountId>/<file>`, and account ids are generated client-side then written into `added_by_user_id` on insert, so we scope storage access by role rather than by a pre-existing account row.
 
-- Enable email/password signup in Supabase auth.
-- **Auto-confirm email = ON** (no email verification friction for 100+ employees).
-- No Supabase admin approval; the invite code is the gate.
+### Migration
 
-## Server function: `redeemInviteAndSignup`
+Add to `storage.objects` for `bucket_id = 'x-screenshots'`:
 
-- Input: email, password, name, invite_code.
-- Verifies invite code against `employee_invite_codes` (active only).
-- Creates auth user via admin client, grants `employee` role in `user_roles`.
-- Returns success/failure. Client then signs in normally.
-- Rate-limited per IP to prevent code brute-forcing (simple in-memory or table-based counter).
+- **Employees upload**: INSERT policy — `has_role(auth.uid(), 'employee')`
+- **Employees read**: SELECT policy — `has_role(auth.uid(), 'employee')` (needed to sign URLs for their own screenshots)
+- **Employees update/delete own**: for re-uploads/cleanup — owner = `auth.uid()`
+- **Managers upload (fixed)**: replace the current INSERT policy with a simple `has_role(auth.uid(), 'manager')` check. Ownership is still enforced at the `x_tracker_accounts`/`x_tracker_screenshots` row level.
+- **Managers read**: SELECT policy — `has_role(auth.uid(), 'manager')` (they already need to view their own + team screenshots).
 
-## Frontend
+Admin policies stay unchanged.
 
-- **New route `/employee/login`**: combined sign-in + sign-up tabs. Sign-up form has invite code field.
-- **New route `/employee`** (under `_authenticated`): employee dashboard.
-  - Lists their X accounts (username, current views, views gained since last, last updated).
-  - "Add account" button — reuses simplified flow (X username + pinned post + screenshot upload, OCR extracts starting views).
-  - "Upload weekly screenshot" per account.
-  - No payout/rate/commission fields shown anywhere.
-- **Admin panel**: existing "Added by" column already handles this; employee emails will show alongside managers. Optionally add role badge (M/E) to distinguish.
-- Admin gets a small "Invite codes" mini-panel to create/rotate codes.
+## Notes
 
-## Technical notes
-
-- Employee dashboard reuses `XTrackerPanel` logic but stripped down — cleaner to make a dedicated `EmployeePanel.tsx` that shares the AccountForm and ScreenshotUploadModal sub-components with payout props hidden.
-- `has_role(auth.uid(), 'employee')` used in RLS and route guards.
-- Admin `list_managers()` RPC pattern extended with `list_employees()` for admin visibility.
-- Invite code is a shared secret; you can rotate it by deactivating old codes and creating new ones. Compromise recovery = rotate + review recently added accounts.
-
-## Security considerations
-
-- Invite code is a soft gate — anyone with the code can sign up. That's the trade-off for zero manual approval. Rotate periodically.
-- Employees are fully isolated by RLS — one employee cannot see or modify another's accounts.
-- All payout logic remains server-side and gated behind admin/manager roles.
+- No frontend changes needed. The existing flow (upload → insert account → insert screenshot row) works once storage lets employees write.
+- Row-level ownership on the actual tracker tables is unaffected — those policies already require `added_by_user_id = auth.uid()`, so an employee still can't create rows attributed to anyone else.
+- Existing manager account/screenshot rows are unaffected.
