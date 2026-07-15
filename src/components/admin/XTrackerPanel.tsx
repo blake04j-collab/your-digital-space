@@ -463,8 +463,10 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
       )}
 
       <div className="mt-5 flex gap-1 rounded-full border border-hairline bg-surface-1 p-1 w-fit flex-wrap">
-        {((isRestricted
+        {((isEmployee
           ? (["accounts", "screenshots"] as const)
+          : isManager
+          ? (["accounts", "screenshots", "team"] as const)
           : (["accounts", "screenshots", "earnings", "history", "managers", "employees"] as const)
         ) as readonly ViewMode[]).map((v) => (
           <button
