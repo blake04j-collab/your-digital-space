@@ -60,7 +60,7 @@ type PageView = {
   created_at: string;
 };
 
-type Tab = "applications" | "va_apps" | "x_tracker" | "analytics" | "links";
+type Tab = "applications" | "va_apps" | "x_tracker";
 
 type VAStatus = "new" | "reviewed" | "contacted" | "archived" | "approved" | "rejected";
 
@@ -127,7 +127,7 @@ function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [authorized, setAuthorized] = useState(false);
   const [role, setRole] = useState<"admin" | "manager" | null>(null);
-  const [tab, setTab] = useState<Tab>("applications");
+  const [tab, setTab] = useState<Tab>("x_tracker");
 
   const [apps, setApps] = useState<Application[]>([]);
   const [vaApps, setVaApps] = useState<VAApplication[]>([]);
@@ -297,7 +297,7 @@ function AdminDashboard() {
             <div className="hidden gap-1 rounded-full border border-hairline bg-surface-1 p-1 sm:flex">
               {((role === "manager"
                 ? (["x_tracker"] as const)
-                : (["applications", "va_apps", "x_tracker", "analytics", "links"] as const)
+                : (["x_tracker", "applications", "va_apps"] as const)
               ) as readonly Tab[]).map((t) => (
                 <button
                   key={t}
@@ -308,7 +308,7 @@ function AdminDashboard() {
                       : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
-                  {t === "va_apps" ? "VA Apps" : t === "x_tracker" ? "X Tracker" : t}
+                  {t === "va_apps" ? "VA Apps" : t === "x_tracker" ? "X Tracker" : t === "applications" ? "Model Applications" : t}
                 </button>
               ))}
 
@@ -324,7 +324,7 @@ function AdminDashboard() {
         <div className="flex gap-1 border-t border-hairline px-5 py-2 sm:hidden">
           {((role === "manager"
             ? (["x_tracker"] as const)
-            : (["applications", "va_apps", "x_tracker", "analytics", "links"] as const)
+            : (["x_tracker", "applications", "va_apps"] as const)
           ) as readonly Tab[]).map((t) => (
             <button
               key={t}
@@ -333,7 +333,7 @@ function AdminDashboard() {
                 tab === t ? "bg-lime text-primary-foreground" : "text-muted-foreground"
               }`}
             >
-              {t === "va_apps" ? "VA" : t === "x_tracker" ? "X" : t}
+              {t === "va_apps" ? "VA" : t === "x_tracker" ? "X" : t === "applications" ? "Models" : t}
             </button>
           ))}
 
@@ -443,13 +443,6 @@ function AdminDashboard() {
 
         {tab === "x_tracker" && <XTrackerPanel role={role ?? "admin"} />}
 
-
-
-        {tab === "analytics" && <AnalyticsPanel views={views} apps={apps} />}
-
-        {tab === "links" && (
-          <LinksPanel links={links} setLinks={setLinks} clicks={clicks} apps={apps} />
-        )}
       </main>
 
       {selected && (
