@@ -95,8 +95,10 @@ type ViewMode = "accounts" | "history" | "earnings" | "screenshots" | "managers"
 
 const MANAGER_COMMISSION_PCT = 0.10;
 
-export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "manager" }) {
+export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "manager" | "employee" }) {
   const isManager = role === "manager";
+  const isEmployee = role === "employee";
+  const isRestricted = isManager || isEmployee; // own-scope, hide money
   const [accounts, setAccounts] = useState<XAccount[]>([]);
   const [history, setHistory] = useState<XHistory[]>([]);
   const [screenshots, setScreenshots] = useState<XScreenshot[]>([]);
