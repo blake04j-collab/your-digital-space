@@ -91,7 +91,18 @@ async function signedUrl(path: string): Promise<string | null> {
   return data?.signedUrl ?? null;
 }
 
-type ViewMode = "accounts" | "history" | "earnings" | "screenshots" | "managers";
+type ViewMode = "accounts" | "history" | "earnings" | "screenshots" | "managers" | "employees";
+
+type EmployeeRow = {
+  user_id: string;
+  email: string;
+  account_count: number;
+  weekly_views: number;
+  usdt_address: string;
+  usdt_network: string;
+};
+
+type WalletRow = { user_id: string; usdt_address: string; network: string };
 
 const MANAGER_COMMISSION_PCT = 0.10;
 
