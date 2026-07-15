@@ -127,7 +127,7 @@ function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [authorized, setAuthorized] = useState(false);
   const [role, setRole] = useState<"admin" | "manager" | null>(null);
-  const [tab, setTab] = useState<Tab>("applications");
+  const [tab, setTab] = useState<Tab>("x_tracker");
 
   const [apps, setApps] = useState<Application[]>([]);
   const [vaApps, setVaApps] = useState<VAApplication[]>([]);
