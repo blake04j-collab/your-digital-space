@@ -14,6 +14,7 @@ import { Route as L5RouteImport } from './routes/L5'
 import { Route as B1RouteImport } from './routes/B1'
 import { Route as RefRouteImport } from './routes/$ref'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as EmployeeIndexRouteImport } from './routes/employee.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as EmployeeLoginRouteImport } from './routes/employee.login'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
@@ -42,6 +43,11 @@ const RefRoute = RefRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EmployeeIndexRoute = EmployeeIndexRouteImport.update({
+  id: '/employee/',
+  path: '/employee/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
@@ -75,6 +81,7 @@ export interface FileRoutesByFullPath {
   '/admin/login': typeof AdminLoginRoute
   '/employee/login': typeof EmployeeLoginRoute
   '/admin/': typeof AdminIndexRoute
+  '/employee/': typeof EmployeeIndexRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
 export interface FileRoutesByTo {
@@ -86,6 +93,7 @@ export interface FileRoutesByTo {
   '/admin/login': typeof AdminLoginRoute
   '/employee/login': typeof EmployeeLoginRoute
   '/admin': typeof AdminIndexRoute
+  '/employee': typeof EmployeeIndexRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
 export interface FileRoutesById {
@@ -98,6 +106,7 @@ export interface FileRoutesById {
   '/admin/login': typeof AdminLoginRoute
   '/employee/login': typeof EmployeeLoginRoute
   '/admin/': typeof AdminIndexRoute
+  '/employee/': typeof EmployeeIndexRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
 export interface FileRouteTypes {
@@ -111,6 +120,7 @@ export interface FileRouteTypes {
     | '/admin/login'
     | '/employee/login'
     | '/admin/'
+    | '/employee/'
     | '/lovable/email/queue/process'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -122,6 +132,7 @@ export interface FileRouteTypes {
     | '/admin/login'
     | '/employee/login'
     | '/admin'
+    | '/employee'
     | '/lovable/email/queue/process'
   id:
     | '__root__'
@@ -133,6 +144,7 @@ export interface FileRouteTypes {
     | '/admin/login'
     | '/employee/login'
     | '/admin/'
+    | '/employee/'
     | '/lovable/email/queue/process'
   fileRoutesById: FileRoutesById
 }
@@ -145,6 +157,7 @@ export interface RootRouteChildren {
   AdminLoginRoute: typeof AdminLoginRoute
   EmployeeLoginRoute: typeof EmployeeLoginRoute
   AdminIndexRoute: typeof AdminIndexRoute
+  EmployeeIndexRoute: typeof EmployeeIndexRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
 }
 
@@ -183,6 +196,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/employee/': {
+      id: '/employee/'
+      path: '/employee'
+      fullPath: '/employee/'
+      preLoaderRoute: typeof EmployeeIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/': {
@@ -225,6 +245,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminLoginRoute: AdminLoginRoute,
   EmployeeLoginRoute: EmployeeLoginRoute,
   AdminIndexRoute: AdminIndexRoute,
+  EmployeeIndexRoute: EmployeeIndexRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
 }
 export const routeTree = rootRouteImport
