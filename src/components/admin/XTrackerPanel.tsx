@@ -782,6 +782,16 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
         </div>
       )}
 
+      {view === "team" && isManager && (
+        <ManagerTeamPanel
+          employees={myEmployees}
+          codes={myInviteCodes}
+          onChanged={refresh}
+        />
+      )}
+
+
+
 
 
 
