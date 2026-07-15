@@ -443,13 +443,6 @@ function AdminDashboard() {
 
         {tab === "x_tracker" && <XTrackerPanel role={role ?? "admin"} />}
 
-
-
-        {tab === "analytics" && <AnalyticsPanel views={views} apps={apps} />}
-
-        {tab === "links" && (
-          <LinksPanel links={links} setLinks={setLinks} clicks={clicks} apps={apps} />
-        )}
       </main>
 
       {selected && (
