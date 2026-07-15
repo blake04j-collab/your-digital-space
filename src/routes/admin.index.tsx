@@ -324,7 +324,7 @@ function AdminDashboard() {
         <div className="flex gap-1 border-t border-hairline px-5 py-2 sm:hidden">
           {((role === "manager"
             ? (["x_tracker"] as const)
-            : (["applications", "va_apps", "x_tracker", "analytics", "links"] as const)
+            : (["x_tracker", "applications", "va_apps"] as const)
           ) as readonly Tab[]).map((t) => (
             <button
               key={t}
@@ -333,7 +333,7 @@ function AdminDashboard() {
                 tab === t ? "bg-lime text-primary-foreground" : "text-muted-foreground"
               }`}
             >
-              {t === "va_apps" ? "VA" : t === "x_tracker" ? "X" : t}
+              {t === "va_apps" ? "VA" : t === "x_tracker" ? "X" : t === "applications" ? "Models" : t}
             </button>
           ))}
 
