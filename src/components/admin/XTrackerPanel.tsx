@@ -491,7 +491,7 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
                         <td className="px-4 py-3 text-muted-foreground">{fmt(a.previous_views ?? 0)}</td>
                         <td className="px-4 py-3 text-foreground">{fmt(a.current_views)}</td>
                         <td className="px-4 py-3 text-foreground">{fmt(gained)}</td>
-                        {!isManager && (
+                        {!isRestricted && (
                           <td className="px-4 py-3 font-medium text-lime">{money(owed)}</td>
                         )}
                         <td className="px-4 py-3 text-xs text-muted-foreground">
@@ -499,7 +499,7 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
                             ? new Date(a.last_screenshot_upload_at).toLocaleString()
                             : "—"}
                         </td>
-                        {!isManager && (
+                        {!isRestricted && (
                           <td className="px-4 py-3 text-xs">
                             {a.added_by_user_id ? (
                               managerEmailById.has(a.added_by_user_id) ? (
@@ -624,7 +624,7 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
         </div>
       )}
 
-      {view === "managers" && !isManager && (
+      {view === "managers" && !isRestricted && (
         <div className="mt-4 overflow-hidden rounded-2xl border border-hairline bg-surface-1">
           {managerStats.length === 0 ? (
             <div className="p-10 text-center text-sm text-muted-foreground">
