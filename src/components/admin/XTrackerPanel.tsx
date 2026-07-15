@@ -1388,7 +1388,7 @@ function AccountForm({
             previous_views: 0,
             views_gained_since_last: 0,
             payout_owed_cents: 0,
-            weekly_starting_views: finalViews,
+            weekly_starting_views: 0,
             screenshot_url: screenshotPath,
             last_updated: now,
             last_refresh_at: now,
