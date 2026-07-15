@@ -175,6 +175,12 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
     } else if (isManager) {
       const row = Array.isArray(extra?.data) ? (extra.data[0] as { unpaid_commission_cents?: number } | undefined) : undefined;
       setMyUnpaidCommissionCents(Number(row?.unpaid_commission_cents ?? 0));
+      const [{ data: myEmps }, { data: codes }] = await Promise.all([
+        supabase.rpc("list_my_employees" as never),
+        supabase.rpc("list_my_invite_codes" as never),
+      ]);
+      setMyEmployees(((myEmps as unknown) as EmployeeRow[]) ?? []);
+      setMyInviteCodes(((codes as unknown) as InviteCodeRow[]) ?? []);
     }
     if (isRestricted) {
       const { data: w } = await supabase
