@@ -95,8 +95,10 @@ type ViewMode = "accounts" | "history" | "earnings" | "screenshots" | "managers"
 
 const MANAGER_COMMISSION_PCT = 0.10;
 
-export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "manager" }) {
+export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "manager" | "employee" }) {
   const isManager = role === "manager";
+  const isEmployee = role === "employee";
+  const isRestricted = isManager || isEmployee; // own-scope, hide money
   const [accounts, setAccounts] = useState<XAccount[]>([]);
   const [history, setHistory] = useState<XHistory[]>([]);
   const [screenshots, setScreenshots] = useState<XScreenshot[]>([]);
@@ -133,21 +135,23 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
         .order("uploaded_at", { ascending: false })
         .limit(500) as unknown as PromiseLike<{ data: unknown }>,
     ];
-    if (!isManager) {
+    if (role === "admin") {
       promises.push(supabase.rpc("list_managers" as never) as unknown as PromiseLike<{ data: unknown }>);
-    } else {
+    } else if (isManager) {
       promises.push(
         supabase.rpc("get_my_manager_commission" as never) as unknown as PromiseLike<{ data: unknown }>,
       );
+    } else {
+      promises.push(Promise.resolve({ data: null }));
     }
     const results = await Promise.all(promises);
     const [a, h, s, extra] = results;
     setAccounts((a.data as XAccount[]) ?? []);
     setHistory((h.data as XHistory[]) ?? []);
     setScreenshots((s.data as XScreenshot[]) ?? []);
-    if (!isManager) {
+    if (role === "admin") {
       setManagers((extra?.data as ManagerRow[]) ?? []);
-    } else {
+    } else if (isManager) {
       const row = Array.isArray(extra?.data) ? (extra.data[0] as { unpaid_commission_cents?: number } | undefined) : undefined;
       setMyUnpaidCommissionCents(Number(row?.unpaid_commission_cents ?? 0));
     }
@@ -365,10 +369,12 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
       <div className="mb-3 flex items-start justify-between gap-3">
         <div>
           <h2 className="font-display text-2xl text-foreground">
-            {isManager ? "Your X Accounts" : "X View Tracker"}
+            {isRestricted ? "Your X Accounts" : "X View Tracker"}
           </h2>
           <p className="mt-1 text-xs text-muted-foreground">
-            {isManager
+            {isEmployee
+              ? "Add the X accounts you're running and upload weekly screenshots of your pinned post."
+              : isManager
               ? "Add X accounts you're managing and upload weekly screenshots. You earn 10% commission on the views your accounts generate."
               : "Upload a screenshot of each account's post — OCR reads the view count, you confirm, payroll updates. $3 per 1,000 weekly views."}
           </p>
@@ -380,7 +386,7 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
           >
             + Add account
           </button>
-          {!isManager && (
+          {!isRestricted && (
             <>
               <button
                 onClick={exportPayrollCsv}
@@ -401,11 +407,12 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
       </div>
 
       <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">
-        <TinyStat label={isManager ? "Your accounts" : "Accounts tracked"} value={String(stats.active)} />
+        <TinyStat label={isRestricted ? "Your accounts" : "Accounts tracked"} value={String(stats.active)} />
         <TinyStat label="Weekly views" value={fmt(stats.totalWeekly)} />
-        {isManager ? (
+        {isManager && (
           <TinyStat label="Your commission (10%)" value={money(managerCommissionCents)} accent />
-        ) : (
+        )}
+        {!isRestricted && (
           <>
             <TinyStat label="Weekly pay" value={money(stats.totalWeeklyPay)} accent />
             <TinyStat label="Last 30 days pay" value={money(stats.monthPay)} />
@@ -414,7 +421,7 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
       </div>
 
       <div className="mt-5 flex gap-1 rounded-full border border-hairline bg-surface-1 p-1 w-fit flex-wrap">
-        {((isManager
+        {((isRestricted
           ? (["accounts", "screenshots"] as const)
           : (["accounts", "screenshots", "earnings", "history", "managers"] as const)
         ) as readonly ViewMode[]).map((v) => (
@@ -443,13 +450,13 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
                 <thead className="border-b border-hairline text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
                   <tr>
                     <th className="px-4 py-3">Account</th>
-                    <th className="px-4 py-3">{isManager ? "Contact" : "Employee"}</th>
+                    <th className="px-4 py-3">{isRestricted ? "Contact" : "Employee"}</th>
                     <th className="px-4 py-3">Previous</th>
                     <th className="px-4 py-3">Current</th>
                     <th className="px-4 py-3">Gained</th>
-                    {!isManager && <th className="px-4 py-3">Owed</th>}
+                    {!isRestricted && <th className="px-4 py-3">Owed</th>}
                     <th className="px-4 py-3">Last upload</th>
-                    {!isManager && <th className="px-4 py-3">Added by</th>}
+                    {!isRestricted && <th className="px-4 py-3">Added by</th>}
                     <th className="px-4 py-3 text-right">Actions</th>
                   </tr>
 
@@ -484,7 +491,7 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
                         <td className="px-4 py-3 text-muted-foreground">{fmt(a.previous_views ?? 0)}</td>
                         <td className="px-4 py-3 text-foreground">{fmt(a.current_views)}</td>
                         <td className="px-4 py-3 text-foreground">{fmt(gained)}</td>
-                        {!isManager && (
+                        {!isRestricted && (
                           <td className="px-4 py-3 font-medium text-lime">{money(owed)}</td>
                         )}
                         <td className="px-4 py-3 text-xs text-muted-foreground">
@@ -492,7 +499,7 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
                             ? new Date(a.last_screenshot_upload_at).toLocaleString()
                             : "—"}
                         </td>
-                        {!isManager && (
+                        {!isRestricted && (
                           <td className="px-4 py-3 text-xs">
                             {a.added_by_user_id ? (
                               managerEmailById.has(a.added_by_user_id) ? (
@@ -541,7 +548,7 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
       )}
 
       {view === "screenshots" && (
-        <ScreenshotHistory rows={screenshots} hideMoney={isManager} />
+        <ScreenshotHistory rows={screenshots} hideMoney={isRestricted} />
       )}
 
 
@@ -617,7 +624,7 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
         </div>
       )}
 
-      {view === "managers" && !isManager && (
+      {view === "managers" && !isRestricted && (
         <div className="mt-4 overflow-hidden rounded-2xl border border-hairline bg-surface-1">
           {managerStats.length === 0 ? (
             <div className="p-10 text-center text-sm text-muted-foreground">

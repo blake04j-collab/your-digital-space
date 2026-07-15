@@ -164,6 +164,33 @@ export type Database = {
         }
         Relationships: []
       }
+      employee_invite_codes: {
+        Row: {
+          active: boolean
+          code: string
+          created_at: string
+          created_by: string | null
+          id: string
+          label: string | null
+        }
+        Insert: {
+          active?: boolean
+          code: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          label?: string | null
+        }
+        Update: {
+          active?: boolean
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          label?: string | null
+        }
+        Relationships: []
+      }
       link_clicks: {
         Row: {
           code: string
@@ -608,6 +635,15 @@ export type Database = {
         }
         Returns: boolean
       }
+      list_employees: {
+        Args: never
+        Returns: {
+          account_count: number
+          email: string
+          user_id: string
+          weekly_views: number
+        }[]
+      }
       list_managers: {
         Args: never
         Returns: {
@@ -633,13 +669,14 @@ export type Database = {
           read_ct: number
         }[]
       }
+      redeem_employee_invite: { Args: { _code: string }; Returns: boolean }
       reset_manager_commission: {
         Args: { _lifetime_cents: number; _manager: string }
         Returns: undefined
       }
     }
     Enums: {
-      app_role: "admin" | "user" | "manager"
+      app_role: "admin" | "user" | "manager" | "employee"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -767,7 +804,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "user", "manager"],
+      app_role: ["admin", "user", "manager", "employee"],
     },
   },
 } as const
