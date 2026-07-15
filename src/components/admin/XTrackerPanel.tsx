@@ -819,8 +819,10 @@ function WalletCard({
   async function save() {
     if (!userId) return;
     setSaving(true);
-    const { data, error } = await supabase
-      .from("payout_wallets" as never)
+    const { data, error } = await (supabase
+      .from("payout_wallets" as never) as unknown as {
+        upsert: (v: unknown) => { select: (s: string) => { single: () => Promise<{ data: unknown; error: { message: string } | null }> } };
+      })
       .upsert({ user_id: userId, usdt_address: address.trim(), network })
       .select("*")
       .single();
