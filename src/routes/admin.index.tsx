@@ -297,7 +297,7 @@ function AdminDashboard() {
             <div className="hidden gap-1 rounded-full border border-hairline bg-surface-1 p-1 sm:flex">
               {((role === "manager"
                 ? (["x_tracker"] as const)
-                : (["applications", "va_apps", "x_tracker", "analytics", "links"] as const)
+                : (["x_tracker", "applications", "va_apps"] as const)
               ) as readonly Tab[]).map((t) => (
                 <button
                   key={t}
@@ -308,7 +308,7 @@ function AdminDashboard() {
                       : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
-                  {t === "va_apps" ? "VA Apps" : t === "x_tracker" ? "X Tracker" : t}
+                  {t === "va_apps" ? "VA Apps" : t === "x_tracker" ? "X Tracker" : t === "applications" ? "Model Applications" : t}
                 </button>
               ))}
 
