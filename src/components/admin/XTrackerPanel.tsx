@@ -135,21 +135,23 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
         .order("uploaded_at", { ascending: false })
         .limit(500) as unknown as PromiseLike<{ data: unknown }>,
     ];
-    if (!isManager) {
+    if (role === "admin") {
       promises.push(supabase.rpc("list_managers" as never) as unknown as PromiseLike<{ data: unknown }>);
-    } else {
+    } else if (isManager) {
       promises.push(
         supabase.rpc("get_my_manager_commission" as never) as unknown as PromiseLike<{ data: unknown }>,
       );
+    } else {
+      promises.push(Promise.resolve({ data: null }));
     }
     const results = await Promise.all(promises);
     const [a, h, s, extra] = results;
     setAccounts((a.data as XAccount[]) ?? []);
     setHistory((h.data as XHistory[]) ?? []);
     setScreenshots((s.data as XScreenshot[]) ?? []);
-    if (!isManager) {
+    if (role === "admin") {
       setManagers((extra?.data as ManagerRow[]) ?? []);
-    } else {
+    } else if (isManager) {
       const row = Array.isArray(extra?.data) ? (extra.data[0] as { unpaid_commission_cents?: number } | undefined) : undefined;
       setMyUnpaidCommissionCents(Number(row?.unpaid_commission_cents ?? 0));
     }
