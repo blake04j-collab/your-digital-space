@@ -165,7 +165,7 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
     if (role === "admin") {
       setManagers((extra?.data as ManagerRow[]) ?? []);
       const { data: emps } = await supabase.rpc("list_employees" as never);
-      setEmployees((emps as EmployeeRow[]) ?? []);
+      setEmployees(((emps as unknown) as EmployeeRow[]) ?? []);
     } else if (isManager) {
       const row = Array.isArray(extra?.data) ? (extra.data[0] as { unpaid_commission_cents?: number } | undefined) : undefined;
       setMyUnpaidCommissionCents(Number(row?.unpaid_commission_cents ?? 0));
