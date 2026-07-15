@@ -723,10 +723,11 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[900px] text-left text-sm">
+              <table className="w-full min-w-[1000px] text-left text-sm">
                 <thead className="border-b border-hairline text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
                   <tr>
                     <th className="px-4 py-3">Employee</th>
+                    <th className="px-4 py-3">Manager</th>
                     <th className="px-4 py-3">Accounts</th>
                     <th className="px-4 py-3">Weekly views</th>
                     <th className="px-4 py-3">USDT address</th>
@@ -737,14 +738,31 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
                   {employees.map((e) => (
                     <tr key={e.user_id} className="border-b border-hairline/60 last:border-0">
                       <td className="px-4 py-3 text-foreground">{e.email}</td>
+                      <td className="px-4 py-3">
+                        <select
+                          value={e.manager_user_id ?? ""}
+                          onChange={async (ev) => {
+                            const mgr = ev.target.value || null;
+                            const { error } = await supabase.rpc("assign_employee_manager" as never, {
+                              _employee: e.user_id, _manager: mgr,
+                            } as never);
+                            if (error) { alert(error.message); return; }
+                            await refresh();
+                          }}
+                          className="rounded-lg border border-hairline bg-background px-2 py-1 text-xs text-foreground"
+                        >
+                          <option value="">Unassigned</option>
+                          {managers.map((m) => (
+                            <option key={m.user_id} value={m.user_id}>{m.email}</option>
+                          ))}
+                        </select>
+                      </td>
                       <td className="px-4 py-3 text-muted-foreground">{e.account_count}</td>
                       <td className="px-4 py-3 text-muted-foreground">{fmt(e.weekly_views)}</td>
                       <td className="px-4 py-3">
                         {e.usdt_address ? (
                           <button
-                            onClick={() => {
-                              navigator.clipboard.writeText(e.usdt_address);
-                            }}
+                            onClick={() => { navigator.clipboard.writeText(e.usdt_address); }}
                             title="Click to copy"
                             className="font-mono text-xs text-foreground hover:text-lime break-all text-left"
                           >
