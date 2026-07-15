@@ -638,9 +638,10 @@ export type Database = {
       list_employees: {
         Args: never
         Returns: {
-          created_at: string
+          account_count: number
           email: string
           user_id: string
+          weekly_views: number
         }[]
       }
       list_managers: {
