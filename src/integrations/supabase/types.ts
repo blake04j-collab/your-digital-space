@@ -172,6 +172,7 @@ export type Database = {
           created_by: string | null
           id: string
           label: string | null
+          manager_user_id: string | null
         }
         Insert: {
           active?: boolean
@@ -180,6 +181,7 @@ export type Database = {
           created_by?: string | null
           id?: string
           label?: string | null
+          manager_user_id?: string | null
         }
         Update: {
           active?: boolean
@@ -188,6 +190,25 @@ export type Database = {
           created_by?: string | null
           id?: string
           label?: string | null
+          manager_user_id?: string | null
+        }
+        Relationships: []
+      }
+      employee_managers: {
+        Row: {
+          assigned_at: string
+          manager_user_id: string
+          user_id: string
+        }
+        Insert: {
+          assigned_at?: string
+          manager_user_id: string
+          user_id: string
+        }
+        Update: {
+          assigned_at?: string
+          manager_user_id?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -632,6 +653,19 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      account_owned_by_my_employee: {
+        Args: { _account_id: string }
+        Returns: boolean
+      }
+      assign_employee_manager: {
+        Args: { _employee: string; _manager: string }
+        Returns: undefined
+      }
+      create_manager_invite_code: { Args: { _label?: string }; Returns: string }
+      deactivate_manager_invite_code: {
+        Args: { _code: string }
+        Returns: boolean
+      }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
@@ -656,11 +690,14 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_my_employee: { Args: { _user_id: string }; Returns: boolean }
       list_employees: {
         Args: never
         Returns: {
           account_count: number
           email: string
+          manager_email: string
+          manager_user_id: string
           usdt_address: string
           usdt_network: string
           user_id: string
@@ -673,6 +710,26 @@ export type Database = {
           email: string
           paid_baseline_cents: number
           user_id: string
+        }[]
+      }
+      list_my_employees: {
+        Args: never
+        Returns: {
+          account_count: number
+          email: string
+          usdt_address: string
+          usdt_network: string
+          user_id: string
+          weekly_views: number
+        }[]
+      }
+      list_my_invite_codes: {
+        Args: never
+        Returns: {
+          active: boolean
+          code: string
+          created_at: string
+          label: string
         }[]
       }
       move_to_dlq: {
