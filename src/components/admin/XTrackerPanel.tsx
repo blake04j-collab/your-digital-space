@@ -91,7 +91,7 @@ async function signedUrl(path: string): Promise<string | null> {
   return data?.signedUrl ?? null;
 }
 
-type ViewMode = "accounts" | "history" | "earnings" | "screenshots" | "managers" | "employees";
+type ViewMode = "accounts" | "history" | "earnings" | "screenshots" | "managers" | "employees" | "team";
 
 type EmployeeRow = {
   user_id: string;
@@ -100,7 +100,11 @@ type EmployeeRow = {
   weekly_views: number;
   usdt_address: string;
   usdt_network: string;
+  manager_user_id?: string | null;
+  manager_email?: string | null;
 };
+
+type InviteCodeRow = { code: string; label: string | null; active: boolean; created_at: string };
 
 type WalletRow = { user_id: string; usdt_address: string; network: string };
 
@@ -123,6 +127,8 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
   const [userId, setUserId] = useState<string | null>(null);
   const [myUnpaidCommissionCents, setMyUnpaidCommissionCents] = useState<number>(0);
   const [employees, setEmployees] = useState<EmployeeRow[]>([]);
+  const [myEmployees, setMyEmployees] = useState<EmployeeRow[]>([]);
+  const [myInviteCodes, setMyInviteCodes] = useState<InviteCodeRow[]>([]);
   const [myWallet, setMyWallet] = useState<WalletRow | null>(null);
 
   useEffect(() => {
@@ -169,6 +175,12 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
     } else if (isManager) {
       const row = Array.isArray(extra?.data) ? (extra.data[0] as { unpaid_commission_cents?: number } | undefined) : undefined;
       setMyUnpaidCommissionCents(Number(row?.unpaid_commission_cents ?? 0));
+      const [{ data: myEmps }, { data: codes }] = await Promise.all([
+        supabase.rpc("list_my_employees" as never),
+        supabase.rpc("list_my_invite_codes" as never),
+      ]);
+      setMyEmployees(((myEmps as unknown) as EmployeeRow[]) ?? []);
+      setMyInviteCodes(((codes as unknown) as InviteCodeRow[]) ?? []);
     }
     if (isRestricted) {
       const { data: w } = await supabase
@@ -451,8 +463,10 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
       )}
 
       <div className="mt-5 flex gap-1 rounded-full border border-hairline bg-surface-1 p-1 w-fit flex-wrap">
-        {((isRestricted
+        {((isEmployee
           ? (["accounts", "screenshots"] as const)
+          : isManager
+          ? (["accounts", "screenshots", "team"] as const)
           : (["accounts", "screenshots", "earnings", "history", "managers", "employees"] as const)
         ) as readonly ViewMode[]).map((v) => (
           <button
@@ -709,10 +723,11 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[900px] text-left text-sm">
+              <table className="w-full min-w-[1000px] text-left text-sm">
                 <thead className="border-b border-hairline text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
                   <tr>
                     <th className="px-4 py-3">Employee</th>
+                    <th className="px-4 py-3">Manager</th>
                     <th className="px-4 py-3">Accounts</th>
                     <th className="px-4 py-3">Weekly views</th>
                     <th className="px-4 py-3">USDT address</th>
@@ -723,14 +738,31 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
                   {employees.map((e) => (
                     <tr key={e.user_id} className="border-b border-hairline/60 last:border-0">
                       <td className="px-4 py-3 text-foreground">{e.email}</td>
+                      <td className="px-4 py-3">
+                        <select
+                          value={e.manager_user_id ?? ""}
+                          onChange={async (ev) => {
+                            const mgr = ev.target.value || null;
+                            const { error } = await supabase.rpc("assign_employee_manager" as never, {
+                              _employee: e.user_id, _manager: mgr,
+                            } as never);
+                            if (error) { alert(error.message); return; }
+                            await refresh();
+                          }}
+                          className="rounded-lg border border-hairline bg-background px-2 py-1 text-xs text-foreground"
+                        >
+                          <option value="">Unassigned</option>
+                          {managers.map((m) => (
+                            <option key={m.user_id} value={m.user_id}>{m.email}</option>
+                          ))}
+                        </select>
+                      </td>
                       <td className="px-4 py-3 text-muted-foreground">{e.account_count}</td>
                       <td className="px-4 py-3 text-muted-foreground">{fmt(e.weekly_views)}</td>
                       <td className="px-4 py-3">
                         {e.usdt_address ? (
                           <button
-                            onClick={() => {
-                              navigator.clipboard.writeText(e.usdt_address);
-                            }}
+                            onClick={() => { navigator.clipboard.writeText(e.usdt_address); }}
                             title="Click to copy"
                             className="font-mono text-xs text-foreground hover:text-lime break-all text-left"
                           >
@@ -749,6 +781,16 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
           )}
         </div>
       )}
+
+      {view === "team" && isManager && (
+        <ManagerTeamPanel
+          employees={myEmployees}
+          codes={myInviteCodes}
+          onChanged={refresh}
+        />
+      )}
+
+
 
 
 
@@ -1506,3 +1548,163 @@ function Input({
     </div>
   );
 }
+
+function ManagerTeamPanel({
+  employees,
+  codes,
+  onChanged,
+}: {
+  employees: EmployeeRow[];
+  codes: InviteCodeRow[];
+  onChanged: () => Promise<void> | void;
+}) {
+  const [label, setLabel] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [newCode, setNewCode] = useState<string | null>(null);
+
+  async function createCode() {
+    setBusy(true);
+    const { data, error } = await supabase.rpc("create_manager_invite_code" as never, { _label: label || null } as never);
+    setBusy(false);
+    if (error) { alert(error.message); return; }
+    setNewCode((data as unknown as string) ?? null);
+    setLabel("");
+    await onChanged();
+  }
+
+  async function deactivate(code: string) {
+    if (!confirm(`Deactivate invite code ${code}?`)) return;
+    const { error } = await supabase.rpc("deactivate_manager_invite_code" as never, { _code: code } as never);
+    if (error) { alert(error.message); return; }
+    await onChanged();
+  }
+
+  return (
+    <div className="mt-4 space-y-4">
+      <div className="rounded-2xl border border-hairline bg-surface-1 p-5">
+        <h3 className="font-display text-lg text-foreground">Invite codes</h3>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Share a code with someone you want on your team. When they sign up at
+          <span className="text-foreground"> /employee/login</span> and enter it, they'll be added to your roster automatically.
+        </p>
+
+        <div className="mt-4 flex flex-wrap items-end gap-2">
+          <div className="flex-1 min-w-[220px]">
+            <label className="mb-1.5 block text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+              Label (optional)
+            </label>
+            <input
+              value={label}
+              onChange={(e) => setLabel(e.target.value)}
+              placeholder="e.g. Batch A"
+              className="w-full rounded-lg border border-hairline bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-lime"
+            />
+          </div>
+          <button
+            onClick={createCode}
+            disabled={busy}
+            className="rounded-full bg-lime px-4 py-2 text-[10px] uppercase tracking-[0.2em] text-primary-foreground disabled:opacity-50"
+          >
+            {busy ? "…" : "Generate code"}
+          </button>
+        </div>
+
+        {newCode && (
+          <div className="mt-3 rounded-lg border border-lime/40 bg-lime-soft p-3">
+            <div className="text-[10px] uppercase tracking-[0.2em] text-lime">New code</div>
+            <button
+              onClick={() => navigator.clipboard.writeText(newCode)}
+              className="mt-1 font-mono text-lg tracking-widest text-foreground hover:text-lime"
+              title="Click to copy"
+            >
+              {newCode}
+            </button>
+          </div>
+        )}
+
+        {codes.length > 0 && (
+          <div className="mt-5 overflow-x-auto">
+            <table className="w-full min-w-[520px] text-left text-sm">
+              <thead className="border-b border-hairline text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                <tr>
+                  <th className="py-2">Code</th>
+                  <th className="py-2">Label</th>
+                  <th className="py-2">Status</th>
+                  <th className="py-2 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {codes.map((c) => (
+                  <tr key={c.code} className="border-b border-hairline/60 last:border-0">
+                    <td className="py-2">
+                      <button
+                        onClick={() => navigator.clipboard.writeText(c.code)}
+                        className="font-mono text-xs text-foreground hover:text-lime"
+                        title="Click to copy"
+                      >
+                        {c.code}
+                      </button>
+                    </td>
+                    <td className="py-2 text-muted-foreground">{c.label || "—"}</td>
+                    <td className="py-2 text-xs">
+                      {c.active ? (
+                        <span className="text-lime">Active</span>
+                      ) : (
+                        <span className="text-muted-foreground">Inactive</span>
+                      )}
+                    </td>
+                    <td className="py-2 text-right">
+                      {c.active && (
+                        <button
+                          onClick={() => deactivate(c.code)}
+                          className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground hover:text-destructive"
+                        >
+                          Deactivate
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      <div className="rounded-2xl border border-hairline bg-surface-1 p-5">
+        <h3 className="font-display text-lg text-foreground">Your team</h3>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Employees who signed up with one of your codes. You see their tracked accounts under
+          <span className="text-foreground"> Accounts</span>.
+        </p>
+        {employees.length === 0 ? (
+          <div className="mt-4 rounded-lg border border-hairline bg-background p-6 text-center text-sm text-muted-foreground">
+            No team members yet. Generate a code above and share it.
+          </div>
+        ) : (
+          <div className="mt-4 overflow-x-auto">
+            <table className="w-full min-w-[560px] text-left text-sm">
+              <thead className="border-b border-hairline text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                <tr>
+                  <th className="py-2">Employee</th>
+                  <th className="py-2">Accounts</th>
+                  <th className="py-2">Weekly views</th>
+                </tr>
+              </thead>
+              <tbody>
+                {employees.map((e) => (
+                  <tr key={e.user_id} className="border-b border-hairline/60 last:border-0">
+                    <td className="py-2 text-foreground">{e.email}</td>
+                    <td className="py-2 text-muted-foreground">{e.account_count}</td>
+                    <td className="py-2 text-muted-foreground">{fmt(e.weekly_views)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
