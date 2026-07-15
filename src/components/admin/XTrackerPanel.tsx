@@ -369,10 +369,12 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
       <div className="mb-3 flex items-start justify-between gap-3">
         <div>
           <h2 className="font-display text-2xl text-foreground">
-            {isManager ? "Your X Accounts" : "X View Tracker"}
+            {isRestricted ? "Your X Accounts" : "X View Tracker"}
           </h2>
           <p className="mt-1 text-xs text-muted-foreground">
-            {isManager
+            {isEmployee
+              ? "Add the X accounts you're running and upload weekly screenshots of your pinned post."
+              : isManager
               ? "Add X accounts you're managing and upload weekly screenshots. You earn 10% commission on the views your accounts generate."
               : "Upload a screenshot of each account's post — OCR reads the view count, you confirm, payroll updates. $3 per 1,000 weekly views."}
           </p>
@@ -384,7 +386,7 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
           >
             + Add account
           </button>
-          {!isManager && (
+          {!isRestricted && (
             <>
               <button
                 onClick={exportPayrollCsv}
@@ -405,11 +407,12 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
       </div>
 
       <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">
-        <TinyStat label={isManager ? "Your accounts" : "Accounts tracked"} value={String(stats.active)} />
+        <TinyStat label={isRestricted ? "Your accounts" : "Accounts tracked"} value={String(stats.active)} />
         <TinyStat label="Weekly views" value={fmt(stats.totalWeekly)} />
-        {isManager ? (
+        {isManager && (
           <TinyStat label="Your commission (10%)" value={money(managerCommissionCents)} accent />
-        ) : (
+        )}
+        {!isRestricted && (
           <>
             <TinyStat label="Weekly pay" value={money(stats.totalWeeklyPay)} accent />
             <TinyStat label="Last 30 days pay" value={money(stats.monthPay)} />
@@ -418,7 +421,7 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
       </div>
 
       <div className="mt-5 flex gap-1 rounded-full border border-hairline bg-surface-1 p-1 w-fit flex-wrap">
-        {((isManager
+        {((isRestricted
           ? (["accounts", "screenshots"] as const)
           : (["accounts", "screenshots", "earnings", "history", "managers"] as const)
         ) as readonly ViewMode[]).map((v) => (
