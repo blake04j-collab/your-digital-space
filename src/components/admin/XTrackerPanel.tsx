@@ -450,13 +450,13 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
                 <thead className="border-b border-hairline text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
                   <tr>
                     <th className="px-4 py-3">Account</th>
-                    <th className="px-4 py-3">{isManager ? "Contact" : "Employee"}</th>
+                    <th className="px-4 py-3">{isRestricted ? "Contact" : "Employee"}</th>
                     <th className="px-4 py-3">Previous</th>
                     <th className="px-4 py-3">Current</th>
                     <th className="px-4 py-3">Gained</th>
-                    {!isManager && <th className="px-4 py-3">Owed</th>}
+                    {!isRestricted && <th className="px-4 py-3">Owed</th>}
                     <th className="px-4 py-3">Last upload</th>
-                    {!isManager && <th className="px-4 py-3">Added by</th>}
+                    {!isRestricted && <th className="px-4 py-3">Added by</th>}
                     <th className="px-4 py-3 text-right">Actions</th>
                   </tr>
 
@@ -548,7 +548,7 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
       )}
 
       {view === "screenshots" && (
-        <ScreenshotHistory rows={screenshots} hideMoney={isManager} />
+        <ScreenshotHistory rows={screenshots} hideMoney={isRestricted} />
       )}
 
 
