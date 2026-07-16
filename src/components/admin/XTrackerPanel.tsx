@@ -91,7 +91,27 @@ async function signedUrl(path: string): Promise<string | null> {
   return data?.signedUrl ?? null;
 }
 
-type ViewMode = "accounts" | "history" | "earnings" | "screenshots" | "managers" | "employees" | "team";
+type ViewMode = "accounts" | "team";
+
+function extractXUsername(input: string): string | null {
+  const raw = input.trim().replace(/^@/, "");
+  if (!raw) return null;
+  const looksLikeUrl = /^https?:\/\//i.test(raw) || /^(www\.)?(x|twitter)\.com\//i.test(raw);
+  if (!looksLikeUrl) {
+    // treat as bare username
+    const clean = raw.split(/[/?#]/)[0];
+    return /^[A-Za-z0-9_]{1,20}$/.test(clean) ? clean : null;
+  }
+  try {
+    const u = new URL(raw.startsWith("http") ? raw : `https://${raw}`);
+    if (!/(^|\.)(x|twitter)\.com$/i.test(u.hostname)) return null;
+    const seg = u.pathname.split("/").filter(Boolean)[0];
+    if (!seg) return null;
+    return /^[A-Za-z0-9_]{1,20}$/.test(seg) ? seg : null;
+  } catch {
+    return null;
+  }
+}
 
 type EmployeeRow = {
   user_id: string;
