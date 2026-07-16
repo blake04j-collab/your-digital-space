@@ -862,16 +862,22 @@ function WalletCard({
 
   async function save() {
     if (!userId) return;
+    const trimmed = address.trim();
+    if (!isValidEthAddress(trimmed)) {
+      setError("Enter a valid Ethereum (ERC20) address — starts with 0x and 42 characters long.");
+      return;
+    }
+    setError(null);
     setSaving(true);
-    const { data, error } = await (supabase
+    const { data, error: err } = await (supabase
       .from("payout_wallets" as never) as unknown as {
         upsert: (v: unknown) => { select: (s: string) => { single: () => Promise<{ data: unknown; error: { message: string } | null }> } };
       })
-      .upsert({ user_id: userId, usdt_address: address.trim(), network })
+      .upsert({ user_id: userId, usdt_address: trimmed, network })
       .select("*")
       .single();
     setSaving(false);
-    if (error) return alert(error.message);
+    if (err) return alert(err.message);
     onSaved(data as unknown as WalletRow);
     setSavedFlash(true);
     setTimeout(() => setSavedFlash(false), 1800);
@@ -885,32 +891,24 @@ function WalletCard({
             Payout wallet
           </div>
           <div className="mt-1 text-sm text-foreground">
-            USDT address for payments
+            USDT address (Ethereum / ERC20 only)
           </div>
         </div>
         {savedFlash && (
           <span className="text-[10px] uppercase tracking-[0.2em] text-lime">Saved</span>
         )}
       </div>
-      <div className="mt-3 grid gap-2 md:grid-cols-[1fr_140px_auto]">
+      <div className="mt-3 grid gap-2 md:grid-cols-[1fr_160px_auto]">
         <input
           type="text"
           value={address}
-          onChange={(e) => setAddress(e.target.value)}
-          placeholder="Paste your USDT wallet address"
+          onChange={(e) => { setAddress(e.target.value); if (error) setError(null); }}
+          placeholder="0x… USDT (ERC20) address"
           className="rounded-lg border border-hairline bg-background px-3 py-2 font-mono text-xs text-foreground"
         />
-        <select
-          value={network}
-          onChange={(e) => setNetwork(e.target.value)}
-          className="rounded-lg border border-hairline bg-background px-3 py-2 text-xs text-foreground"
-        >
-          <option value="TRC20">TRC20 (Tron)</option>
-          <option value="ERC20">ERC20 (Ethereum)</option>
-          <option value="BEP20">BEP20 (BSC)</option>
-          <option value="SOL">Solana</option>
-          <option value="Other">Other</option>
-        </select>
+        <div className="rounded-lg border border-hairline bg-background px-3 py-2 text-xs text-muted-foreground flex items-center">
+          ERC20 (Ethereum)
+        </div>
         <button
           onClick={save}
           disabled={saving || !address.trim()}
@@ -919,8 +917,11 @@ function WalletCard({
           {saving ? "Saving…" : "Save"}
         </button>
       </div>
+      {error && (
+        <p className="mt-2 text-[11px] text-red-400">{error}</p>
+      )}
       <p className="mt-2 text-[11px] text-muted-foreground">
-        Double-check the network and address — payments sent on the wrong network cannot be recovered.
+        Only USDT on the Ethereum (ERC20) network is supported. Payments sent on any other network cannot be recovered.
       </p>
     </div>
   );
