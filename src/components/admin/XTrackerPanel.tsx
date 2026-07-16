@@ -2260,7 +2260,7 @@ function AdminPayroll({ accounts, payments, employees, managerLabelForAccount, o
               <tr key={a.id} className="border-t border-hairline">
                 <td className="px-3 py-2">{a.employee_name}</td>
                 <td className="px-3 py-2 text-muted-foreground">{managerLabelForAccount(a.added_by_user_id) ?? "—"}</td>
-                <td className="px-3 py-2">@{a.x_username}</td>
+                <td className="px-3 py-2"><a className="hover:underline" href={a.profile_url} target="_blank" rel="noreferrer">@{a.x_username}</a></td>
                 <td className="px-3 py-2 text-right">{fmt(periodViews)}</td>
                 <td className="px-3 py-2 text-right">{money(amount)}</td>
                 <td className="px-3 py-2 text-right text-muted-foreground">{money(commission)}</td>
