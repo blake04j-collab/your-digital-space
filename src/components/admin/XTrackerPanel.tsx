@@ -487,8 +487,13 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
         </div>
         <div className="flex flex-wrap gap-2">
           <button
+            type="button"
             onClick={() => setShowAdd(true)}
-            className="rounded-full border border-hairline bg-surface-1 px-4 py-1.5 text-[10px] uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground"
+            className={
+              isRestricted
+                ? "rounded-full bg-lime px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.2em] text-primary-foreground shadow-sm hover:opacity-90"
+                : "rounded-full border border-hairline bg-surface-1 px-4 py-1.5 text-[10px] uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground"
+            }
           >
             + Add account
           </button>
