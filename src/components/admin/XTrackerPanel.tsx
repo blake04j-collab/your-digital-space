@@ -1933,6 +1933,7 @@ function AddrCell({ address, network }: { address?: string | null; network?: str
 type OverviewProps = {
   accounts: XAccount[];
   payments: XPayment[];
+  employees: EmployeeRow[];
   managerLabelForAccount: (addedBy: string | null) => string | null;
   filterManager: string;
   setFilterManager: (v: string) => void;
@@ -1948,10 +1949,12 @@ type OverviewProps = {
 
 function AdminOverview(props: OverviewProps) {
   const {
-    accounts, payments, managerLabelForAccount,
+    accounts, payments, employees, managerLabelForAccount,
     filterManager, setFilterManager, filterEmployee, setFilterEmployee,
     filterStatus, setFilterStatus, sortKey, setSortKey, onOpenEmployee, onUpload,
   } = props;
+
+  const walletByUid = new Map(employees.map((e) => [e.user_id, e] as const));
 
   const managerOptions = Array.from(
     new Set(accounts.map((a) => managerLabelForAccount(a.added_by_user_id)).filter(Boolean) as string[]),
