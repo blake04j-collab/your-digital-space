@@ -2155,7 +2155,6 @@ function AdminEmployees(props: EmployeesProps) {
           <tbody>
             {list.map((a) => {
               const gained = a.views_gained_since_last ?? Math.max(0, a.current_views - (a.previous_views ?? 0));
-              const owed = payFromViews(Math.max(0, a.current_views - a.weekly_starting_views), a.rate_cents_per_1k);
               return (
                 <tr key={a.id} className="border-t border-hairline">
                   <td className="px-3 py-2"><a className="hover:underline" href={a.profile_url} target="_blank" rel="noreferrer">@{a.x_username}</a></td>
@@ -2164,7 +2163,7 @@ function AdminEmployees(props: EmployeesProps) {
                   <td className="px-3 py-2 text-right text-muted-foreground">{fmt(a.previous_views ?? 0)}</td>
                   <td className="px-3 py-2 text-right">{fmt(a.current_views)}</td>
                   <td className="px-3 py-2 text-right">{fmt(gained)}</td>
-                  <td className="px-3 py-2 text-right">{money(owed)}</td>
+                  <td className="px-3 py-2 text-right text-muted-foreground">{fmt(a.weekly_starting_views)}</td>
                   <td className="px-3 py-2 text-muted-foreground">{a.last_screenshot_upload_at ? new Date(a.last_screenshot_upload_at).toLocaleDateString() : "—"}</td>
                   <td className="px-3 py-2 text-right space-x-1">
                     <button className="rounded-md border border-hairline px-2 py-1 text-[10px] hover:bg-surface-1" onClick={() => onUpload(a)}>Upload</button>
