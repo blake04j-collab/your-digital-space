@@ -482,24 +482,6 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
         />
       )}
 
-      <div className="mt-5 flex gap-1 rounded-full border border-hairline bg-surface-1 p-1 w-fit flex-wrap">
-        {((isEmployee
-          ? (["accounts", "screenshots"] as const)
-          : isManager
-          ? (["accounts", "screenshots", "team"] as const)
-          : (["accounts", "screenshots", "earnings", "history", "managers", "employees"] as const)
-        ) as readonly ViewMode[]).map((v) => (
-          <button
-            key={v}
-            onClick={() => setView(v)}
-            className={`rounded-full px-3.5 py-1.5 text-[10px] uppercase tracking-[0.2em] transition-colors ${
-              view === v ? "bg-lime text-primary-foreground" : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            {v}
-          </button>
-        ))}
-      </div>
 
 
       <div className="mt-5 flex gap-1 rounded-full border border-hairline bg-surface-1 p-1 w-fit flex-wrap">
