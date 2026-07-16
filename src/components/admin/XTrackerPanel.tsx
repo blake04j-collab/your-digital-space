@@ -1355,14 +1355,15 @@ function AccountForm({
 
   async function save() {
     setError(null);
-    if (!xUsername.trim()) return setError("X username required");
+    if (!profileUrl.trim()) return setError("X profile link required");
+    const u = extractXUsername(profileUrl);
+    if (!u) return setError("Enter a valid X profile link, e.g. https://x.com/username");
     if (!contact.trim()) return setError("Discord or Telegram username required");
     if (!isEdit && !file) return setError("Upload a screenshot of the pinned post");
     const finalViews = Math.max(0, Math.floor(Number(views) || 0));
 
     setSaving(true);
     try {
-      const u = xUsername.replace(/^@/, "").trim();
       const now = new Date().toISOString();
       const rateCents = Math.max(0, Math.round(Number(rate) * 100));
 
