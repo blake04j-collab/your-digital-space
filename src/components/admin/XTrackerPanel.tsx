@@ -2199,13 +2199,15 @@ function AdminEmployees(props: EmployeesProps) {
 type PayrollProps = {
   accounts: XAccount[];
   payments: XPayment[];
+  employees: EmployeeRow[];
   managerLabelForAccount: (addedBy: string | null) => string | null;
   onChanged: () => void | Promise<void>;
   userId: string | null;
 };
 
-function AdminPayroll({ accounts, payments, managerLabelForAccount, onChanged, userId }: PayrollProps) {
+function AdminPayroll({ accounts, payments, employees, managerLabelForAccount, onChanged, userId }: PayrollProps) {
   const [busy, setBusy] = useState<string | null>(null);
+  const walletByUid = new Map(employees.map((e) => [e.user_id, e] as const));
 
   async function markPaid(a: XAccount) {
     setBusy(a.id);
