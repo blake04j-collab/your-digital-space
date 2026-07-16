@@ -502,303 +502,340 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
       </div>
 
 
-      {view === "accounts" && (
-        <div className="mt-4 overflow-hidden rounded-2xl border border-hairline bg-surface-1">
-          {accounts.length === 0 ? (
-            <div className="p-10 text-center text-sm text-muted-foreground">
-              No accounts yet. Click <span className="text-foreground">+ Add account</span> to start tracking.
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[1000px] text-left text-sm">
-                <thead className="border-b border-hairline text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-                  <tr>
-                    <th className="px-4 py-3">Account</th>
-                    <th className="px-4 py-3">{isRestricted ? "Contact" : "Employee"}</th>
-                    <th className="px-4 py-3">Previous</th>
-                    <th className="px-4 py-3">Current</th>
-                    <th className="px-4 py-3">Gained</th>
-                    {!isRestricted && <th className="px-4 py-3">Owed</th>}
-                    <th className="px-4 py-3">Last upload</th>
-                    {!isRestricted && <th className="px-4 py-3">Added by</th>}
-                    <th className="px-4 py-3 text-right">Actions</th>
-                  </tr>
+      <div className="mt-5 flex gap-1 rounded-full border border-hairline bg-surface-1 p-1 w-fit flex-wrap">
+        {(isEmployee
+          ? (["accounts"] as const)
+          : (["accounts", "team"] as const)
+        ).map((v) => (
+          <button
+            key={v}
+            onClick={() => setView(v)}
+            className={`rounded-full px-3.5 py-1.5 text-[10px] uppercase tracking-[0.2em] transition-colors ${
+              view === v ? "bg-lime text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            {v === "accounts" ? "Accounts" : isManager ? "My team" : "Team & history"}
+          </button>
+        ))}
+      </div>
 
-                </thead>
-                <tbody>
-                  {accounts.map((a) => {
-                    const gained = a.views_gained_since_last ?? 0;
-                    const owed = a.payout_owed_cents ?? 0;
-                    return (
-                      <tr key={a.id} className="border-b border-hairline/60 last:border-0 hover:bg-surface-2">
-                        <td className="px-4 py-3">
-                          <a
-                            href={a.profile_url}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="text-foreground hover:text-lime"
-                          >
-                            @{a.x_username}
-                          </a>
-                          {a.pinned_post_url && (
+      {view === "accounts" && (
+        <div className="mt-4 space-y-6">
+          <div className="overflow-hidden rounded-2xl border border-hairline bg-surface-1">
+            {accounts.length === 0 ? (
+              <div className="p-10 text-center text-sm text-muted-foreground">
+                No accounts yet. Click <span className="text-foreground">+ Add account</span> to start tracking.
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[1000px] text-left text-sm">
+                  <thead className="border-b border-hairline text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                    <tr>
+                      <th className="px-4 py-3">Account</th>
+                      <th className="px-4 py-3">{isRestricted ? "Contact" : "Employee"}</th>
+                      <th className="px-4 py-3">Previous</th>
+                      <th className="px-4 py-3">Current</th>
+                      <th className="px-4 py-3">Gained</th>
+                      {!isRestricted && <th className="px-4 py-3">Owed</th>}
+                      <th className="px-4 py-3">Last upload</th>
+                      {!isRestricted && <th className="px-4 py-3">Added by</th>}
+                      <th className="px-4 py-3 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {accounts.map((a) => {
+                      const gained = a.views_gained_since_last ?? 0;
+                      const owed = a.payout_owed_cents ?? 0;
+                      return (
+                        <tr key={a.id} className="border-b border-hairline/60 last:border-0 hover:bg-surface-2">
+                          <td className="px-4 py-3">
                             <a
-                              href={a.pinned_post_url}
+                              href={a.profile_url}
                               target="_blank"
                               rel="noreferrer"
-                              className="ml-2 text-[10px] uppercase tracking-[0.2em] text-muted-foreground hover:text-lime"
+                              className="text-foreground hover:text-lime"
                             >
-                              post ›
+                              @{a.x_username}
                             </a>
-                          )}
-                        </td>
-                        <td className="px-4 py-3 text-muted-foreground">{a.employee_name || "—"}</td>
-                        <td className="px-4 py-3 text-muted-foreground">{fmt(a.previous_views ?? 0)}</td>
-                        <td className="px-4 py-3 text-foreground">{fmt(a.current_views)}</td>
-                        <td className="px-4 py-3 text-foreground">{fmt(gained)}</td>
-                        {!isRestricted && (
-                          <td className="px-4 py-3 font-medium text-lime">{money(owed)}</td>
-                        )}
-                        <td className="px-4 py-3 text-xs text-muted-foreground">
-                          {a.last_screenshot_upload_at
-                            ? new Date(a.last_screenshot_upload_at).toLocaleString()
-                            : "—"}
-                        </td>
-                        {!isRestricted && (
-                          <td className="px-4 py-3 text-xs">
-                            {a.added_by_user_id ? (
-                              managerEmailById.has(a.added_by_user_id) ? (
-                                <span className="rounded-full border border-lime/40 bg-lime-soft px-2 py-0.5 text-lime">
-                                  {managerEmailById.get(a.added_by_user_id)}
-                                </span>
-                              ) : (
-                                <span className="text-muted-foreground">Admin</span>
-                              )
-                            ) : (
-                              <span className="text-muted-foreground">—</span>
+                            {a.pinned_post_url && (
+                              <a
+                                href={a.pinned_post_url}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="ml-2 text-[10px] uppercase tracking-[0.2em] text-muted-foreground hover:text-lime"
+                              >
+                                post ›
+                              </a>
                             )}
                           </td>
-                        )}
+                          <td className="px-4 py-3 text-muted-foreground">{a.employee_name || "—"}</td>
+                          <td className="px-4 py-3 text-muted-foreground">{fmt(a.previous_views ?? 0)}</td>
+                          <td className="px-4 py-3 text-foreground">{fmt(a.current_views)}</td>
+                          <td className="px-4 py-3 text-foreground">{fmt(gained)}</td>
+                          {!isRestricted && (
+                            <td className="px-4 py-3 font-medium text-lime">{money(owed)}</td>
+                          )}
+                          <td className="px-4 py-3 text-xs text-muted-foreground">
+                            {a.last_screenshot_upload_at
+                              ? new Date(a.last_screenshot_upload_at).toLocaleString()
+                              : "—"}
+                          </td>
+                          {!isRestricted && (
+                            <td className="px-4 py-3 text-xs">
+                              {a.added_by_user_id ? (
+                                managerEmailById.has(a.added_by_user_id) ? (
+                                  <span className="rounded-full border border-lime/40 bg-lime-soft px-2 py-0.5 text-lime">
+                                    {managerEmailById.get(a.added_by_user_id)}
+                                  </span>
+                                ) : (
+                                  <span className="text-muted-foreground">Admin</span>
+                                )
+                              ) : (
+                                <span className="text-muted-foreground">—</span>
+                              )}
+                            </td>
+                          )}
+                          <td className="px-4 py-3 text-right">
+                            <div className="flex justify-end gap-1.5">
+                              <button
+                                onClick={() => setUploading(a)}
+                                className="rounded-full bg-lime px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-primary-foreground"
+                              >
+                                Upload screenshot
+                              </button>
+                              <button
+                                onClick={() => setEditing(a)}
+                                className="rounded-full border border-hairline px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground"
+                              >
+                                Edit
+                              </button>
+                              <button
+                                onClick={() => deleteAccount(a.id)}
+                                className="rounded-full border border-destructive/40 bg-destructive/10 px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-destructive"
+                              >
+                                Del
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
 
-                        <td className="px-4 py-3 text-right">
-                          <div className="flex justify-end gap-1.5">
-                            <button
-                              onClick={() => setUploading(a)}
-                              className="rounded-full bg-lime px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-primary-foreground"
-                            >
-                              Upload screenshot
-                            </button>
-                            <button
-                              onClick={() => setEditing(a)}
-                              className="rounded-full border border-hairline px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground"
-                            >
-                              Edit
-                            </button>
-                            <button
-                              onClick={() => deleteAccount(a.id)}
-                              className="rounded-full border border-destructive/40 bg-destructive/10 px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-destructive"
-                            >
-                              Del
-                            </button>
-                          </div>
-                        </td>
+          <div>
+            <h3 className="mb-2 font-display text-sm uppercase tracking-[0.2em] text-muted-foreground">
+              {isRestricted ? "Your uploads" : "Recent screenshots"}
+            </h3>
+            <ScreenshotHistory rows={screenshots} hideMoney={isRestricted} />
+          </div>
+        </div>
+      )}
+
+      {view === "team" && !isRestricted && (
+        <div className="mt-4 space-y-8">
+          <section>
+            <h3 className="mb-2 font-display text-sm uppercase tracking-[0.2em] text-muted-foreground">
+              Employee earnings
+            </h3>
+            <div className="overflow-hidden rounded-2xl border border-hairline bg-surface-1">
+              {employeeEarnings.length === 0 ? (
+                <div className="p-10 text-center text-sm text-muted-foreground">No earnings yet.</div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-sm">
+                    <thead className="border-b border-hairline text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                      <tr>
+                        <th className="px-4 py-3">Employee</th>
+                        <th className="px-4 py-3">This week views</th>
+                        <th className="px-4 py-3">This week pay</th>
+                        <th className="px-4 py-3">Last 30 days</th>
+                        <th className="px-4 py-3">Lifetime</th>
                       </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+                    </thead>
+                    <tbody>
+                      {employeeEarnings.map((e) => (
+                        <tr key={e.name} className="border-b border-hairline/60 last:border-0">
+                          <td className="px-4 py-3 text-foreground">{e.name}</td>
+                          <td className="px-4 py-3 text-muted-foreground">{fmt(e.weeklyViews)}</td>
+                          <td className="px-4 py-3 text-lime">{money(e.weeklyPay)}</td>
+                          <td className="px-4 py-3 text-foreground">{money(e.monthPay)}</td>
+                          <td className="px-4 py-3 text-foreground">{money(e.lifetimePay)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
-          )}
-        </div>
-      )}
+          </section>
 
-      {view === "screenshots" && (
-        <ScreenshotHistory rows={screenshots} hideMoney={isRestricted} />
-      )}
+          <section>
+            <h3 className="mb-2 font-display text-sm uppercase tracking-[0.2em] text-muted-foreground">
+              Managers & commissions
+            </h3>
+            <div className="overflow-hidden rounded-2xl border border-hairline bg-surface-1">
+              {managerStats.length === 0 ? (
+                <div className="p-10 text-center text-sm text-muted-foreground">
+                  No managers yet. Grant a user the manager role to see their commissions here.
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[900px] text-left text-sm">
+                    <thead className="border-b border-hairline text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                      <tr>
+                        <th className="px-4 py-3">Manager</th>
+                        <th className="px-4 py-3">Accounts</th>
+                        <th className="px-4 py-3">Weekly views</th>
+                        <th className="px-4 py-3">Lifetime commission (10%)</th>
+                        <th className="px-4 py-3">Already paid</th>
+                        <th className="px-4 py-3">Unpaid balance</th>
+                        <th className="px-4 py-3 text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {managerStats.map((m) => (
+                        <tr key={m.user_id} className="border-b border-hairline/60 last:border-0">
+                          <td className="px-4 py-3 text-foreground">{m.email}</td>
+                          <td className="px-4 py-3 text-muted-foreground">{m.accountsCount}</td>
+                          <td className="px-4 py-3 text-muted-foreground">{fmt(m.weeklyViews)}</td>
+                          <td className="px-4 py-3 text-foreground">{money(m.lifetimeCommissionCents)}</td>
+                          <td className="px-4 py-3 text-muted-foreground">{money(m.paid_baseline_cents)}</td>
+                          <td className="px-4 py-3 font-medium text-lime">{money(m.unpaidCommissionCents)}</td>
+                          <td className="px-4 py-3 text-right">
+                            <button
+                              onClick={() => resetManagerCommission(m)}
+                              disabled={m.unpaidCommissionCents === 0}
+                              className="rounded-full border border-lime bg-lime-soft px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-lime disabled:opacity-40"
+                            >
+                              Mark paid & reset
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </section>
 
+          <section>
+            <h3 className="mb-2 font-display text-sm uppercase tracking-[0.2em] text-muted-foreground">
+              Employees
+            </h3>
+            <div className="overflow-hidden rounded-2xl border border-hairline bg-surface-1">
+              {employees.length === 0 ? (
+                <div className="p-10 text-center text-sm text-muted-foreground">
+                  No employees yet. Share the invite code with your team so they can sign up at /employee/login.
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[1000px] text-left text-sm">
+                    <thead className="border-b border-hairline text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                      <tr>
+                        <th className="px-4 py-3">Employee</th>
+                        <th className="px-4 py-3">Manager</th>
+                        <th className="px-4 py-3">Accounts</th>
+                        <th className="px-4 py-3">Weekly views</th>
+                        <th className="px-4 py-3">USDT address</th>
+                        <th className="px-4 py-3">Network</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {employees.map((e) => (
+                        <tr key={e.user_id} className="border-b border-hairline/60 last:border-0">
+                          <td className="px-4 py-3 text-foreground">{e.email}</td>
+                          <td className="px-4 py-3">
+                            <select
+                              value={e.manager_user_id ?? ""}
+                              onChange={async (ev) => {
+                                const mgr = ev.target.value || null;
+                                const { error } = await supabase.rpc("assign_employee_manager" as never, {
+                                  _employee: e.user_id, _manager: mgr,
+                                } as never);
+                                if (error) { alert(error.message); return; }
+                                await refresh();
+                              }}
+                              className="rounded-lg border border-hairline bg-background px-2 py-1 text-xs text-foreground"
+                            >
+                              <option value="">Unassigned</option>
+                              {managers.map((m) => (
+                                <option key={m.user_id} value={m.user_id}>{m.email}</option>
+                              ))}
+                            </select>
+                          </td>
+                          <td className="px-4 py-3 text-muted-foreground">{e.account_count}</td>
+                          <td className="px-4 py-3 text-muted-foreground">{fmt(e.weekly_views)}</td>
+                          <td className="px-4 py-3">
+                            {e.usdt_address ? (
+                              <button
+                                onClick={() => { navigator.clipboard.writeText(e.usdt_address); }}
+                                title="Click to copy"
+                                className="font-mono text-xs text-foreground hover:text-lime break-all text-left"
+                              >
+                                {e.usdt_address}
+                              </button>
+                            ) : (
+                              <span className="text-muted-foreground italic">Not set</span>
+                            )}
+                          </td>
+                          <td className="px-4 py-3 text-muted-foreground">{e.usdt_network || "—"}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </section>
 
-      {view === "earnings" && (
-        <div className="mt-4 overflow-hidden rounded-2xl border border-hairline bg-surface-1">
-          {employeeEarnings.length === 0 ? (
-            <div className="p-10 text-center text-sm text-muted-foreground">No earnings yet.</div>
-          ) : (
-            <table className="w-full text-left text-sm">
-              <thead className="border-b border-hairline text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-                <tr>
-                  <th className="px-4 py-3">Employee</th>
-                  <th className="px-4 py-3">This week views</th>
-                  <th className="px-4 py-3">This week pay</th>
-                  <th className="px-4 py-3">Last 30 days</th>
-                  <th className="px-4 py-3">Lifetime</th>
-                </tr>
-              </thead>
-              <tbody>
-                {employeeEarnings.map((e) => (
-                  <tr key={e.name} className="border-b border-hairline/60 last:border-0">
-                    <td className="px-4 py-3 text-foreground">{e.name}</td>
-                    <td className="px-4 py-3 text-muted-foreground">{fmt(e.weeklyViews)}</td>
-                    <td className="px-4 py-3 text-lime">{money(e.weeklyPay)}</td>
-                    <td className="px-4 py-3 text-foreground">{money(e.monthPay)}</td>
-                    <td className="px-4 py-3 text-foreground">{money(e.lifetimePay)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </div>
-      )}
-
-      {view === "history" && (
-        <div className="mt-4 overflow-hidden rounded-2xl border border-hairline bg-surface-1">
-          {history.length === 0 ? (
-            <div className="p-10 text-center text-sm text-muted-foreground">
-              No history yet. Close a week to snapshot payouts.
+          <section>
+            <h3 className="mb-2 font-display text-sm uppercase tracking-[0.2em] text-muted-foreground">
+              Weekly history
+            </h3>
+            <div className="overflow-hidden rounded-2xl border border-hairline bg-surface-1">
+              {history.length === 0 ? (
+                <div className="p-10 text-center text-sm text-muted-foreground">
+                  No history yet. Close a week to snapshot payouts.
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[800px] text-left text-sm">
+                    <thead className="border-b border-hairline text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                      <tr>
+                        <th className="px-4 py-3">Week</th>
+                        <th className="px-4 py-3">Account</th>
+                        <th className="px-4 py-3">Employee</th>
+                        <th className="px-4 py-3">Start</th>
+                        <th className="px-4 py-3">End</th>
+                        <th className="px-4 py-3">Views</th>
+                        <th className="px-4 py-3">Pay</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {history.map((h) => (
+                        <tr key={h.id} className="border-b border-hairline/60 last:border-0">
+                          <td className="px-4 py-3 text-xs text-muted-foreground">
+                            {h.week_start} → {h.week_end}
+                          </td>
+                          <td className="px-4 py-3 text-foreground">@{h.x_username}</td>
+                          <td className="px-4 py-3 text-muted-foreground">{h.employee_name || "—"}</td>
+                          <td className="px-4 py-3 text-muted-foreground">{fmt(h.starting_views)}</td>
+                          <td className="px-4 py-3 text-muted-foreground">{fmt(h.ending_views)}</td>
+                          <td className="px-4 py-3 text-foreground">{fmt(h.weekly_views)}</td>
+                          <td className="px-4 py-3 text-lime">{money(h.weekly_pay_cents)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[800px] text-left text-sm">
-                <thead className="border-b border-hairline text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-                  <tr>
-                    <th className="px-4 py-3">Week</th>
-                    <th className="px-4 py-3">Account</th>
-                    <th className="px-4 py-3">Employee</th>
-                    <th className="px-4 py-3">Start</th>
-                    <th className="px-4 py-3">End</th>
-                    <th className="px-4 py-3">Views</th>
-                    <th className="px-4 py-3">Pay</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {history.map((h) => (
-                    <tr key={h.id} className="border-b border-hairline/60 last:border-0">
-                      <td className="px-4 py-3 text-xs text-muted-foreground">
-                        {h.week_start} → {h.week_end}
-                      </td>
-                      <td className="px-4 py-3 text-foreground">@{h.x_username}</td>
-                      <td className="px-4 py-3 text-muted-foreground">{h.employee_name || "—"}</td>
-                      <td className="px-4 py-3 text-muted-foreground">{fmt(h.starting_views)}</td>
-                      <td className="px-4 py-3 text-muted-foreground">{fmt(h.ending_views)}</td>
-                      <td className="px-4 py-3 text-foreground">{fmt(h.weekly_views)}</td>
-                      <td className="px-4 py-3 text-lime">{money(h.weekly_pay_cents)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-      )}
-
-      {view === "managers" && !isRestricted && (
-        <div className="mt-4 overflow-hidden rounded-2xl border border-hairline bg-surface-1">
-          {managerStats.length === 0 ? (
-            <div className="p-10 text-center text-sm text-muted-foreground">
-              No managers yet. Grant a user the manager role to see their commissions here.
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[900px] text-left text-sm">
-                <thead className="border-b border-hairline text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-                  <tr>
-                    <th className="px-4 py-3">Manager</th>
-                    <th className="px-4 py-3">Accounts</th>
-                    <th className="px-4 py-3">Weekly views</th>
-                    <th className="px-4 py-3">Lifetime commission (10%)</th>
-                    <th className="px-4 py-3">Already paid</th>
-                    <th className="px-4 py-3">Unpaid balance</th>
-                    <th className="px-4 py-3 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {managerStats.map((m) => (
-                    <tr key={m.user_id} className="border-b border-hairline/60 last:border-0">
-                      <td className="px-4 py-3 text-foreground">{m.email}</td>
-                      <td className="px-4 py-3 text-muted-foreground">{m.accountsCount}</td>
-                      <td className="px-4 py-3 text-muted-foreground">{fmt(m.weeklyViews)}</td>
-                      <td className="px-4 py-3 text-foreground">{money(m.lifetimeCommissionCents)}</td>
-                      <td className="px-4 py-3 text-muted-foreground">{money(m.paid_baseline_cents)}</td>
-                      <td className="px-4 py-3 font-medium text-lime">{money(m.unpaidCommissionCents)}</td>
-                      <td className="px-4 py-3 text-right">
-                        <button
-                          onClick={() => resetManagerCommission(m)}
-                          disabled={m.unpaidCommissionCents === 0}
-                          className="rounded-full border border-lime bg-lime-soft px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-lime disabled:opacity-40"
-                        >
-                          Mark paid & reset
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-      )}
-
-      {view === "employees" && !isRestricted && (
-        <div className="mt-4 overflow-hidden rounded-2xl border border-hairline bg-surface-1">
-          {employees.length === 0 ? (
-            <div className="p-10 text-center text-sm text-muted-foreground">
-              No employees yet. Share the invite code with your team so they can sign up at /employee/login.
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[1000px] text-left text-sm">
-                <thead className="border-b border-hairline text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-                  <tr>
-                    <th className="px-4 py-3">Employee</th>
-                    <th className="px-4 py-3">Manager</th>
-                    <th className="px-4 py-3">Accounts</th>
-                    <th className="px-4 py-3">Weekly views</th>
-                    <th className="px-4 py-3">USDT address</th>
-                    <th className="px-4 py-3">Network</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {employees.map((e) => (
-                    <tr key={e.user_id} className="border-b border-hairline/60 last:border-0">
-                      <td className="px-4 py-3 text-foreground">{e.email}</td>
-                      <td className="px-4 py-3">
-                        <select
-                          value={e.manager_user_id ?? ""}
-                          onChange={async (ev) => {
-                            const mgr = ev.target.value || null;
-                            const { error } = await supabase.rpc("assign_employee_manager" as never, {
-                              _employee: e.user_id, _manager: mgr,
-                            } as never);
-                            if (error) { alert(error.message); return; }
-                            await refresh();
-                          }}
-                          className="rounded-lg border border-hairline bg-background px-2 py-1 text-xs text-foreground"
-                        >
-                          <option value="">Unassigned</option>
-                          {managers.map((m) => (
-                            <option key={m.user_id} value={m.user_id}>{m.email}</option>
-                          ))}
-                        </select>
-                      </td>
-                      <td className="px-4 py-3 text-muted-foreground">{e.account_count}</td>
-                      <td className="px-4 py-3 text-muted-foreground">{fmt(e.weekly_views)}</td>
-                      <td className="px-4 py-3">
-                        {e.usdt_address ? (
-                          <button
-                            onClick={() => { navigator.clipboard.writeText(e.usdt_address); }}
-                            title="Click to copy"
-                            className="font-mono text-xs text-foreground hover:text-lime break-all text-left"
-                          >
-                            {e.usdt_address}
-                          </button>
-                        ) : (
-                          <span className="text-muted-foreground italic">Not set</span>
-                        )}
-                      </td>
-                      <td className="px-4 py-3 text-muted-foreground">{e.usdt_network || "—"}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+          </section>
         </div>
       )}
 
