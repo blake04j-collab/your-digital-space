@@ -1618,6 +1618,18 @@ function AccountForm({
             onChange={setProfileUrl}
             placeholder="https://x.com/username"
           />
+          <Input
+            label="Pinned post link (optional)"
+            value={pinnedUrl}
+            onChange={setPinnedUrl}
+            placeholder="https://x.com/username/status/..."
+          />
+          <Input
+            label="Pinned post date (required)"
+            value={pinnedDate}
+            onChange={setPinnedDate}
+            type="date"
+          />
           <Input label="Rate ($/1k views)" value={rate} onChange={setRate} type="number" />
 
           <div>
