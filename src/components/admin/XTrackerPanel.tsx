@@ -2081,6 +2081,8 @@ type EmployeesProps = {
 function AdminEmployees(props: EmployeesProps) {
   const { accounts, employees, screenshots, managerLabelForAccount, selected, setSelected, onUpload, onEdit } = props;
 
+  const walletByUid = new Map(employees.map((e) => [e.user_id, e] as const));
+
   // Group accounts by employee_name (contact label on the account)
   const names = Array.from(new Set(accounts.map((a) => a.employee_name))).sort();
 
@@ -2094,6 +2096,7 @@ function AdminEmployees(props: EmployeesProps) {
               <th className="px-3 py-2 text-left">Manager</th>
               <th className="px-3 py-2 text-right">Accounts</th>
               <th className="px-3 py-2 text-right">Total views</th>
+              <th className="px-3 py-2 text-left">USDT (ERC20)</th>
             </tr>
           </thead>
           <tbody>
@@ -2101,17 +2104,19 @@ function AdminEmployees(props: EmployeesProps) {
               const list = accounts.filter((a) => a.employee_name === n);
               const totalViews = list.reduce((s, a) => s + a.current_views, 0);
               const mgr = managerLabelForAccount(list[0]?.added_by_user_id ?? null);
+              const w = walletByUid.get(list[0]?.added_by_user_id ?? "");
               return (
                 <tr key={n} className="cursor-pointer border-t border-hairline hover:bg-surface-1" onClick={() => setSelected(n)}>
                   <td className="px-3 py-2 underline-offset-2 hover:underline">{n}</td>
                   <td className="px-3 py-2 text-muted-foreground">{mgr ?? "—"}</td>
                   <td className="px-3 py-2 text-right">{list.length}</td>
                   <td className="px-3 py-2 text-right">{fmt(totalViews)}</td>
+                  <td className="px-3 py-2"><AddrCell address={w?.usdt_address} network={w?.usdt_network} /></td>
                 </tr>
               );
             })}
             {names.length === 0 && (
-              <tr><td colSpan={4} className="px-3 py-6 text-center text-muted-foreground">No employees yet.</td></tr>
+              <tr><td colSpan={5} className="px-3 py-6 text-center text-muted-foreground">No employees yet.</td></tr>
             )}
           </tbody>
         </table>
@@ -2120,7 +2125,9 @@ function AdminEmployees(props: EmployeesProps) {
   }
 
   const list = accounts.filter((a) => a.employee_name === selected);
-  const empRow = employees.find((e) => e.email === selected);
+  // Lookup wallet by any added_by_user_id in this group (accounts added by the employee themselves)
+  const uidForSelected = list.map((a) => a.added_by_user_id).find((u) => u && walletByUid.has(u)) ?? null;
+  const empRow = (uidForSelected && walletByUid.get(uidForSelected)) || employees.find((e) => e.email === selected) || null;
   const shots = screenshots.filter((s) => s.employee_name === selected);
 
   return (
