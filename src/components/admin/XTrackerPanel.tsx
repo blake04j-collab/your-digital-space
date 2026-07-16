@@ -10,6 +10,7 @@ export type XAccount = {
   notes: string | null;
   profile_url: string;
   pinned_post_url: string | null;
+  pinned_post_date: string | null;
   current_views: number;
   previous_views: number | null;
   views_gained_since_last: number | null;
@@ -25,6 +26,19 @@ export type XAccount = {
   created_at: string;
   updated_at: string;
   added_by_user_id: string | null;
+};
+
+export type XPayment = {
+  id: string;
+  account_id: string | null;
+  employee_name: string;
+  x_username: string;
+  period_start: string | null;
+  period_end: string | null;
+  views_paid: number;
+  amount_cents: number;
+  manager_commission_cents: number;
+  paid_at: string;
 };
 
 export type ManagerRow = {
