@@ -105,7 +105,7 @@ async function signedUrl(path: string): Promise<string | null> {
   return data?.signedUrl ?? null;
 }
 
-type ViewMode = "accounts" | "team";
+type ViewMode = "accounts" | "team" | "overview" | "employees" | "screenshots" | "payroll";
 
 function extractXUsername(input: string): string | null {
   const raw = input.trim().replace(/^@/, "");
