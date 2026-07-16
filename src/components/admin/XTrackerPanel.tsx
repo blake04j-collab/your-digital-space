@@ -1066,10 +1066,10 @@ function WalletCard({
         </div>
         <button
           onClick={save}
-          disabled={saving || !address.trim()}
+          disabled={saving || !address.trim() || address.trim() === (wallet?.usdt_address ?? "")}
           className="rounded-full border border-lime bg-lime-soft px-4 py-2 text-[10px] uppercase tracking-[0.2em] text-lime disabled:opacity-40"
         >
-          {saving ? "Saving…" : "Save"}
+          {saving ? "Saving…" : wallet?.usdt_address ? "Update" : "Save"}
         </button>
       </div>
       {error && (
