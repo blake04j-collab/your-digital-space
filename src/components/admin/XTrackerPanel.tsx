@@ -2294,7 +2294,7 @@ function AdminPayroll({ accounts, payments, employees, managerLabelForAccount, o
               </tr>
             ))}
             {rows.length === 0 && (
-              <tr><td colSpan={8} className="px-3 py-6 text-center text-muted-foreground">No accounts.</td></tr>
+              <tr><td colSpan={9} className="px-3 py-6 text-center text-muted-foreground">No accounts.</td></tr>
             )}
           </tbody>
         </table>
