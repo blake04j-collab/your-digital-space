@@ -1440,6 +1440,8 @@ function AccountForm({
   const [profileUrl, setProfileUrl] = useState(account?.profile_url ?? "");
   const [contact, setContact] = useState(account?.employee_name ?? "");
   const [rate, setRate] = useState(String((account?.rate_cents_per_1k ?? 300) / 100));
+  const [pinnedDate, setPinnedDate] = useState<string>(account?.pinned_post_date ?? "");
+  const [pinnedUrl, setPinnedUrl] = useState<string>(account?.pinned_post_url ?? "");
 
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(account?.screenshot_url ? null : null);
