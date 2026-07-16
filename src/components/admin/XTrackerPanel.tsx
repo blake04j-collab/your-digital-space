@@ -731,7 +731,7 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
         </div>
       )}
 
-      {view === "team" && !isRestricted && (
+      {!isAdmin && view === "team" && !isRestricted && (
         <div className="mt-4 space-y-8">
           <section>
             <h3 className="mb-2 font-display text-sm uppercase tracking-[0.2em] text-muted-foreground">
