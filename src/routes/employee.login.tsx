@@ -46,10 +46,25 @@ function EmployeeLogin() {
       password,
       options: { emailRedirectTo: `${window.location.origin}/employee` },
     });
-    if (error) { setLoading(false); setErr(error.message); return; }
 
-    // Session may be null if email confirm required — try to sign in to get a session
-    if (!signUpData.session) {
+    // If the user already exists, try signing them in with the provided password
+    // so they can redeem the invite code on their existing account.
+    if (error) {
+      const alreadyRegistered =
+        /already\s*registered|already\s*exists|user\s*already/i.test(error.message);
+      if (!alreadyRegistered) {
+        setLoading(false);
+        setErr(error.message);
+        return;
+      }
+      const signIn = await supabase.auth.signInWithPassword({ email, password });
+      if (signIn.error) {
+        setLoading(false);
+        setErr("This email is already registered. Sign in with your existing password, then enter your invite code.");
+        return;
+      }
+    } else if (!signUpData.session) {
+      // Session may be null if email confirm required — try to sign in to get a session
       const signIn = await supabase.auth.signInWithPassword({ email, password });
       if (signIn.error) {
         setLoading(false);
