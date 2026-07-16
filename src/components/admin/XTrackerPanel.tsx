@@ -585,17 +585,21 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
                           </td>
                           {!isRestricted && (
                             <td className="px-4 py-3 text-xs">
-                              {a.added_by_user_id ? (
-                                managerEmailById.has(a.added_by_user_id) ? (
-                                  <span className="rounded-full border border-lime/40 bg-lime-soft px-2 py-0.5 text-lime">
-                                    {managerEmailById.get(a.added_by_user_id)}
-                                  </span>
-                                ) : (
+                              {(() => {
+                                const label = managerLabelForAccount(a.added_by_user_id);
+                                if (label) {
+                                  return (
+                                    <span className="rounded-full border border-lime/40 bg-lime-soft px-2 py-0.5 text-lime">
+                                      {label}
+                                    </span>
+                                  );
+                                }
+                                return a.added_by_user_id ? (
                                   <span className="text-muted-foreground">Admin</span>
-                                )
-                              ) : (
-                                <span className="text-muted-foreground">—</span>
-                              )}
+                                ) : (
+                                  <span className="text-muted-foreground">—</span>
+                                );
+                              })()}
                             </td>
                           )}
                           <td className="px-4 py-3 text-right">
