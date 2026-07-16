@@ -849,14 +849,16 @@ function WalletCard({
   onSaved: (w: WalletRow) => void;
 }) {
   const [address, setAddress] = useState(wallet?.usdt_address ?? "");
-  const [network, setNetwork] = useState(wallet?.network ?? "TRC20");
+  const network = "ERC20";
   const [saving, setSaving] = useState(false);
   const [savedFlash, setSavedFlash] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     setAddress(wallet?.usdt_address ?? "");
-    setNetwork(wallet?.network ?? "TRC20");
   }, [wallet]);
+
+  const isValidEthAddress = (v: string) => /^0x[a-fA-F0-9]{40}$/.test(v.trim());
 
   async function save() {
     if (!userId) return;
