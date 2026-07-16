@@ -1223,11 +1223,11 @@ function ScreenshotUploadModal({
   return (
     <div
       onClick={onClose}
-      className="fixed inset-0 z-50 grid place-items-center bg-black/60 p-5 backdrop-blur-sm"
+      className="fixed inset-0 z-50 overflow-y-auto overscroll-contain bg-black/60 p-5 backdrop-blur-sm"
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-2xl rounded-3xl border border-hairline bg-background p-6"
+        className="mx-auto my-4 w-full max-w-2xl rounded-3xl border border-hairline bg-background p-6"
       >
         <div className="mb-4 flex items-center justify-between">
           <div>
