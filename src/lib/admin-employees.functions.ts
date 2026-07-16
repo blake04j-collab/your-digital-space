@@ -20,7 +20,7 @@ export const deleteEmployee = createServerFn({ method: "POST" })
     const uid = data.userId;
 
     // Clean up app data (auth.users delete may not cascade to all tables)
-    await supabaseAdmin.from("x_tracker_screenshots").delete().eq("uploaded_by_user_id", uid);
+    await supabaseAdmin.from("x_tracker_screenshots").delete().eq("added_by_user_id", uid);
     await supabaseAdmin.from("x_tracker_history").delete().eq("added_by_user_id", uid);
     await supabaseAdmin.from("x_tracker_accounts").delete().eq("added_by_user_id", uid);
     await supabaseAdmin.from("payout_wallets").delete().eq("user_id", uid);
