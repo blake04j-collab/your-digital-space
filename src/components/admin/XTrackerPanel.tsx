@@ -2188,12 +2188,12 @@ function AdminPayroll({ accounts, payments, managerLabelForAccount, onChanged, u
         account_id: a.id,
         employee_name: a.employee_name,
         x_username: a.x_username,
-        period_start: periodStart,
-        period_end: new Date().toISOString(),
+        period_start: periodStart ? new Date(periodStart).toISOString().slice(0, 10) : null,
+        period_end: new Date().toISOString().slice(0, 10),
         views_paid: a.current_views,
         amount_cents: amount,
         manager_commission_cents: commission,
-        paid_by_user_id: userId,
+        marked_by: userId,
       } as never);
       if (error) throw new Error(error.message);
       await onChanged();
