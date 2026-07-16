@@ -920,7 +920,7 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
                           <td className="px-4 py-3 text-xs text-muted-foreground">
                             {h.week_start} → {h.week_end}
                           </td>
-                          <td className="px-4 py-3 text-foreground">@{h.x_username}</td>
+                          <td className="px-4 py-3 text-foreground"><a className="hover:underline" href={`https://x.com/${h.x_username}`} target="_blank" rel="noreferrer">@{h.x_username}</a></td>
                           <td className="px-4 py-3 text-muted-foreground">{h.employee_name || "—"}</td>
                           <td className="px-4 py-3 text-muted-foreground">{fmt(h.starting_views)}</td>
                           <td className="px-4 py-3 text-muted-foreground">{fmt(h.ending_views)}</td>
