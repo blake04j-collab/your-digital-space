@@ -2077,38 +2077,38 @@ function AdminEmployees(props: EmployeesProps) {
 
   if (!selected) {
     return (
-      <div className="mt-4 overflow-x-auto rounded-xl border border-hairline">
-        <table className="min-w-full text-xs">
-          <thead className="bg-surface-1 text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
-            <tr>
-              <th className="px-3 py-2 text-left">Employee</th>
-              <th className="px-3 py-2 text-left">Manager</th>
-              <th className="px-3 py-2 text-right">Accounts</th>
-              <th className="px-3 py-2 text-right">Total views</th>
-              <th className="px-3 py-2 text-left">USDT (ERC20)</th>
-            </tr>
-          </thead>
-          <tbody>
-            {names.map((n) => {
-              const list = accounts.filter((a) => a.employee_name === n);
-              const totalViews = list.reduce((s, a) => s + a.current_views, 0);
-              const mgr = managerLabelForAccount(list[0]?.added_by_user_id ?? null);
-              const w = walletByUid.get(list[0]?.added_by_user_id ?? "");
-              return (
-                <tr key={n} className="cursor-pointer border-t border-hairline hover:bg-surface-1" onClick={() => setSelected(n)}>
-                  <td className="px-3 py-2 underline-offset-2 hover:underline">{n}</td>
-                  <td className="px-3 py-2 text-muted-foreground">{mgr ?? "—"}</td>
-                  <td className="px-3 py-2 text-right">{list.length}</td>
-                  <td className="px-3 py-2 text-right">{fmt(totalViews)}</td>
-                  <td className="px-3 py-2"><AddrCell address={w?.usdt_address} network={w?.usdt_network} /></td>
-                </tr>
-              );
-            })}
-            {names.length === 0 && (
-              <tr><td colSpan={5} className="px-3 py-6 text-center text-muted-foreground">No employees yet.</td></tr>
-            )}
-          </tbody>
-        </table>
+      <div className="mt-4 space-y-2">
+        <p className="text-[11px] text-muted-foreground">Click an employee to see their profile, wallet, accounts &amp; screenshot history.</p>
+        <div className="overflow-x-auto rounded-xl border border-hairline">
+          <table className="min-w-full text-xs">
+            <thead className="bg-surface-1 text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+              <tr>
+                <th className="px-3 py-2 text-left">Employee</th>
+                <th className="px-3 py-2 text-left">Manager</th>
+                <th className="px-3 py-2 text-right">Accounts</th>
+                <th className="px-3 py-2 text-right">Total views</th>
+              </tr>
+            </thead>
+            <tbody>
+              {names.map((n) => {
+                const list = accounts.filter((a) => a.employee_name === n);
+                const totalViews = list.reduce((s, a) => s + a.current_views, 0);
+                const mgr = managerLabelForAccount(list[0]?.added_by_user_id ?? null);
+                return (
+                  <tr key={n} className="cursor-pointer border-t border-hairline hover:bg-surface-1" onClick={() => setSelected(n)}>
+                    <td className="px-3 py-2 underline-offset-2 hover:underline">{n}</td>
+                    <td className="px-3 py-2 text-muted-foreground">{mgr ?? "—"}</td>
+                    <td className="px-3 py-2 text-right">{list.length}</td>
+                    <td className="px-3 py-2 text-right">{fmt(totalViews)}</td>
+                  </tr>
+                );
+              })}
+              {names.length === 0 && (
+                <tr><td colSpan={4} className="px-3 py-6 text-center text-muted-foreground">No employees yet.</td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     );
   }
