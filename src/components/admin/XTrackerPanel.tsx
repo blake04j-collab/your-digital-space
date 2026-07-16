@@ -148,12 +148,14 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
   const isManager = role === "manager";
   const isEmployee = role === "employee";
   const isRestricted = isManager || isEmployee; // own-scope, hide money
+  const isAdmin = role === "admin";
   const [accounts, setAccounts] = useState<XAccount[]>([]);
   const [history, setHistory] = useState<XHistory[]>([]);
   const [screenshots, setScreenshots] = useState<XScreenshot[]>([]);
   const [managers, setManagers] = useState<ManagerRow[]>([]);
+  const [payments, setPayments] = useState<XPayment[]>([]);
   const [loading, setLoading] = useState(true);
-  const [view, setView] = useState<ViewMode>("accounts");
+  const [view, setView] = useState<ViewMode>(role === "admin" ? "overview" : "accounts");
   const [showAdd, setShowAdd] = useState(false);
   const [editing, setEditing] = useState<XAccount | null>(null);
   const [uploading, setUploading] = useState<XAccount | null>(null);
@@ -164,6 +166,12 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
   const [myEmployees, setMyEmployees] = useState<EmployeeRow[]>([]);
   const [myInviteCodes, setMyInviteCodes] = useState<InviteCodeRow[]>([]);
   const [myWallet, setMyWallet] = useState<WalletRow | null>(null);
+  const [selectedEmployee, setSelectedEmployee] = useState<string | null>(null);
+  // Filters
+  const [filterManager, setFilterManager] = useState<string>("all");
+  const [filterEmployee, setFilterEmployee] = useState<string>("all");
+  const [filterStatus, setFilterStatus] = useState<"all" | "pending" | "paid">("all");
+  const [sortKey, setSortKey] = useState<"gained" | "owed" | "last_upload" | "employee">("gained");
 
   useEffect(() => {
     (async () => {
