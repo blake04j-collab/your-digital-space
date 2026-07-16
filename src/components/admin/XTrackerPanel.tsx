@@ -566,6 +566,7 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
         <AdminOverview
           accounts={accounts}
           payments={payments}
+          employees={employees}
           managerLabelForAccount={managerLabelForAccount}
           filterManager={filterManager}
           setFilterManager={setFilterManager}
@@ -604,6 +605,7 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
         <AdminPayroll
           accounts={accounts}
           payments={payments}
+          employees={employees}
           managerLabelForAccount={managerLabelForAccount}
           onChanged={refresh}
           userId={userId}
