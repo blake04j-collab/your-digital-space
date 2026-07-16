@@ -2306,7 +2306,7 @@ function AdminPayroll({ accounts, payments, employees, managerLabelForAccount, o
               <tr key={p.id} className="border-t border-hairline">
                 <td className="px-3 py-2 text-muted-foreground">{p.paid_at ? new Date(p.paid_at).toLocaleString() : "—"}</td>
                 <td className="px-3 py-2">{p.employee_name}</td>
-                <td className="px-3 py-2">@{p.x_username}</td>
+                <td className="px-3 py-2"><a className="hover:underline" href={`https://x.com/${p.x_username}`} target="_blank" rel="noreferrer">@{p.x_username}</a></td>
                 <td className="px-3 py-2 text-right">{fmt(p.views_paid)}</td>
                 <td className="px-3 py-2 text-right">{money(p.amount_cents)}</td>
                 <td className="px-3 py-2 text-right text-muted-foreground">{money(p.manager_commission_cents)}</td>
