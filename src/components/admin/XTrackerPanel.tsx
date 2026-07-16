@@ -2005,6 +2005,7 @@ function AdminOverview(props: OverviewProps) {
         </select>
       </div>
 
+      <p className="text-[11px] text-muted-foreground">Quick monitoring view. Money details live in Payroll; profile &amp; screenshots live in Employees.</p>
       <div className="overflow-x-auto rounded-xl border border-hairline">
         <table className="min-w-full text-xs">
           <thead className="bg-surface-1 text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
@@ -2012,14 +2013,9 @@ function AdminOverview(props: OverviewProps) {
               <th className="px-3 py-2 text-left">Employee</th>
               <th className="px-3 py-2 text-left">Manager</th>
               <th className="px-3 py-2 text-left">X username</th>
-              <th className="px-3 py-2 text-left">Pinned</th>
-              <th className="px-3 py-2 text-left">Days</th>
               <th className="px-3 py-2 text-right">Current</th>
-              <th className="px-3 py-2 text-right">Previous</th>
               <th className="px-3 py-2 text-right">Gained</th>
-              <th className="px-3 py-2 text-right">Owed</th>
               <th className="px-3 py-2 text-left">Last upload</th>
-              <th className="px-3 py-2 text-left">USDT (ERC20)</th>
               <th className="px-3 py-2 text-left">Status</th>
               <th className="px-3 py-2 text-right">Actions</th>
             </tr>
@@ -2028,8 +2024,6 @@ function AdminOverview(props: OverviewProps) {
             {rows.map((a) => {
               const paid = isPaidForAccount(payments, a.id, a.current_views);
               const gained = a.views_gained_since_last ?? Math.max(0, a.current_views - (a.previous_views ?? 0));
-              const owed = payFromViews(Math.max(0, a.current_views - a.weekly_starting_views), a.rate_cents_per_1k);
-              const d = daysSince(a.pinned_post_date);
               return (
                 <tr key={a.id} className="border-t border-hairline">
                   <td className="px-3 py-2">
@@ -2037,14 +2031,9 @@ function AdminOverview(props: OverviewProps) {
                   </td>
                   <td className="px-3 py-2 text-muted-foreground">{managerLabelForAccount(a.added_by_user_id) ?? "—"}</td>
                   <td className="px-3 py-2"><a className="hover:underline" href={a.profile_url} target="_blank" rel="noreferrer">@{a.x_username}</a></td>
-                  <td className="px-3 py-2 text-muted-foreground">{a.pinned_post_date ?? "—"}</td>
-                  <td className="px-3 py-2 text-muted-foreground">{d ?? "—"}</td>
                   <td className="px-3 py-2 text-right">{fmt(a.current_views)}</td>
-                  <td className="px-3 py-2 text-right text-muted-foreground">{fmt(a.previous_views ?? 0)}</td>
                   <td className="px-3 py-2 text-right">{fmt(gained)}</td>
-                  <td className="px-3 py-2 text-right">{money(owed)}</td>
                   <td className="px-3 py-2 text-muted-foreground">{a.last_screenshot_upload_at ? new Date(a.last_screenshot_upload_at).toLocaleDateString() : "—"}</td>
-                  <td className="px-3 py-2"><AddrCell address={walletByUid.get(a.added_by_user_id ?? "")?.usdt_address} network={walletByUid.get(a.added_by_user_id ?? "")?.usdt_network} /></td>
                   <td className="px-3 py-2">
                     <span className={`rounded-full px-2 py-0.5 text-[10px] ${paid ? "bg-green-500/15 text-green-500" : "bg-yellow-500/15 text-yellow-600"}`}>
                       {paid ? "Paid" : "Unpaid"}
@@ -2057,7 +2046,7 @@ function AdminOverview(props: OverviewProps) {
               );
             })}
             {rows.length === 0 && (
-              <tr><td colSpan={13} className="px-3 py-6 text-center text-muted-foreground">No accounts match these filters.</td></tr>
+              <tr><td colSpan={8} className="px-3 py-6 text-center text-muted-foreground">No accounts match these filters.</td></tr>
             )}
           </tbody>
         </table>
@@ -2088,38 +2077,38 @@ function AdminEmployees(props: EmployeesProps) {
 
   if (!selected) {
     return (
-      <div className="mt-4 overflow-x-auto rounded-xl border border-hairline">
-        <table className="min-w-full text-xs">
-          <thead className="bg-surface-1 text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
-            <tr>
-              <th className="px-3 py-2 text-left">Employee</th>
-              <th className="px-3 py-2 text-left">Manager</th>
-              <th className="px-3 py-2 text-right">Accounts</th>
-              <th className="px-3 py-2 text-right">Total views</th>
-              <th className="px-3 py-2 text-left">USDT (ERC20)</th>
-            </tr>
-          </thead>
-          <tbody>
-            {names.map((n) => {
-              const list = accounts.filter((a) => a.employee_name === n);
-              const totalViews = list.reduce((s, a) => s + a.current_views, 0);
-              const mgr = managerLabelForAccount(list[0]?.added_by_user_id ?? null);
-              const w = walletByUid.get(list[0]?.added_by_user_id ?? "");
-              return (
-                <tr key={n} className="cursor-pointer border-t border-hairline hover:bg-surface-1" onClick={() => setSelected(n)}>
-                  <td className="px-3 py-2 underline-offset-2 hover:underline">{n}</td>
-                  <td className="px-3 py-2 text-muted-foreground">{mgr ?? "—"}</td>
-                  <td className="px-3 py-2 text-right">{list.length}</td>
-                  <td className="px-3 py-2 text-right">{fmt(totalViews)}</td>
-                  <td className="px-3 py-2"><AddrCell address={w?.usdt_address} network={w?.usdt_network} /></td>
-                </tr>
-              );
-            })}
-            {names.length === 0 && (
-              <tr><td colSpan={5} className="px-3 py-6 text-center text-muted-foreground">No employees yet.</td></tr>
-            )}
-          </tbody>
-        </table>
+      <div className="mt-4 space-y-2">
+        <p className="text-[11px] text-muted-foreground">Click an employee to see their profile, wallet, accounts &amp; screenshot history.</p>
+        <div className="overflow-x-auto rounded-xl border border-hairline">
+          <table className="min-w-full text-xs">
+            <thead className="bg-surface-1 text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+              <tr>
+                <th className="px-3 py-2 text-left">Employee</th>
+                <th className="px-3 py-2 text-left">Manager</th>
+                <th className="px-3 py-2 text-right">Accounts</th>
+                <th className="px-3 py-2 text-right">Total views</th>
+              </tr>
+            </thead>
+            <tbody>
+              {names.map((n) => {
+                const list = accounts.filter((a) => a.employee_name === n);
+                const totalViews = list.reduce((s, a) => s + a.current_views, 0);
+                const mgr = managerLabelForAccount(list[0]?.added_by_user_id ?? null);
+                return (
+                  <tr key={n} className="cursor-pointer border-t border-hairline hover:bg-surface-1" onClick={() => setSelected(n)}>
+                    <td className="px-3 py-2 underline-offset-2 hover:underline">{n}</td>
+                    <td className="px-3 py-2 text-muted-foreground">{mgr ?? "—"}</td>
+                    <td className="px-3 py-2 text-right">{list.length}</td>
+                    <td className="px-3 py-2 text-right">{fmt(totalViews)}</td>
+                  </tr>
+                );
+              })}
+              {names.length === 0 && (
+                <tr><td colSpan={4} className="px-3 py-6 text-center text-muted-foreground">No employees yet.</td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     );
   }
@@ -2158,7 +2147,7 @@ function AdminEmployees(props: EmployeesProps) {
               <th className="px-3 py-2 text-right">Previous</th>
               <th className="px-3 py-2 text-right">Current</th>
               <th className="px-3 py-2 text-right">Gained</th>
-              <th className="px-3 py-2 text-right">Owed</th>
+              <th className="px-3 py-2 text-left">Starting</th>
               <th className="px-3 py-2 text-left">Last upload</th>
               <th className="px-3 py-2 text-right">Actions</th>
             </tr>
@@ -2166,7 +2155,6 @@ function AdminEmployees(props: EmployeesProps) {
           <tbody>
             {list.map((a) => {
               const gained = a.views_gained_since_last ?? Math.max(0, a.current_views - (a.previous_views ?? 0));
-              const owed = payFromViews(Math.max(0, a.current_views - a.weekly_starting_views), a.rate_cents_per_1k);
               return (
                 <tr key={a.id} className="border-t border-hairline">
                   <td className="px-3 py-2"><a className="hover:underline" href={a.profile_url} target="_blank" rel="noreferrer">@{a.x_username}</a></td>
@@ -2175,7 +2163,7 @@ function AdminEmployees(props: EmployeesProps) {
                   <td className="px-3 py-2 text-right text-muted-foreground">{fmt(a.previous_views ?? 0)}</td>
                   <td className="px-3 py-2 text-right">{fmt(a.current_views)}</td>
                   <td className="px-3 py-2 text-right">{fmt(gained)}</td>
-                  <td className="px-3 py-2 text-right">{money(owed)}</td>
+                  <td className="px-3 py-2 text-right text-muted-foreground">{fmt(a.weekly_starting_views)}</td>
                   <td className="px-3 py-2 text-muted-foreground">{a.last_screenshot_upload_at ? new Date(a.last_screenshot_upload_at).toLocaleDateString() : "—"}</td>
                   <td className="px-3 py-2 text-right space-x-1">
                     <button className="rounded-md border border-hairline px-2 py-1 text-[10px] hover:bg-surface-1" onClick={() => onUpload(a)}>Upload</button>
