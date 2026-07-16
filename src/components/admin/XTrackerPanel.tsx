@@ -1911,6 +1911,25 @@ function isPaidForAccount(payments: XPayment[], accountId: string, currentViews:
   return last.views_paid >= currentViews;
 }
 
+function shortAddr(a: string | null | undefined): string {
+  if (!a) return "";
+  return a.length > 12 ? `${a.slice(0, 6)}…${a.slice(-4)}` : a;
+}
+
+function AddrCell({ address, network }: { address?: string | null; network?: string | null }) {
+  if (!address) return <span className="text-muted-foreground italic">Not set</span>;
+  return (
+    <button
+      type="button"
+      title={`${address}${network ? ` (${network})` : ""} — click to copy`}
+      onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(address); }}
+      className="font-mono text-[11px] text-foreground hover:text-lime"
+    >
+      {shortAddr(address)}
+    </button>
+  );
+}
+
 type OverviewProps = {
   accounts: XAccount[];
   payments: XPayment[];
