@@ -566,6 +566,7 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
         <AdminOverview
           accounts={accounts}
           payments={payments}
+          employees={employees}
           managerLabelForAccount={managerLabelForAccount}
           filterManager={filterManager}
           setFilterManager={setFilterManager}
@@ -604,6 +605,7 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
         <AdminPayroll
           accounts={accounts}
           payments={payments}
+          employees={employees}
           managerLabelForAccount={managerLabelForAccount}
           onChanged={refresh}
           userId={userId}
@@ -1909,9 +1911,29 @@ function isPaidForAccount(payments: XPayment[], accountId: string, currentViews:
   return last.views_paid >= currentViews;
 }
 
+function shortAddr(a: string | null | undefined): string {
+  if (!a) return "";
+  return a.length > 12 ? `${a.slice(0, 6)}…${a.slice(-4)}` : a;
+}
+
+function AddrCell({ address, network }: { address?: string | null; network?: string | null }) {
+  if (!address) return <span className="text-muted-foreground italic">Not set</span>;
+  return (
+    <button
+      type="button"
+      title={`${address}${network ? ` (${network})` : ""} — click to copy`}
+      onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(address); }}
+      className="font-mono text-[11px] text-foreground hover:text-lime"
+    >
+      {shortAddr(address)}
+    </button>
+  );
+}
+
 type OverviewProps = {
   accounts: XAccount[];
   payments: XPayment[];
+  employees: EmployeeRow[];
   managerLabelForAccount: (addedBy: string | null) => string | null;
   filterManager: string;
   setFilterManager: (v: string) => void;
@@ -1927,10 +1949,12 @@ type OverviewProps = {
 
 function AdminOverview(props: OverviewProps) {
   const {
-    accounts, payments, managerLabelForAccount,
+    accounts, payments, employees, managerLabelForAccount,
     filterManager, setFilterManager, filterEmployee, setFilterEmployee,
     filterStatus, setFilterStatus, sortKey, setSortKey, onOpenEmployee, onUpload,
   } = props;
+
+  const walletByUid = new Map(employees.map((e) => [e.user_id, e] as const));
 
   const managerOptions = Array.from(
     new Set(accounts.map((a) => managerLabelForAccount(a.added_by_user_id)).filter(Boolean) as string[]),
@@ -1995,6 +2019,7 @@ function AdminOverview(props: OverviewProps) {
               <th className="px-3 py-2 text-right">Gained</th>
               <th className="px-3 py-2 text-right">Owed</th>
               <th className="px-3 py-2 text-left">Last upload</th>
+              <th className="px-3 py-2 text-left">USDT (ERC20)</th>
               <th className="px-3 py-2 text-left">Status</th>
               <th className="px-3 py-2 text-right">Actions</th>
             </tr>
@@ -2019,6 +2044,7 @@ function AdminOverview(props: OverviewProps) {
                   <td className="px-3 py-2 text-right">{fmt(gained)}</td>
                   <td className="px-3 py-2 text-right">{money(owed)}</td>
                   <td className="px-3 py-2 text-muted-foreground">{a.last_screenshot_upload_at ? new Date(a.last_screenshot_upload_at).toLocaleDateString() : "—"}</td>
+                  <td className="px-3 py-2"><AddrCell address={walletByUid.get(a.added_by_user_id ?? "")?.usdt_address} network={walletByUid.get(a.added_by_user_id ?? "")?.usdt_network} /></td>
                   <td className="px-3 py-2">
                     <span className={`rounded-full px-2 py-0.5 text-[10px] ${paid ? "bg-green-500/15 text-green-500" : "bg-yellow-500/15 text-yellow-600"}`}>
                       {paid ? "Paid" : "Unpaid"}
@@ -2031,7 +2057,7 @@ function AdminOverview(props: OverviewProps) {
               );
             })}
             {rows.length === 0 && (
-              <tr><td colSpan={12} className="px-3 py-6 text-center text-muted-foreground">No accounts match these filters.</td></tr>
+              <tr><td colSpan={13} className="px-3 py-6 text-center text-muted-foreground">No accounts match these filters.</td></tr>
             )}
           </tbody>
         </table>
@@ -2055,6 +2081,8 @@ type EmployeesProps = {
 function AdminEmployees(props: EmployeesProps) {
   const { accounts, employees, screenshots, managerLabelForAccount, selected, setSelected, onUpload, onEdit } = props;
 
+  const walletByUid = new Map(employees.map((e) => [e.user_id, e] as const));
+
   // Group accounts by employee_name (contact label on the account)
   const names = Array.from(new Set(accounts.map((a) => a.employee_name))).sort();
 
@@ -2068,6 +2096,7 @@ function AdminEmployees(props: EmployeesProps) {
               <th className="px-3 py-2 text-left">Manager</th>
               <th className="px-3 py-2 text-right">Accounts</th>
               <th className="px-3 py-2 text-right">Total views</th>
+              <th className="px-3 py-2 text-left">USDT (ERC20)</th>
             </tr>
           </thead>
           <tbody>
@@ -2075,17 +2104,19 @@ function AdminEmployees(props: EmployeesProps) {
               const list = accounts.filter((a) => a.employee_name === n);
               const totalViews = list.reduce((s, a) => s + a.current_views, 0);
               const mgr = managerLabelForAccount(list[0]?.added_by_user_id ?? null);
+              const w = walletByUid.get(list[0]?.added_by_user_id ?? "");
               return (
                 <tr key={n} className="cursor-pointer border-t border-hairline hover:bg-surface-1" onClick={() => setSelected(n)}>
                   <td className="px-3 py-2 underline-offset-2 hover:underline">{n}</td>
                   <td className="px-3 py-2 text-muted-foreground">{mgr ?? "—"}</td>
                   <td className="px-3 py-2 text-right">{list.length}</td>
                   <td className="px-3 py-2 text-right">{fmt(totalViews)}</td>
+                  <td className="px-3 py-2"><AddrCell address={w?.usdt_address} network={w?.usdt_network} /></td>
                 </tr>
               );
             })}
             {names.length === 0 && (
-              <tr><td colSpan={4} className="px-3 py-6 text-center text-muted-foreground">No employees yet.</td></tr>
+              <tr><td colSpan={5} className="px-3 py-6 text-center text-muted-foreground">No employees yet.</td></tr>
             )}
           </tbody>
         </table>
@@ -2094,7 +2125,9 @@ function AdminEmployees(props: EmployeesProps) {
   }
 
   const list = accounts.filter((a) => a.employee_name === selected);
-  const empRow = employees.find((e) => e.email === selected);
+  // Lookup wallet by any added_by_user_id in this group (accounts added by the employee themselves)
+  const uidForSelected = list.map((a) => a.added_by_user_id).find((u) => u && walletByUid.has(u)) ?? null;
+  const empRow = (uidForSelected && walletByUid.get(uidForSelected)) || employees.find((e) => e.email === selected) || null;
   const shots = screenshots.filter((s) => s.employee_name === selected);
 
   return (
@@ -2166,13 +2199,15 @@ function AdminEmployees(props: EmployeesProps) {
 type PayrollProps = {
   accounts: XAccount[];
   payments: XPayment[];
+  employees: EmployeeRow[];
   managerLabelForAccount: (addedBy: string | null) => string | null;
   onChanged: () => void | Promise<void>;
   userId: string | null;
 };
 
-function AdminPayroll({ accounts, payments, managerLabelForAccount, onChanged, userId }: PayrollProps) {
+function AdminPayroll({ accounts, payments, employees, managerLabelForAccount, onChanged, userId }: PayrollProps) {
   const [busy, setBusy] = useState<string | null>(null);
+  const walletByUid = new Map(employees.map((e) => [e.user_id, e] as const));
 
   async function markPaid(a: XAccount) {
     setBusy(a.id);
@@ -2227,6 +2262,7 @@ function AdminPayroll({ accounts, payments, managerLabelForAccount, onChanged, u
               <th className="px-3 py-2 text-right">Views this period</th>
               <th className="px-3 py-2 text-right">Amount owed</th>
               <th className="px-3 py-2 text-right">Manager 10%</th>
+              <th className="px-3 py-2 text-left">USDT (ERC20)</th>
               <th className="px-3 py-2 text-left">Status</th>
               <th className="px-3 py-2 text-right">Actions</th>
             </tr>
@@ -2240,6 +2276,7 @@ function AdminPayroll({ accounts, payments, managerLabelForAccount, onChanged, u
                 <td className="px-3 py-2 text-right">{fmt(periodViews)}</td>
                 <td className="px-3 py-2 text-right">{money(amount)}</td>
                 <td className="px-3 py-2 text-right text-muted-foreground">{money(commission)}</td>
+                <td className="px-3 py-2"><AddrCell address={walletByUid.get(a.added_by_user_id ?? "")?.usdt_address} network={walletByUid.get(a.added_by_user_id ?? "")?.usdt_network} /></td>
                 <td className="px-3 py-2">
                   <span className={`rounded-full px-2 py-0.5 text-[10px] ${paid ? "bg-green-500/15 text-green-500" : "bg-yellow-500/15 text-yellow-600"}`}>
                     {paid ? "Paid" : "Unpaid"}
@@ -2257,7 +2294,7 @@ function AdminPayroll({ accounts, payments, managerLabelForAccount, onChanged, u
               </tr>
             ))}
             {rows.length === 0 && (
-              <tr><td colSpan={8} className="px-3 py-6 text-center text-muted-foreground">No accounts.</td></tr>
+              <tr><td colSpan={9} className="px-3 py-6 text-center text-muted-foreground">No accounts.</td></tr>
             )}
           </tbody>
         </table>
