@@ -920,7 +920,7 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
                           <td className="px-4 py-3 text-xs text-muted-foreground">
                             {h.week_start} → {h.week_end}
                           </td>
-                          <td className="px-4 py-3 text-foreground">@{h.x_username}</td>
+                          <td className="px-4 py-3 text-foreground"><a className="hover:underline" href={`https://x.com/${h.x_username}`} target="_blank" rel="noreferrer">@{h.x_username}</a></td>
                           <td className="px-4 py-3 text-muted-foreground">{h.employee_name || "—"}</td>
                           <td className="px-4 py-3 text-muted-foreground">{fmt(h.starting_views)}</td>
                           <td className="px-4 py-3 text-muted-foreground">{fmt(h.ending_views)}</td>
@@ -2260,7 +2260,7 @@ function AdminPayroll({ accounts, payments, employees, managerLabelForAccount, o
               <tr key={a.id} className="border-t border-hairline">
                 <td className="px-3 py-2">{a.employee_name}</td>
                 <td className="px-3 py-2 text-muted-foreground">{managerLabelForAccount(a.added_by_user_id) ?? "—"}</td>
-                <td className="px-3 py-2">@{a.x_username}</td>
+                <td className="px-3 py-2"><a className="hover:underline" href={a.profile_url} target="_blank" rel="noreferrer">@{a.x_username}</a></td>
                 <td className="px-3 py-2 text-right">{fmt(periodViews)}</td>
                 <td className="px-3 py-2 text-right">{money(amount)}</td>
                 <td className="px-3 py-2 text-right text-muted-foreground">{money(commission)}</td>
@@ -2306,7 +2306,7 @@ function AdminPayroll({ accounts, payments, employees, managerLabelForAccount, o
               <tr key={p.id} className="border-t border-hairline">
                 <td className="px-3 py-2 text-muted-foreground">{p.paid_at ? new Date(p.paid_at).toLocaleString() : "—"}</td>
                 <td className="px-3 py-2">{p.employee_name}</td>
-                <td className="px-3 py-2">@{p.x_username}</td>
+                <td className="px-3 py-2"><a className="hover:underline" href={`https://x.com/${p.x_username}`} target="_blank" rel="noreferrer">@{p.x_username}</a></td>
                 <td className="px-3 py-2 text-right">{fmt(p.views_paid)}</td>
                 <td className="px-3 py-2 text-right">{money(p.amount_cents)}</td>
                 <td className="px-3 py-2 text-right text-muted-foreground">{money(p.manager_commission_cents)}</td>
