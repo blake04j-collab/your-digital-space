@@ -1032,7 +1032,10 @@ function WalletCard({
   const isValidEthAddress = (v: string) => /^0x[a-fA-F0-9]{40}$/.test(v.trim());
 
   async function save() {
-    if (!userId) return;
+    if (!userId) {
+      setError("You must be signed in to save a wallet address.");
+      return;
+    }
     const trimmed = address.trim();
     if (!isValidEthAddress(trimmed)) {
       setError("Enter a valid Ethereum (ERC20) address — starts with 0x and 42 characters long.");
@@ -1040,19 +1043,39 @@ function WalletCard({
     }
     setError(null);
     setSaving(true);
-    const { data, error: err } = await (supabase
-      .from("payout_wallets" as never) as unknown as {
-        upsert: (v: unknown) => { select: (s: string) => { single: () => Promise<{ data: unknown; error: { message: string } | null }> } };
-      })
-      .upsert({ user_id: userId, usdt_address: trimmed, network })
-      .select("*")
-      .single();
-    setSaving(false);
-    if (err) return alert(err.message);
-    onSaved(data as unknown as WalletRow);
-    setSavedFlash(true);
-    setTimeout(() => setSavedFlash(false), 1800);
+    try {
+      const client = supabase as unknown as {
+        from: (t: string) => {
+          upsert: (v: unknown, opts?: unknown) => {
+            select: (s: string) => { maybeSingle: () => Promise<{ data: unknown; error: { message: string } | null }> };
+          };
+        };
+      };
+      const { data, error: err } = await client
+        .from("payout_wallets")
+        .upsert(
+          { user_id: userId, usdt_address: trimmed, network },
+          { onConflict: "user_id" },
+        )
+        .select("*")
+        .maybeSingle();
+      if (err) {
+        setError(err.message || "Could not save wallet. Please try again.");
+        return;
+      }
+      const saved = (data as WalletRow | null) ?? { user_id: userId, usdt_address: trimmed, network };
+      onSaved(saved);
+      setSavedFlash(true);
+      setTimeout(() => setSavedFlash(false), 1800);
+    } catch (e) {
+      setError((e as Error)?.message ?? "Unexpected error saving wallet.");
+    } finally {
+      setSaving(false);
+    }
   }
+
+  const trimmedAddress = address.trim();
+  const canSave = !saving && isValidEthAddress(trimmedAddress);
 
   return (
     <div className="mt-5 rounded-2xl border border-hairline bg-surface-1 p-4">
@@ -1075,14 +1098,18 @@ function WalletCard({
           value={address}
           onChange={(e) => { setAddress(e.target.value); if (error) setError(null); }}
           placeholder="0x… USDT (ERC20) address"
+          autoCapitalize="off"
+          autoCorrect="off"
+          spellCheck={false}
           className="rounded-lg border border-hairline bg-background px-3 py-2 font-mono text-xs text-foreground"
         />
         <div className="rounded-lg border border-hairline bg-background px-3 py-2 text-xs text-muted-foreground flex items-center">
           ERC20 (Ethereum)
         </div>
         <button
+          type="button"
           onClick={save}
-          disabled={saving || !address.trim() || address.trim() === (wallet?.usdt_address ?? "")}
+          disabled={!canSave}
           className="rounded-full border border-lime bg-lime-soft px-4 py-2 text-[10px] uppercase tracking-[0.2em] text-lime disabled:opacity-40"
         >
           {saving ? "Saving…" : wallet?.usdt_address ? "Update" : "Save"}
