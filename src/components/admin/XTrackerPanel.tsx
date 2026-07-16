@@ -2147,7 +2147,7 @@ function AdminEmployees(props: EmployeesProps) {
               <th className="px-3 py-2 text-right">Previous</th>
               <th className="px-3 py-2 text-right">Current</th>
               <th className="px-3 py-2 text-right">Gained</th>
-              <th className="px-3 py-2 text-right">Owed</th>
+              <th className="px-3 py-2 text-left">Starting</th>
               <th className="px-3 py-2 text-left">Last upload</th>
               <th className="px-3 py-2 text-right">Actions</th>
             </tr>
