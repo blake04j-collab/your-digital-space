@@ -2067,10 +2067,27 @@ type EmployeesProps = {
   setSelected: (v: string | null) => void;
   onUpload: (a: XAccount) => void;
   onEdit: (a: XAccount) => void;
+  onRefresh: () => void | Promise<void>;
 };
 
 function AdminEmployees(props: EmployeesProps) {
-  const { accounts, employees, screenshots, managerLabelForAccount, selected, setSelected, onUpload, onEdit } = props;
+  const { accounts, employees, screenshots, managerLabelForAccount, selected, setSelected, onUpload, onEdit, onRefresh } = props;
+  const deleteEmp = useServerFn(deleteEmployeeFn);
+  const [deleting, setDeleting] = useState<string | null>(null);
+
+  async function handleDelete(uid: string, label: string) {
+    if (!confirm(`Permanently delete ${label}? This removes their account, wallet, X accounts, screenshots and history. This cannot be undone.`)) return;
+    setDeleting(uid);
+    try {
+      await deleteEmp({ data: { userId: uid } });
+      setSelected(null);
+      await onRefresh();
+    } catch (e) {
+      alert(`Delete failed: ${(e as Error).message}`);
+    } finally {
+      setDeleting(null);
+    }
+  }
 
   const walletByUid = new Map(employees.map((e) => [e.user_id, e] as const));
 
