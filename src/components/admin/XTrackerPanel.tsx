@@ -212,8 +212,16 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
     setScreenshots((s.data as XScreenshot[]) ?? []);
     if (role === "admin") {
       setManagers((extra?.data as ManagerRow[]) ?? []);
-      const { data: emps } = await supabase.rpc("list_employees" as never);
+      const [{ data: emps }, { data: pays }] = await Promise.all([
+        supabase.rpc("list_employees" as never),
+        supabase
+          .from("x_payments" as never)
+          .select("*")
+          .order("paid_at", { ascending: false })
+          .limit(2000) as unknown as Promise<{ data: unknown }>,
+      ]);
       setEmployees(((emps as unknown) as EmployeeRow[]) ?? []);
+      setPayments(((pays as unknown) as XPayment[]) ?? []);
     } else if (isManager) {
       const row = Array.isArray(extra?.data) ? (extra.data[0] as { unpaid_commission_cents?: number } | undefined) : undefined;
       setMyUnpaidCommissionCents(Number(row?.unpaid_commission_cents ?? 0));
