@@ -2019,6 +2019,7 @@ function AdminOverview(props: OverviewProps) {
               <th className="px-3 py-2 text-right">Gained</th>
               <th className="px-3 py-2 text-right">Owed</th>
               <th className="px-3 py-2 text-left">Last upload</th>
+              <th className="px-3 py-2 text-left">USDT (ERC20)</th>
               <th className="px-3 py-2 text-left">Status</th>
               <th className="px-3 py-2 text-right">Actions</th>
             </tr>
