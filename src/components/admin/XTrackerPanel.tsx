@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useServerFn } from "@tanstack/react-start";
 import { extractViewsFromScreenshot } from "@/lib/x-views.functions";
+import { deleteEmployee as deleteEmployeeFn } from "@/lib/admin-employees.functions";
 
 export type XAccount = {
   id: string;
@@ -592,6 +593,7 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
           setSelected={setSelectedEmployee}
           onUpload={(a) => setUploading(a)}
           onEdit={(a) => setEditing(a)}
+          onRefresh={refresh}
         />
       )}
 
@@ -2065,10 +2067,27 @@ type EmployeesProps = {
   setSelected: (v: string | null) => void;
   onUpload: (a: XAccount) => void;
   onEdit: (a: XAccount) => void;
+  onRefresh: () => void | Promise<void>;
 };
 
 function AdminEmployees(props: EmployeesProps) {
-  const { accounts, employees, screenshots, managerLabelForAccount, selected, setSelected, onUpload, onEdit } = props;
+  const { accounts, employees, screenshots, managerLabelForAccount, selected, setSelected, onUpload, onEdit, onRefresh } = props;
+  const deleteEmp = useServerFn(deleteEmployeeFn);
+  const [deleting, setDeleting] = useState<string | null>(null);
+
+  async function handleDelete(uid: string, label: string) {
+    if (!confirm(`Permanently delete ${label}? This removes their account, wallet, X accounts, screenshots and history. This cannot be undone.`)) return;
+    setDeleting(uid);
+    try {
+      await deleteEmp({ data: { userId: uid } });
+      setSelected(null);
+      await onRefresh();
+    } catch (e) {
+      alert(`Delete failed: ${(e as Error).message}`);
+    } finally {
+      setDeleting(null);
+    }
+  }
 
   const walletByUid = new Map(employees.map((e) => [e.user_id, e] as const));
 
@@ -2087,6 +2106,7 @@ function AdminEmployees(props: EmployeesProps) {
                 <th className="px-3 py-2 text-left">Manager</th>
                 <th className="px-3 py-2 text-right">Accounts</th>
                 <th className="px-3 py-2 text-right">Total views</th>
+                <th className="px-3 py-2 text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -2094,17 +2114,33 @@ function AdminEmployees(props: EmployeesProps) {
                 const list = accounts.filter((a) => a.employee_name === n);
                 const totalViews = list.reduce((s, a) => s + a.current_views, 0);
                 const mgr = managerLabelForAccount(list[0]?.added_by_user_id ?? null);
+                const uid = list.map((a) => a.added_by_user_id).find((u) => u && walletByUid.has(u))
+                  ?? employees.find((e) => e.email === n)?.user_id
+                  ?? null;
                 return (
                   <tr key={n} className="cursor-pointer border-t border-hairline hover:bg-surface-1" onClick={() => setSelected(n)}>
                     <td className="px-3 py-2 underline-offset-2 hover:underline">{n}</td>
                     <td className="px-3 py-2 text-muted-foreground">{mgr ?? "—"}</td>
                     <td className="px-3 py-2 text-right">{list.length}</td>
                     <td className="px-3 py-2 text-right">{fmt(totalViews)}</td>
+                    <td className="px-3 py-2 text-right" onClick={(e) => e.stopPropagation()}>
+                      {uid ? (
+                        <button
+                          disabled={deleting === uid}
+                          className="rounded-md border border-red-500/40 px-2 py-1 text-[10px] text-red-500 hover:bg-red-500/10 disabled:opacity-50"
+                          onClick={() => handleDelete(uid, n)}
+                        >
+                          {deleting === uid ? "Deleting…" : "Delete"}
+                        </button>
+                      ) : (
+                        <span className="text-[10px] text-muted-foreground">—</span>
+                      )}
+                    </td>
                   </tr>
                 );
               })}
               {names.length === 0 && (
-                <tr><td colSpan={4} className="px-3 py-6 text-center text-muted-foreground">No employees yet.</td></tr>
+                <tr><td colSpan={5} className="px-3 py-6 text-center text-muted-foreground">No employees yet.</td></tr>
               )}
             </tbody>
           </table>
@@ -2124,8 +2160,21 @@ function AdminEmployees(props: EmployeesProps) {
       <button className="text-xs text-muted-foreground underline-offset-2 hover:underline" onClick={() => setSelected(null)}>← Back to employees</button>
 
       <div className="rounded-xl border border-hairline p-4">
-        <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Employee</div>
-        <div className="mt-1 text-lg font-medium">{selected}</div>
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Employee</div>
+            <div className="mt-1 text-lg font-medium">{selected}</div>
+          </div>
+          {empRow && (
+            <button
+              disabled={deleting === empRow.user_id}
+              className="rounded-md border border-red-500/40 px-3 py-1.5 text-xs text-red-500 hover:bg-red-500/10 disabled:opacity-50"
+              onClick={() => handleDelete(empRow.user_id, selected)}
+            >
+              {deleting === empRow.user_id ? "Deleting…" : "Delete employee"}
+            </button>
+          )}
+        </div>
         {empRow && (
           <div className="mt-2 grid gap-1 text-xs text-muted-foreground sm:grid-cols-2">
             <div>Auth email: {empRow.email}</div>
