@@ -2106,6 +2106,7 @@ function AdminEmployees(props: EmployeesProps) {
                 <th className="px-3 py-2 text-left">Manager</th>
                 <th className="px-3 py-2 text-right">Accounts</th>
                 <th className="px-3 py-2 text-right">Total views</th>
+                <th className="px-3 py-2 text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -2113,17 +2114,33 @@ function AdminEmployees(props: EmployeesProps) {
                 const list = accounts.filter((a) => a.employee_name === n);
                 const totalViews = list.reduce((s, a) => s + a.current_views, 0);
                 const mgr = managerLabelForAccount(list[0]?.added_by_user_id ?? null);
+                const uid = list.map((a) => a.added_by_user_id).find((u) => u && walletByUid.has(u))
+                  ?? employees.find((e) => e.email === n)?.user_id
+                  ?? null;
                 return (
                   <tr key={n} className="cursor-pointer border-t border-hairline hover:bg-surface-1" onClick={() => setSelected(n)}>
                     <td className="px-3 py-2 underline-offset-2 hover:underline">{n}</td>
                     <td className="px-3 py-2 text-muted-foreground">{mgr ?? "—"}</td>
                     <td className="px-3 py-2 text-right">{list.length}</td>
                     <td className="px-3 py-2 text-right">{fmt(totalViews)}</td>
+                    <td className="px-3 py-2 text-right" onClick={(e) => e.stopPropagation()}>
+                      {uid ? (
+                        <button
+                          disabled={deleting === uid}
+                          className="rounded-md border border-red-500/40 px-2 py-1 text-[10px] text-red-500 hover:bg-red-500/10 disabled:opacity-50"
+                          onClick={() => handleDelete(uid, n)}
+                        >
+                          {deleting === uid ? "Deleting…" : "Delete"}
+                        </button>
+                      ) : (
+                        <span className="text-[10px] text-muted-foreground">—</span>
+                      )}
+                    </td>
                   </tr>
                 );
               })}
               {names.length === 0 && (
-                <tr><td colSpan={4} className="px-3 py-6 text-center text-muted-foreground">No employees yet.</td></tr>
+                <tr><td colSpan={5} className="px-3 py-6 text-center text-muted-foreground">No employees yet.</td></tr>
               )}
             </tbody>
           </table>
