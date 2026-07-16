@@ -2276,6 +2276,7 @@ function AdminPayroll({ accounts, payments, employees, managerLabelForAccount, o
                 <td className="px-3 py-2 text-right">{fmt(periodViews)}</td>
                 <td className="px-3 py-2 text-right">{money(amount)}</td>
                 <td className="px-3 py-2 text-right text-muted-foreground">{money(commission)}</td>
+                <td className="px-3 py-2"><AddrCell address={walletByUid.get(a.added_by_user_id ?? "")?.usdt_address} network={walletByUid.get(a.added_by_user_id ?? "")?.usdt_network} /></td>
                 <td className="px-3 py-2">
                   <span className={`rounded-full px-2 py-0.5 text-[10px] ${paid ? "bg-green-500/15 text-green-500" : "bg-yellow-500/15 text-yellow-600"}`}>
                     {paid ? "Paid" : "Unpaid"}
