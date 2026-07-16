@@ -1506,6 +1506,8 @@ function AccountForm({
             x_username: u,
             employee_name: contact.trim(),
             profile_url: `https://x.com/${u}`,
+            pinned_post_date: pinnedDate || null,
+            pinned_post_url: pinnedUrl.trim() || null,
             rate_cents_per_1k: rateCents,
             current_views: finalViews,
             previous_views: previous,
