@@ -611,7 +611,7 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
       )}
 
 
-      {view === "accounts" && (
+      {!isAdmin && view === "accounts" && (
         <div className="mt-4 space-y-6">
           <div className="overflow-hidden rounded-2xl border border-hairline bg-surface-1">
             {accounts.length === 0 ? (
