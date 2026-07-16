@@ -2160,8 +2160,21 @@ function AdminEmployees(props: EmployeesProps) {
       <button className="text-xs text-muted-foreground underline-offset-2 hover:underline" onClick={() => setSelected(null)}>← Back to employees</button>
 
       <div className="rounded-xl border border-hairline p-4">
-        <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Employee</div>
-        <div className="mt-1 text-lg font-medium">{selected}</div>
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Employee</div>
+            <div className="mt-1 text-lg font-medium">{selected}</div>
+          </div>
+          {empRow && (
+            <button
+              disabled={deleting === empRow.user_id}
+              className="rounded-md border border-red-500/40 px-3 py-1.5 text-xs text-red-500 hover:bg-red-500/10 disabled:opacity-50"
+              onClick={() => handleDelete(empRow.user_id, selected)}
+            >
+              {deleting === empRow.user_id ? "Deleting…" : "Delete employee"}
+            </button>
+          )}
+        </div>
         {empRow && (
           <div className="mt-2 grid gap-1 text-xs text-muted-foreground sm:grid-cols-2">
             <div>Auth email: {empRow.email}</div>
