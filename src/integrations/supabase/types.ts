@@ -464,6 +464,59 @@ export type Database = {
         }
         Relationships: []
       }
+      x_payments: {
+        Row: {
+          account_id: string | null
+          amount_cents: number
+          created_at: string
+          employee_name: string
+          id: string
+          manager_commission_cents: number
+          marked_by: string | null
+          paid_at: string
+          period_end: string | null
+          period_start: string | null
+          views_paid: number
+          x_username: string
+        }
+        Insert: {
+          account_id?: string | null
+          amount_cents?: number
+          created_at?: string
+          employee_name?: string
+          id?: string
+          manager_commission_cents?: number
+          marked_by?: string | null
+          paid_at?: string
+          period_end?: string | null
+          period_start?: string | null
+          views_paid?: number
+          x_username?: string
+        }
+        Update: {
+          account_id?: string | null
+          amount_cents?: number
+          created_at?: string
+          employee_name?: string
+          id?: string
+          manager_commission_cents?: number
+          marked_by?: string | null
+          paid_at?: string
+          period_end?: string | null
+          period_start?: string | null
+          views_paid?: number
+          x_username?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "x_payments_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "x_tracker_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       x_tracker_accounts: {
         Row: {
           added_by_user_id: string | null
@@ -476,6 +529,7 @@ export type Database = {
           last_updated: string | null
           notes: string | null
           payout_owed_cents: number
+          pinned_post_date: string | null
           pinned_post_url: string | null
           previous_views: number
           profile_url: string
@@ -499,6 +553,7 @@ export type Database = {
           last_updated?: string | null
           notes?: string | null
           payout_owed_cents?: number
+          pinned_post_date?: string | null
           pinned_post_url?: string | null
           previous_views?: number
           profile_url: string
@@ -522,6 +577,7 @@ export type Database = {
           last_updated?: string | null
           notes?: string | null
           payout_owed_cents?: number
+          pinned_post_date?: string | null
           pinned_post_url?: string | null
           previous_views?: number
           profile_url?: string
