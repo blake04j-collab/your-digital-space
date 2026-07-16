@@ -10,6 +10,7 @@ export type XAccount = {
   notes: string | null;
   profile_url: string;
   pinned_post_url: string | null;
+  pinned_post_date: string | null;
   current_views: number;
   previous_views: number | null;
   views_gained_since_last: number | null;
@@ -25,6 +26,19 @@ export type XAccount = {
   created_at: string;
   updated_at: string;
   added_by_user_id: string | null;
+};
+
+export type XPayment = {
+  id: string;
+  account_id: string | null;
+  employee_name: string;
+  x_username: string;
+  period_start: string | null;
+  period_end: string | null;
+  views_paid: number;
+  amount_cents: number;
+  manager_commission_cents: number;
+  paid_at: string;
 };
 
 export type ManagerRow = {
@@ -91,7 +105,7 @@ async function signedUrl(path: string): Promise<string | null> {
   return data?.signedUrl ?? null;
 }
 
-type ViewMode = "accounts" | "team";
+type ViewMode = "accounts" | "team" | "overview" | "employees" | "screenshots" | "payroll";
 
 function extractXUsername(input: string): string | null {
   const raw = input.trim().replace(/^@/, "");
@@ -134,12 +148,14 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
   const isManager = role === "manager";
   const isEmployee = role === "employee";
   const isRestricted = isManager || isEmployee; // own-scope, hide money
+  const isAdmin = role === "admin";
   const [accounts, setAccounts] = useState<XAccount[]>([]);
   const [history, setHistory] = useState<XHistory[]>([]);
   const [screenshots, setScreenshots] = useState<XScreenshot[]>([]);
   const [managers, setManagers] = useState<ManagerRow[]>([]);
+  const [payments, setPayments] = useState<XPayment[]>([]);
   const [loading, setLoading] = useState(true);
-  const [view, setView] = useState<ViewMode>("accounts");
+  const [view, setView] = useState<ViewMode>(role === "admin" ? "overview" : "accounts");
   const [showAdd, setShowAdd] = useState(false);
   const [editing, setEditing] = useState<XAccount | null>(null);
   const [uploading, setUploading] = useState<XAccount | null>(null);
@@ -150,6 +166,12 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
   const [myEmployees, setMyEmployees] = useState<EmployeeRow[]>([]);
   const [myInviteCodes, setMyInviteCodes] = useState<InviteCodeRow[]>([]);
   const [myWallet, setMyWallet] = useState<WalletRow | null>(null);
+  const [selectedEmployee, setSelectedEmployee] = useState<string | null>(null);
+  // Filters
+  const [filterManager, setFilterManager] = useState<string>("");
+  const [filterEmployee, setFilterEmployee] = useState<string>("");
+  const [filterStatus, setFilterStatus] = useState<string>("");
+  const [sortKey, setSortKey] = useState<string>("employee");
 
   useEffect(() => {
     (async () => {
@@ -190,8 +212,16 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
     setScreenshots((s.data as XScreenshot[]) ?? []);
     if (role === "admin") {
       setManagers((extra?.data as ManagerRow[]) ?? []);
-      const { data: emps } = await supabase.rpc("list_employees" as never);
+      const [{ data: emps }, { data: pays }] = await Promise.all([
+        supabase.rpc("list_employees" as never),
+        supabase
+          .from("x_payments" as never)
+          .select("*")
+          .order("paid_at", { ascending: false })
+          .limit(2000) as unknown as Promise<{ data: unknown }>,
+      ]);
       setEmployees(((emps as unknown) as EmployeeRow[]) ?? []);
+      setPayments(((pays as unknown) as XPayment[]) ?? []);
     } else if (isManager) {
       const row = Array.isArray(extra?.data) ? (extra.data[0] as { unpaid_commission_cents?: number } | undefined) : undefined;
       setMyUnpaidCommissionCents(Number(row?.unpaid_commission_cents ?? 0));
@@ -506,23 +536,82 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
 
 
       <div className="mt-5 flex gap-1 rounded-full border border-hairline bg-surface-1 p-1 w-fit flex-wrap">
-        {(isEmployee
-          ? (["accounts"] as const)
-          : (["accounts", "team"] as const)
-        ).map((v) => (
+        {(isAdmin
+          ? ([
+              ["overview", "Overview"],
+              ["employees", "Employees"],
+              ["screenshots", "Screenshot history"],
+              ["payroll", "Payroll"],
+            ] as const)
+          : isEmployee
+          ? ([["accounts", "Accounts"]] as const)
+          : ([
+              ["accounts", "Accounts"],
+              ["team", isManager ? "My team" : "Team & history"],
+            ] as const)
+        ).map(([v, lbl]) => (
           <button
             key={v}
-            onClick={() => setView(v)}
+            onClick={() => { setView(v as ViewMode); setSelectedEmployee(null); }}
             className={`rounded-full px-3.5 py-1.5 text-[10px] uppercase tracking-[0.2em] transition-colors ${
               view === v ? "bg-lime text-primary-foreground" : "text-muted-foreground hover:text-foreground"
             }`}
           >
-            {v === "accounts" ? "Accounts" : isManager ? "My team" : "Team & history"}
+            {lbl}
           </button>
         ))}
       </div>
 
-      {view === "accounts" && (
+      {isAdmin && view === "overview" && (
+        <AdminOverview
+          accounts={accounts}
+          payments={payments}
+          managerLabelForAccount={managerLabelForAccount}
+          filterManager={filterManager}
+          setFilterManager={setFilterManager}
+          filterEmployee={filterEmployee}
+          setFilterEmployee={setFilterEmployee}
+          filterStatus={filterStatus}
+          setFilterStatus={setFilterStatus}
+          sortKey={sortKey}
+          setSortKey={setSortKey}
+          onOpenEmployee={(name) => { setSelectedEmployee(name); setView("employees"); }}
+          onUpload={(a) => setUploading(a)}
+        />
+      )}
+
+      {isAdmin && view === "employees" && (
+        <AdminEmployees
+          accounts={accounts}
+          employees={employees}
+          screenshots={screenshots}
+          managers={managers}
+          managerLabelForAccount={managerLabelForAccount}
+          selected={selectedEmployee}
+          setSelected={setSelectedEmployee}
+          onUpload={(a) => setUploading(a)}
+          onEdit={(a) => setEditing(a)}
+        />
+      )}
+
+      {isAdmin && view === "screenshots" && (
+        <div className="mt-4">
+          <ScreenshotHistory rows={screenshots} />
+        </div>
+      )}
+
+      {isAdmin && view === "payroll" && (
+        <AdminPayroll
+          accounts={accounts}
+          payments={payments}
+          managerLabelForAccount={managerLabelForAccount}
+          onChanged={refresh}
+          userId={userId}
+        />
+      )}
+
+
+      {!isAdmin && view === "accounts" && (
         <div className="mt-4 space-y-6">
           <div className="overflow-hidden rounded-2xl border border-hairline bg-surface-1">
             {accounts.length === 0 ? (
@@ -642,7 +731,7 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
         </div>
       )}
 
-      {view === "team" && !isRestricted && (
+      {!isAdmin && view === "team" && !isRestricted && (
         <div className="mt-4 space-y-8">
           <section>
             <h3 className="mb-2 font-display text-sm uppercase tracking-[0.2em] text-muted-foreground">
@@ -1351,6 +1440,8 @@ function AccountForm({
   const [profileUrl, setProfileUrl] = useState(account?.profile_url ?? "");
   const [contact, setContact] = useState(account?.employee_name ?? "");
   const [rate, setRate] = useState(String((account?.rate_cents_per_1k ?? 300) / 100));
+  const [pinnedDate, setPinnedDate] = useState<string>(account?.pinned_post_date ?? "");
+  const [pinnedUrl, setPinnedUrl] = useState<string>(account?.pinned_post_url ?? "");
 
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(account?.screenshot_url ? null : null);
@@ -1384,6 +1475,7 @@ function AccountForm({
     const u = extractXUsername(profileUrl);
     if (!u) return setError("Enter a valid X profile link, e.g. https://x.com/username");
     if (!contact.trim()) return setError("Discord or Telegram username required");
+    if (!pinnedDate) return setError("Pinned post date required — when did you pin the post?");
     if (!isEdit && !file) return setError("Upload a screenshot of the pinned post");
     const finalViews = Math.max(0, Math.floor(Number(views) || 0));
 
@@ -1414,6 +1506,8 @@ function AccountForm({
             x_username: u,
             employee_name: contact.trim(),
             profile_url: `https://x.com/${u}`,
+            pinned_post_date: pinnedDate || null,
+            pinned_post_url: pinnedUrl.trim() || null,
             rate_cents_per_1k: rateCents,
             current_views: finalViews,
             previous_views: previous,
@@ -1451,6 +1545,8 @@ function AccountForm({
             x_username: u,
             employee_name: contact.trim(),
             profile_url: `https://x.com/${u}`,
+            pinned_post_date: pinnedDate || null,
+            pinned_post_url: pinnedUrl.trim() || null,
             rate_cents_per_1k: rateCents,
             current_views: finalViews,
             previous_views: 0,
@@ -1521,6 +1617,18 @@ function AccountForm({
             value={profileUrl}
             onChange={setProfileUrl}
             placeholder="https://x.com/username"
+          />
+          <Input
+            label="Pinned post link (optional)"
+            value={pinnedUrl}
+            onChange={setPinnedUrl}
+            placeholder="https://x.com/username/status/..."
+          />
+          <Input
+            label="Pinned post date (required)"
+            value={pinnedDate}
+            onChange={setPinnedDate}
+            type="date"
           />
           <Input label="Rate ($/1k views)" value={rate} onChange={setRate} type="number" />
 
@@ -1781,3 +1889,410 @@ function ManagerTeamPanel({
   );
 }
 
+
+// ============================================================
+// Admin sub-views: Overview / Employees / Payroll
+// ============================================================
+
+function daysSince(dateStr: string | null | undefined): number | null {
+  if (!dateStr) return null;
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return null;
+  return Math.max(0, Math.floor((Date.now() - d.getTime()) / 86400000));
+}
+
+function isPaidForAccount(payments: XPayment[], accountId: string, currentViews: number): boolean {
+  const last = payments
+    .filter((p) => p.account_id === accountId)
+    .sort((a, b) => (b.paid_at || "").localeCompare(a.paid_at || ""))[0];
+  if (!last) return false;
+  return last.views_paid >= currentViews;
+}
+
+type OverviewProps = {
+  accounts: XAccount[];
+  payments: XPayment[];
+  managerLabelForAccount: (addedBy: string | null) => string | null;
+  filterManager: string;
+  setFilterManager: (v: string) => void;
+  filterEmployee: string;
+  setFilterEmployee: (v: string) => void;
+  filterStatus: string;
+  setFilterStatus: (v: string) => void;
+  sortKey: string;
+  setSortKey: (v: string) => void;
+  onOpenEmployee: (name: string) => void;
+  onUpload: (a: XAccount) => void;
+};
+
+function AdminOverview(props: OverviewProps) {
+  const {
+    accounts, payments, managerLabelForAccount,
+    filterManager, setFilterManager, filterEmployee, setFilterEmployee,
+    filterStatus, setFilterStatus, sortKey, setSortKey, onOpenEmployee, onUpload,
+  } = props;
+
+  const managerOptions = Array.from(
+    new Set(accounts.map((a) => managerLabelForAccount(a.added_by_user_id)).filter(Boolean) as string[]),
+  );
+  const employeeOptions = Array.from(new Set(accounts.map((a) => a.employee_name).filter(Boolean)));
+
+  let rows = accounts.filter((a) => {
+    if (filterManager && managerLabelForAccount(a.added_by_user_id) !== filterManager) return false;
+    if (filterEmployee && a.employee_name !== filterEmployee) return false;
+    const paid = isPaidForAccount(payments, a.id, a.current_views);
+    if (filterStatus === "paid" && !paid) return false;
+    if (filterStatus === "unpaid" && paid) return false;
+    return true;
+  });
+
+  rows = [...rows].sort((a, b) => {
+    if (sortKey === "views") return b.current_views - a.current_views;
+    if (sortKey === "gained") return (b.views_gained_since_last ?? 0) - (a.views_gained_since_last ?? 0);
+    if (sortKey === "manager") {
+      return (managerLabelForAccount(a.added_by_user_id) ?? "").localeCompare(
+        managerLabelForAccount(b.added_by_user_id) ?? "",
+      );
+    }
+    return a.employee_name.localeCompare(b.employee_name);
+  });
+
+  return (
+    <div className="mt-4 space-y-4">
+      <div className="flex flex-wrap gap-2">
+        <select value={filterManager} onChange={(e) => setFilterManager(e.target.value)} className="rounded-lg border border-hairline bg-surface-1 px-3 py-1.5 text-xs">
+          <option value="">All managers</option>
+          {managerOptions.map((m) => <option key={m} value={m}>{m}</option>)}
+        </select>
+        <select value={filterEmployee} onChange={(e) => setFilterEmployee(e.target.value)} className="rounded-lg border border-hairline bg-surface-1 px-3 py-1.5 text-xs">
+          <option value="">All employees</option>
+          {employeeOptions.map((m) => <option key={m} value={m}>{m}</option>)}
+        </select>
+        <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="rounded-lg border border-hairline bg-surface-1 px-3 py-1.5 text-xs">
+          <option value="">All statuses</option>
+          <option value="paid">Paid</option>
+          <option value="unpaid">Unpaid</option>
+        </select>
+        <select value={sortKey} onChange={(e) => setSortKey(e.target.value)} className="rounded-lg border border-hairline bg-surface-1 px-3 py-1.5 text-xs">
+          <option value="employee">Sort: Employee</option>
+          <option value="manager">Sort: Manager</option>
+          <option value="views">Sort: Current views</option>
+          <option value="gained">Sort: Views gained</option>
+        </select>
+      </div>
+
+      <div className="overflow-x-auto rounded-xl border border-hairline">
+        <table className="min-w-full text-xs">
+          <thead className="bg-surface-1 text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+            <tr>
+              <th className="px-3 py-2 text-left">Employee</th>
+              <th className="px-3 py-2 text-left">Manager</th>
+              <th className="px-3 py-2 text-left">X username</th>
+              <th className="px-3 py-2 text-left">Pinned</th>
+              <th className="px-3 py-2 text-left">Days</th>
+              <th className="px-3 py-2 text-right">Current</th>
+              <th className="px-3 py-2 text-right">Previous</th>
+              <th className="px-3 py-2 text-right">Gained</th>
+              <th className="px-3 py-2 text-right">Owed</th>
+              <th className="px-3 py-2 text-left">Last upload</th>
+              <th className="px-3 py-2 text-left">Status</th>
+              <th className="px-3 py-2 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((a) => {
+              const paid = isPaidForAccount(payments, a.id, a.current_views);
+              const gained = a.views_gained_since_last ?? Math.max(0, a.current_views - (a.previous_views ?? 0));
+              const owed = payFromViews(Math.max(0, a.current_views - a.weekly_starting_views), a.rate_cents_per_1k);
+              const d = daysSince(a.pinned_post_date);
+              return (
+                <tr key={a.id} className="border-t border-hairline">
+                  <td className="px-3 py-2">
+                    <button className="text-left underline-offset-2 hover:underline" onClick={() => onOpenEmployee(a.employee_name)}>{a.employee_name}</button>
+                  </td>
+                  <td className="px-3 py-2 text-muted-foreground">{managerLabelForAccount(a.added_by_user_id) ?? "—"}</td>
+                  <td className="px-3 py-2"><a className="hover:underline" href={a.profile_url} target="_blank" rel="noreferrer">@{a.x_username}</a></td>
+                  <td className="px-3 py-2 text-muted-foreground">{a.pinned_post_date ?? "—"}</td>
+                  <td className="px-3 py-2 text-muted-foreground">{d ?? "—"}</td>
+                  <td className="px-3 py-2 text-right">{fmt(a.current_views)}</td>
+                  <td className="px-3 py-2 text-right text-muted-foreground">{fmt(a.previous_views ?? 0)}</td>
+                  <td className="px-3 py-2 text-right">{fmt(gained)}</td>
+                  <td className="px-3 py-2 text-right">{money(owed)}</td>
+                  <td className="px-3 py-2 text-muted-foreground">{a.last_screenshot_upload_at ? new Date(a.last_screenshot_upload_at).toLocaleDateString() : "—"}</td>
+                  <td className="px-3 py-2">
+                    <span className={`rounded-full px-2 py-0.5 text-[10px] ${paid ? "bg-green-500/15 text-green-500" : "bg-yellow-500/15 text-yellow-600"}`}>
+                      {paid ? "Paid" : "Unpaid"}
+                    </span>
+                  </td>
+                  <td className="px-3 py-2 text-right">
+                    <button className="rounded-md border border-hairline px-2 py-1 text-[10px] hover:bg-surface-1" onClick={() => onUpload(a)}>Upload</button>
+                  </td>
+                </tr>
+              );
+            })}
+            {rows.length === 0 && (
+              <tr><td colSpan={12} className="px-3 py-6 text-center text-muted-foreground">No accounts match these filters.</td></tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+type EmployeesProps = {
+  accounts: XAccount[];
+  employees: EmployeeRow[];
+  screenshots: XScreenshot[];
+  managers: ManagerRow[];
+  managerLabelForAccount: (addedBy: string | null) => string | null;
+  selected: string | null;
+  setSelected: (v: string | null) => void;
+  onUpload: (a: XAccount) => void;
+  onEdit: (a: XAccount) => void;
+};
+
+function AdminEmployees(props: EmployeesProps) {
+  const { accounts, employees, screenshots, managerLabelForAccount, selected, setSelected, onUpload, onEdit } = props;
+
+  // Group accounts by employee_name (contact label on the account)
+  const names = Array.from(new Set(accounts.map((a) => a.employee_name))).sort();
+
+  if (!selected) {
+    return (
+      <div className="mt-4 overflow-x-auto rounded-xl border border-hairline">
+        <table className="min-w-full text-xs">
+          <thead className="bg-surface-1 text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+            <tr>
+              <th className="px-3 py-2 text-left">Employee</th>
+              <th className="px-3 py-2 text-left">Manager</th>
+              <th className="px-3 py-2 text-right">Accounts</th>
+              <th className="px-3 py-2 text-right">Total views</th>
+            </tr>
+          </thead>
+          <tbody>
+            {names.map((n) => {
+              const list = accounts.filter((a) => a.employee_name === n);
+              const totalViews = list.reduce((s, a) => s + a.current_views, 0);
+              const mgr = managerLabelForAccount(list[0]?.added_by_user_id ?? null);
+              return (
+                <tr key={n} className="cursor-pointer border-t border-hairline hover:bg-surface-1" onClick={() => setSelected(n)}>
+                  <td className="px-3 py-2 underline-offset-2 hover:underline">{n}</td>
+                  <td className="px-3 py-2 text-muted-foreground">{mgr ?? "—"}</td>
+                  <td className="px-3 py-2 text-right">{list.length}</td>
+                  <td className="px-3 py-2 text-right">{fmt(totalViews)}</td>
+                </tr>
+              );
+            })}
+            {names.length === 0 && (
+              <tr><td colSpan={4} className="px-3 py-6 text-center text-muted-foreground">No employees yet.</td></tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    );
+  }
+
+  const list = accounts.filter((a) => a.employee_name === selected);
+  const empRow = employees.find((e) => e.email === selected);
+  const shots = screenshots.filter((s) => s.employee_name === selected);
+
+  return (
+    <div className="mt-4 space-y-4">
+      <button className="text-xs text-muted-foreground underline-offset-2 hover:underline" onClick={() => setSelected(null)}>← Back to employees</button>
+
+      <div className="rounded-xl border border-hairline p-4">
+        <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Employee</div>
+        <div className="mt-1 text-lg font-medium">{selected}</div>
+        {empRow && (
+          <div className="mt-2 grid gap-1 text-xs text-muted-foreground sm:grid-cols-2">
+            <div>Auth email: {empRow.email}</div>
+            <div>Manager: {empRow.manager_email ?? "—"}</div>
+            <div>USDT address: {empRow.usdt_address || "—"}</div>
+            <div>Network: {empRow.usdt_network || "—"}</div>
+          </div>
+        )}
+      </div>
+
+      <div className="rounded-xl border border-hairline">
+        <div className="border-b border-hairline px-4 py-2 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">X accounts</div>
+        <table className="min-w-full text-xs">
+          <thead className="bg-surface-1 text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+            <tr>
+              <th className="px-3 py-2 text-left">Username</th>
+              <th className="px-3 py-2 text-left">Pinned</th>
+              <th className="px-3 py-2 text-left">Pinned date</th>
+              <th className="px-3 py-2 text-right">Previous</th>
+              <th className="px-3 py-2 text-right">Current</th>
+              <th className="px-3 py-2 text-right">Gained</th>
+              <th className="px-3 py-2 text-right">Owed</th>
+              <th className="px-3 py-2 text-left">Last upload</th>
+              <th className="px-3 py-2 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {list.map((a) => {
+              const gained = a.views_gained_since_last ?? Math.max(0, a.current_views - (a.previous_views ?? 0));
+              const owed = payFromViews(Math.max(0, a.current_views - a.weekly_starting_views), a.rate_cents_per_1k);
+              return (
+                <tr key={a.id} className="border-t border-hairline">
+                  <td className="px-3 py-2"><a className="hover:underline" href={a.profile_url} target="_blank" rel="noreferrer">@{a.x_username}</a></td>
+                  <td className="px-3 py-2">{a.pinned_post_url ? <a className="hover:underline" href={a.pinned_post_url} target="_blank" rel="noreferrer">Link</a> : "—"}</td>
+                  <td className="px-3 py-2 text-muted-foreground">{a.pinned_post_date ?? "—"}</td>
+                  <td className="px-3 py-2 text-right text-muted-foreground">{fmt(a.previous_views ?? 0)}</td>
+                  <td className="px-3 py-2 text-right">{fmt(a.current_views)}</td>
+                  <td className="px-3 py-2 text-right">{fmt(gained)}</td>
+                  <td className="px-3 py-2 text-right">{money(owed)}</td>
+                  <td className="px-3 py-2 text-muted-foreground">{a.last_screenshot_upload_at ? new Date(a.last_screenshot_upload_at).toLocaleDateString() : "—"}</td>
+                  <td className="px-3 py-2 text-right space-x-1">
+                    <button className="rounded-md border border-hairline px-2 py-1 text-[10px] hover:bg-surface-1" onClick={() => onUpload(a)}>Upload</button>
+                    <button className="rounded-md border border-hairline px-2 py-1 text-[10px] hover:bg-surface-1" onClick={() => onEdit(a)}>Edit</button>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="rounded-xl border border-hairline">
+        <div className="border-b border-hairline px-4 py-2 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Screenshot history ({shots.length})</div>
+        <ScreenshotHistory rows={shots} />
+      </div>
+    </div>
+  );
+}
+
+type PayrollProps = {
+  accounts: XAccount[];
+  payments: XPayment[];
+  managerLabelForAccount: (addedBy: string | null) => string | null;
+  onChanged: () => void | Promise<void>;
+  userId: string | null;
+};
+
+function AdminPayroll({ accounts, payments, managerLabelForAccount, onChanged, userId }: PayrollProps) {
+  const [busy, setBusy] = useState<string | null>(null);
+
+  async function markPaid(a: XAccount) {
+    setBusy(a.id);
+    try {
+      const lastPaid = payments
+        .filter((p) => p.account_id === a.id)
+        .sort((a2, b2) => (b2.paid_at || "").localeCompare(a2.paid_at || ""))[0];
+      const periodStart = lastPaid?.paid_at ?? a.created_at;
+      const viewsPaid = Math.max(0, a.current_views - (lastPaid?.views_paid ?? a.weekly_starting_views));
+      const amount = payFromViews(viewsPaid, a.rate_cents_per_1k);
+      const commission = Math.round(amount * MANAGER_COMMISSION_PCT);
+      const { error } = await supabase.from("x_payments" as never).insert({
+        account_id: a.id,
+        employee_name: a.employee_name,
+        x_username: a.x_username,
+        period_start: periodStart ? new Date(periodStart).toISOString().slice(0, 10) : null,
+        period_end: new Date().toISOString().slice(0, 10),
+        views_paid: a.current_views,
+        amount_cents: amount,
+        manager_commission_cents: commission,
+        marked_by: userId,
+      } as never);
+      if (error) throw new Error(error.message);
+      await onChanged();
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "Failed to mark paid");
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  const rows = accounts.map((a) => {
+    const lastPaid = payments
+      .filter((p) => p.account_id === a.id)
+      .sort((a2, b2) => (b2.paid_at || "").localeCompare(a2.paid_at || ""))[0];
+    const baseline = lastPaid?.views_paid ?? a.weekly_starting_views;
+    const periodViews = Math.max(0, a.current_views - baseline);
+    const amount = payFromViews(periodViews, a.rate_cents_per_1k);
+    const commission = Math.round(amount * MANAGER_COMMISSION_PCT);
+    return { a, periodViews, amount, commission, paid: periodViews === 0 && !!lastPaid };
+  });
+
+  return (
+    <div className="mt-4 space-y-4">
+      <div className="overflow-x-auto rounded-xl border border-hairline">
+        <table className="min-w-full text-xs">
+          <thead className="bg-surface-1 text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+            <tr>
+              <th className="px-3 py-2 text-left">Employee</th>
+              <th className="px-3 py-2 text-left">Manager</th>
+              <th className="px-3 py-2 text-left">X username</th>
+              <th className="px-3 py-2 text-right">Views this period</th>
+              <th className="px-3 py-2 text-right">Amount owed</th>
+              <th className="px-3 py-2 text-right">Manager 10%</th>
+              <th className="px-3 py-2 text-left">Status</th>
+              <th className="px-3 py-2 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map(({ a, periodViews, amount, commission, paid }) => (
+              <tr key={a.id} className="border-t border-hairline">
+                <td className="px-3 py-2">{a.employee_name}</td>
+                <td className="px-3 py-2 text-muted-foreground">{managerLabelForAccount(a.added_by_user_id) ?? "—"}</td>
+                <td className="px-3 py-2">@{a.x_username}</td>
+                <td className="px-3 py-2 text-right">{fmt(periodViews)}</td>
+                <td className="px-3 py-2 text-right">{money(amount)}</td>
+                <td className="px-3 py-2 text-right text-muted-foreground">{money(commission)}</td>
+                <td className="px-3 py-2">
+                  <span className={`rounded-full px-2 py-0.5 text-[10px] ${paid ? "bg-green-500/15 text-green-500" : "bg-yellow-500/15 text-yellow-600"}`}>
+                    {paid ? "Paid" : "Unpaid"}
+                  </span>
+                </td>
+                <td className="px-3 py-2 text-right">
+                  <button
+                    disabled={busy === a.id || periodViews === 0}
+                    className="rounded-md border border-hairline px-2 py-1 text-[10px] hover:bg-surface-1 disabled:opacity-40"
+                    onClick={() => markPaid(a)}
+                  >
+                    {busy === a.id ? "Saving…" : "Mark paid"}
+                  </button>
+                </td>
+              </tr>
+            ))}
+            {rows.length === 0 && (
+              <tr><td colSpan={8} className="px-3 py-6 text-center text-muted-foreground">No accounts.</td></tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="rounded-xl border border-hairline">
+        <div className="border-b border-hairline px-4 py-2 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Payment history ({payments.length})</div>
+        <table className="min-w-full text-xs">
+          <thead className="bg-surface-1 text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+            <tr>
+              <th className="px-3 py-2 text-left">Paid at</th>
+              <th className="px-3 py-2 text-left">Employee</th>
+              <th className="px-3 py-2 text-left">X username</th>
+              <th className="px-3 py-2 text-right">Views @ payment</th>
+              <th className="px-3 py-2 text-right">Amount</th>
+              <th className="px-3 py-2 text-right">Manager 10%</th>
+            </tr>
+          </thead>
+          <tbody>
+            {[...payments].sort((a, b) => (b.paid_at || "").localeCompare(a.paid_at || "")).map((p) => (
+              <tr key={p.id} className="border-t border-hairline">
+                <td className="px-3 py-2 text-muted-foreground">{p.paid_at ? new Date(p.paid_at).toLocaleString() : "—"}</td>
+                <td className="px-3 py-2">{p.employee_name}</td>
+                <td className="px-3 py-2">@{p.x_username}</td>
+                <td className="px-3 py-2 text-right">{fmt(p.views_paid)}</td>
+                <td className="px-3 py-2 text-right">{money(p.amount_cents)}</td>
+                <td className="px-3 py-2 text-right text-muted-foreground">{money(p.manager_commission_cents)}</td>
+              </tr>
+            ))}
+            {payments.length === 0 && (
+              <tr><td colSpan={6} className="px-3 py-6 text-center text-muted-foreground">No payments recorded yet.</td></tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
