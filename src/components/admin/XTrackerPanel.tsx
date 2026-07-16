@@ -1475,6 +1475,7 @@ function AccountForm({
     const u = extractXUsername(profileUrl);
     if (!u) return setError("Enter a valid X profile link, e.g. https://x.com/username");
     if (!contact.trim()) return setError("Discord or Telegram username required");
+    if (!pinnedDate) return setError("Pinned post date required — when did you pin the post?");
     if (!isEdit && !file) return setError("Upload a screenshot of the pinned post");
     const finalViews = Math.max(0, Math.floor(Number(views) || 0));
 
