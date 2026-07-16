@@ -593,6 +593,7 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
           setSelected={setSelectedEmployee}
           onUpload={(a) => setUploading(a)}
           onEdit={(a) => setEditing(a)}
+          onRefresh={refresh}
         />
       )}
 
