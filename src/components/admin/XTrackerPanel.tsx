@@ -1491,7 +1491,12 @@ function AccountForm({
             onChange={setContact}
             placeholder="@handle"
           />
-          <Input label="X username" value={xUsername} onChange={setX} placeholder="username (no @)" />
+          <Input
+            label="X profile link"
+            value={profileUrl}
+            onChange={setProfileUrl}
+            placeholder="https://x.com/username"
+          />
           <Input label="Rate ($/1k views)" value={rate} onChange={setRate} type="number" />
 
           <div>
