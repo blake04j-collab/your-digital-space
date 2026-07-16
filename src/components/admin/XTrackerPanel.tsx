@@ -2262,6 +2262,7 @@ function AdminPayroll({ accounts, payments, employees, managerLabelForAccount, o
               <th className="px-3 py-2 text-right">Views this period</th>
               <th className="px-3 py-2 text-right">Amount owed</th>
               <th className="px-3 py-2 text-right">Manager 10%</th>
+              <th className="px-3 py-2 text-left">USDT (ERC20)</th>
               <th className="px-3 py-2 text-left">Status</th>
               <th className="px-3 py-2 text-right">Actions</th>
             </tr>
