@@ -2057,7 +2057,7 @@ function AdminOverview(props: OverviewProps) {
               );
             })}
             {rows.length === 0 && (
-              <tr><td colSpan={12} className="px-3 py-6 text-center text-muted-foreground">No accounts match these filters.</td></tr>
+              <tr><td colSpan={13} className="px-3 py-6 text-center text-muted-foreground">No accounts match these filters.</td></tr>
             )}
           </tbody>
         </table>
