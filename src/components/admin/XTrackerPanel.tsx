@@ -624,8 +624,17 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
         <div className="mt-4 space-y-6">
           <div className="overflow-hidden rounded-2xl border border-hairline bg-surface-1">
             {accounts.length === 0 ? (
-              <div className="p-10 text-center text-sm text-muted-foreground">
-                No accounts yet. Click <span className="text-foreground">+ Add account</span> to start tracking.
+              <div className="flex flex-col items-center gap-4 p-10 text-center">
+                <p className="text-sm text-muted-foreground">
+                  No accounts yet. Add your first X account to start tracking views &amp; payouts.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setShowAdd(true)}
+                  className="rounded-full bg-lime px-6 py-2.5 text-xs font-semibold uppercase tracking-[0.2em] text-primary-foreground shadow-sm hover:opacity-90"
+                >
+                  + Add your first account
+                </button>
               </div>
             ) : (
               <div className="overflow-x-auto">
