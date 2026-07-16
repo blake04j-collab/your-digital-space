@@ -536,21 +536,80 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
 
 
       <div className="mt-5 flex gap-1 rounded-full border border-hairline bg-surface-1 p-1 w-fit flex-wrap">
-        {(isEmployee
-          ? (["accounts"] as const)
-          : (["accounts", "team"] as const)
-        ).map((v) => (
+        {(isAdmin
+          ? ([
+              ["overview", "Overview"],
+              ["employees", "Employees"],
+              ["screenshots", "Screenshot history"],
+              ["payroll", "Payroll"],
+            ] as const)
+          : isEmployee
+          ? ([["accounts", "Accounts"]] as const)
+          : ([
+              ["accounts", "Accounts"],
+              ["team", isManager ? "My team" : "Team & history"],
+            ] as const)
+        ).map(([v, lbl]) => (
           <button
             key={v}
-            onClick={() => setView(v)}
+            onClick={() => { setView(v as ViewMode); setSelectedEmployee(null); }}
             className={`rounded-full px-3.5 py-1.5 text-[10px] uppercase tracking-[0.2em] transition-colors ${
               view === v ? "bg-lime text-primary-foreground" : "text-muted-foreground hover:text-foreground"
             }`}
           >
-            {v === "accounts" ? "Accounts" : isManager ? "My team" : "Team & history"}
+            {lbl}
           </button>
         ))}
       </div>
+
+      {isAdmin && view === "overview" && (
+        <AdminOverview
+          accounts={accounts}
+          payments={payments}
+          managerLabelForAccount={managerLabelForAccount}
+          filterManager={filterManager}
+          setFilterManager={setFilterManager}
+          filterEmployee={filterEmployee}
+          setFilterEmployee={setFilterEmployee}
+          filterStatus={filterStatus}
+          setFilterStatus={setFilterStatus}
+          sortKey={sortKey}
+          setSortKey={setSortKey}
+          onOpenEmployee={(name) => { setSelectedEmployee(name); setView("employees"); }}
+          onUpload={(a) => setUploading(a)}
+        />
+      )}
+
+      {isAdmin && view === "employees" && (
+        <AdminEmployees
+          accounts={accounts}
+          employees={employees}
+          screenshots={screenshots}
+          managers={managers}
+          managerLabelForAccount={managerLabelForAccount}
+          selected={selectedEmployee}
+          setSelected={setSelectedEmployee}
+          onUpload={(a) => setUploading(a)}
+          onEdit={(a) => setEditing(a)}
+        />
+      )}
+
+      {isAdmin && view === "screenshots" && (
+        <div className="mt-4">
+          <ScreenshotHistory rows={screenshots} />
+        </div>
+      )}
+
+      {isAdmin && view === "payroll" && (
+        <AdminPayroll
+          accounts={accounts}
+          payments={payments}
+          managerLabelForAccount={managerLabelForAccount}
+          onChanged={refresh}
+          userId={userId}
+        />
+      )}
+
 
       {view === "accounts" && (
         <div className="mt-4 space-y-6">
