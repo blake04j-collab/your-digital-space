@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useServerFn } from "@tanstack/react-start";
 import { extractViewsFromScreenshot } from "@/lib/x-views.functions";
+import { deleteEmployee as deleteEmployeeFn } from "@/lib/admin-employees.functions";
 
 export type XAccount = {
   id: string;
