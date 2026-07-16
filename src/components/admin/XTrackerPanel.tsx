@@ -168,10 +168,10 @@ export default function XTrackerPanel({ role = "admin" }: { role?: "admin" | "ma
   const [myWallet, setMyWallet] = useState<WalletRow | null>(null);
   const [selectedEmployee, setSelectedEmployee] = useState<string | null>(null);
   // Filters
-  const [filterManager, setFilterManager] = useState<string>("all");
-  const [filterEmployee, setFilterEmployee] = useState<string>("all");
-  const [filterStatus, setFilterStatus] = useState<"all" | "pending" | "paid">("all");
-  const [sortKey, setSortKey] = useState<"gained" | "owed" | "last_upload" | "employee">("gained");
+  const [filterManager, setFilterManager] = useState<string>("");
+  const [filterEmployee, setFilterEmployee] = useState<string>("");
+  const [filterStatus, setFilterStatus] = useState<string>("");
+  const [sortKey, setSortKey] = useState<string>("employee");
 
   useEffect(() => {
     (async () => {
