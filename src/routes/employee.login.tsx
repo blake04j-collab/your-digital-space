@@ -75,7 +75,7 @@ function EmployeeLogin() {
 
     const { data: ok, error: rpcErr } = await supabase.rpc(
       "redeem_employee_invite" as never,
-      { _code: invite.trim() } as never,
+      { _code: invite.trim().toUpperCase() } as never,
     );
     setLoading(false);
     if (rpcErr) { setErr(rpcErr.message); return; }
