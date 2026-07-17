@@ -75,7 +75,7 @@ function EmployeeLogin() {
 
     const { data: ok, error: rpcErr } = await supabase.rpc(
       "redeem_employee_invite" as never,
-      { _code: invite.trim() } as never,
+      { _code: invite.trim().toUpperCase() } as never,
     );
     setLoading(false);
     if (rpcErr) { setErr(rpcErr.message); return; }
@@ -127,7 +127,7 @@ function EmployeeLogin() {
                 type="text"
                 required
                 value={invite}
-                onChange={(e) => setInvite(e.target.value)}
+                onChange={(e) => setInvite(e.target.value.toUpperCase().trim())}
                 className="w-full rounded-lg border border-hairline bg-background px-3.5 py-3 text-sm uppercase tracking-widest text-foreground outline-none focus:border-lime"
                 placeholder="CLOUD-XXXXXX"
               />
