@@ -127,7 +127,7 @@ function EmployeeLogin() {
                 type="text"
                 required
                 value={invite}
-                onChange={(e) => setInvite(e.target.value)}
+                onChange={(e) => setInvite(e.target.value.toUpperCase().trim())}
                 className="w-full rounded-lg border border-hairline bg-background px-3.5 py-3 text-sm uppercase tracking-widest text-foreground outline-none focus:border-lime"
                 placeholder="CLOUD-XXXXXX"
               />
