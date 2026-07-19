@@ -1552,19 +1552,30 @@ function AccountForm({
   async function handleFile(f: File) {
     setError(null);
     setFile(f);
-    const dataUrl = await readAsDataUrl(f);
-    setPreview(dataUrl);
+    setDetected(null);
     setOcrBusy(true);
-    const res = await runOcr({ data: { imageDataUrl: dataUrl } });
-    setOcrBusy(false);
-    if (!res.ok) {
-      setError(res.error);
-      setDetected(null);
-      return;
+    try {
+      const previewUrl = await readAsDataUrl(f);
+      setPreview(previewUrl);
+      const ocrUrl = await prepareImageForOcr(f);
+      const res = await runOcr({ data: { imageDataUrl: ocrUrl } });
+      if (!res.ok) {
+        setError(res.error);
+        return;
+      }
+      setDetected(res.views);
+      setViews(String(res.views));
+    } catch (e) {
+      setError(
+        e instanceof Error
+          ? `Couldn't read that screenshot: ${e.message}. Enter the view count manually.`
+          : "Couldn't read that screenshot. Enter the view count manually.",
+      );
+    } finally {
+      setOcrBusy(false);
     }
-    setDetected(res.views);
-    setViews(String(res.views));
   }
+
 
   async function save() {
     setError(null);
