@@ -1136,6 +1136,47 @@ function readAsDataUrl(file: File): Promise<string> {
   });
 }
 
+/**
+ * Prepare an image for OCR:
+ *  - Decode via Image + canvas
+ *  - Downscale so the longest side is at most `maxDim` px
+ *  - Re-encode as JPEG at `quality`
+ * Big phone screenshots as raw base64 PNGs can be 10MB+, which makes the
+ * server-fn RPC body huge and often stalls on flaky mobile networks — the
+ * UI then sits on "Reading…" forever. Downscaling keeps the payload small
+ * and OCR fast without hurting the number's legibility.
+ */
+async function prepareImageForOcr(
+  file: File,
+  maxDim = 1600,
+  quality = 0.85,
+): Promise<string> {
+  const original = await readAsDataUrl(file);
+  try {
+    const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+      const el = new Image();
+      el.onload = () => resolve(el);
+      el.onerror = () => reject(new Error("Could not decode image"));
+      el.src = original;
+    });
+    const { width, height } = img;
+    const longest = Math.max(width, height);
+    const scale = longest > maxDim ? maxDim / longest : 1;
+    const w = Math.max(1, Math.round(width * scale));
+    const h = Math.max(1, Math.round(height * scale));
+    const canvas = document.createElement("canvas");
+    canvas.width = w;
+    canvas.height = h;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return original;
+    ctx.drawImage(img, 0, 0, w, h);
+    return canvas.toDataURL("image/jpeg", quality);
+  } catch {
+    // Fall back to original if canvas fails (e.g. tainted, memory)
+    return original;
+  }
+}
+
 function ScreenshotUploadModal({
   account,
   userId,
